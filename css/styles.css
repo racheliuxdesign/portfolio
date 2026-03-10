@@ -167,14 +167,20 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .nav__logo {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--color-text-primary);
-  letter-spacing: -0.01em;
-}
-
-.nav__logo:hover {
-  color: var(--color-accent);
+  display: inline-block;
+  font-size: clamp(1rem, 0.88rem + 0.26vw, 1.15rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  cursor: default;
+  user-select: none;
+  /* Gradient text */
+  background: linear-gradient(110deg, #e040a0 0%, #b94fd6 38%, #7c3aed 72%, #5b2fe0 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  /* Soft matching glow behind the text */
+  filter: drop-shadow(0 0 10px rgba(185, 79, 214, 0.45));
 }
 
 .nav__links {
@@ -294,7 +300,11 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .hero__title span {
-  color: var(--color-accent);
+  background: linear-gradient(110deg, #e040a0 0%, #b94fd6 38%, #7c3aed 72%, #5b2fe0 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 14px rgba(185, 79, 214, 0.5));
 }
 
 .hero__description {
@@ -1051,6 +1061,10 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 @media (max-width: 768px) {
+  .nav__logo {
+    font-size: 0.95rem;
+  }
+
   .nav__links {
     position: fixed;
     top: var(--nav-height);
