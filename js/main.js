@@ -96,5 +96,79 @@ document.addEventListener('DOMContentLoaded', () => {
     updateParallax();
   }
 
+  /* ---------- Lightbox ---------- */
+  const lightbox      = document.getElementById('lightbox');
+  const lightboxImg   = document.getElementById('lightboxImg');
+  const lightboxClose = document.getElementById('lightboxClose');
+
+  if (lightbox && lightboxImg) {
+    let isZoomed = false;
+
+    // --- Open lightbox ---
+    document.querySelectorAll('.case-study__img-thumb').forEach(img => {
+      img.addEventListener('click', () => {
+        lightboxImg.src = img.src;
+        lightboxImg.alt = img.alt;
+        lightboxImg.style.transformOrigin = '50% 50%';
+        isZoomed = false;
+        lightbox.classList.remove('is-zoomed');
+        lightbox.classList.add('is-open');
+        document.body.style.overflow = 'hidden';
+      });
+    });
+
+    // --- Toggle zoom on image click ---
+    lightboxImg.addEventListener('click', e => {
+      e.stopPropagation();
+
+      if (!isZoomed) {
+        // Calculate click position relative to the image as a %
+        const rect = lightboxImg.getBoundingClientRect();
+        const xPct = ((e.clientX - rect.left) / rect.width  * 100).toFixed(2);
+        const yPct = ((e.clientY - rect.top)  / rect.height * 100).toFixed(2);
+        lightboxImg.style.transformOrigin = `${xPct}% ${yPct}%`;
+        isZoomed = true;
+        lightbox.classList.add('is-zoomed');
+      } else {
+        // Zoom out — restore origin to centre after transition
+        isZoomed = false;
+        lightbox.classList.remove('is-zoomed');
+        lightboxImg.addEventListener('transitionend', () => {
+          if (!isZoomed) lightboxImg.style.transformOrigin = '50% 50%';
+        }, { once: true });
+      }
+    });
+
+    // --- Mouse-pan while zoomed ---
+    lightbox.addEventListener('mousemove', e => {
+      if (!isZoomed) return;
+      const rect = lightboxImg.getBoundingClientRect();
+
+      // Map cursor position over the whole viewport to a pan origin on the image
+      const xPct = (e.clientX / window.innerWidth  * 100).toFixed(2);
+      const yPct = (e.clientY / window.innerHeight * 100).toFixed(2);
+      lightboxImg.style.transformOrigin = `${xPct}% ${yPct}%`;
+    });
+
+    // --- Close ---
+    const closeLightbox = () => {
+      isZoomed = false;
+      lightbox.classList.remove('is-open', 'is-zoomed');
+      lightboxImg.style.transformOrigin = '50% 50%';
+      document.body.style.overflow = '';
+    };
+
+    // Click backdrop (not the image) closes
+    lightbox.addEventListener('click', closeLightbox);
+    if (lightboxClose) lightboxClose.addEventListener('click', e => {
+      e.stopPropagation();
+      closeLightbox();
+    });
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeLightbox();
+    });
+  }
+
 });
 
