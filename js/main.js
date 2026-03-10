@@ -1,0 +1,100 @@
+﻿/* ============================================
+   Racheli Klots — Portfolio
+   JavaScript — Core interactions
+   ============================================ */
+
+document.addEventListener('DOMContentLoaded', () => {
+
+  /* ---------- Navigation scroll effect ---------- */
+  const nav = document.querySelector('.nav');
+  if (nav) {
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('nav--scrolled', window.scrollY > 10);
+    }, { passive: true });
+  }
+
+  /* ---------- Mobile menu toggle ---------- */
+  const toggle = document.querySelector('.nav__toggle');
+  const links = document.querySelector('.nav__links');
+  if (toggle && links) {
+    toggle.addEventListener('click', () => {
+      const isOpen = links.classList.toggle('nav__links--open');
+      toggle.setAttribute('aria-expanded', isOpen);
+    });
+    // Close on link click
+    links.querySelectorAll('.nav__link').forEach(link => {
+      link.addEventListener('click', () => {
+        links.classList.remove('nav__links--open');
+        toggle.setAttribute('aria-expanded', 'false');
+      });
+    });
+  }
+
+  /* ---------- Scroll reveal (fade-in) ---------- */
+  const faders = document.querySelectorAll('.fade-in');
+  if (faders.length) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          // Clear stagger delay after entrance animation so it won't affect hover
+          entry.target.addEventListener('transitionend', function clearDelay() {
+            entry.target.style.transitionDelay = '0s';
+            entry.target.removeEventListener('transitionend', clearDelay);
+          });
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+    faders.forEach(el => observer.observe(el));
+  }
+
+  /* ---------- Active nav link ---------- */
+  const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+  document.querySelectorAll('.nav__link').forEach(link => {
+    const href = link.getAttribute('href').split('/').pop();
+    if (href === currentPage || (currentPage === '' && href === 'index.html')) {
+      link.classList.add('nav__link--active');
+    }
+  });
+
+  /* ---------- Parallax on project card images ---------- */
+  const parallaxTargets = document.querySelectorAll('.project-card__image');
+  if (parallaxTargets.length) {
+    let ticking = false;
+
+    const updateParallax = () => {
+      const viewportHeight = window.innerHeight;
+
+      parallaxTargets.forEach(card => {
+        const rect = card.getBoundingClientRect();
+        // Only process cards that are in or near the viewport
+        if (rect.bottom < -100 || rect.top > viewportHeight + 100) return;
+
+        // Progress: 0 when card enters bottom, 1 when it exits top
+        const progress = 1 - (rect.bottom / (viewportHeight + rect.height));
+        // Shift range: -10px to +10px (subtle)
+        const shift = (progress - 0.5) * 20;
+
+        const inner = card.querySelector('.project-card__placeholder, img');
+        if (inner) {
+          inner.style.transform = `translateY(${shift}px)`;
+        }
+      });
+      ticking = false;
+    };
+
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        requestAnimationFrame(updateParallax);
+        ticking = true;
+      }
+    }, { passive: true });
+
+    // Run once on load
+    updateParallax();
+  }
+
+});
+
