@@ -43,89 +43,198 @@
             Added greater flexibility for handling more question types. Introduced enterprise-level
             filter organization for large-scale data.
           </p>
-          <div class="case-study__meta">
-            <div class="case-study__meta-item">
-              <span class="case-study__meta-label">Role</span>
-              <span class="case-study__meta-value">Lead Product Designer</span>
+
+        </div>
+
+        <div class="case-study__three-col fade-in">
+          <div class="case-study__section">
+            <h2 class="case-study__section-title">What are we trying to fix?</h2>
+            <ul>
+              <li>Currently, aggregated findings rely on representative attributes that do not accurately reflect all underlying members.</li>
+              <li>As a result, users often apply filters and receive irrelevant results, or struggle to understand why certain findings are missing.</li>
+              <li><strong>These unclear logic, inconsistencies, lead to user confusion and <em>loss of trust</em>.</strong></li>
+            </ul>
+          </div>
+
+          <div class="case-study__section">
+            <h2 class="case-study__section-title">What is the solution?</h2>
+            <ul>
+              <li>Transition the Findings page to a Remediation Items page.</li>
+              <li>Revise and standardize the filters calculation logic.</li>
+              <li>Clearly communicate the updated logic while simplifying complexity.</li>
+              <li>Enhance filtering capabilities to improve accuracy and organizational control.</li>
+            </ul>
+            <p><strong><em>lets drill down to each aspect...</em></strong></p>
+          </div>
+
+          <div class="case-study__section">
+            <h2 class="case-study__section-title">Findings page to Remediation items page</h2>
+            <p>
+              Creating a new entity called "Remediation Item" — the next evolution of third-party findings.
+            </p>
+            <ul>
+              <li>It may represent a single finding or a grouped set that shares a common remediation.</li>
+              <li>The entity is enriched with internally generated data and AI Enrichment data providing stronger context and deeper insights beyond the original integration inputs.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="case-study__img-wrap fade-in">
+          <img
+            src="../images/filters/filter1.jpg"
+            alt="Filters Makeover — screen overview"
+            class="case-study__img-thumb"
+          />
+        </div>
+
+        <div class="case-study__img-wrap fade-in">
+          <img
+            src="../images/filters/filter2.jpg"
+            alt="Filters Makeover — screen detail"
+            class="case-study__img-thumb"
+          />
+        </div>
+
+
+        <div class="case-study__figma fade-in">
+          <p class="case-study__figma-label">Want to see a live Figma prototype?</p>
+          <a
+            href="https://www.figma.com/make/tRFHudqb69D5f2hhBAUyQl/filters-in-findings-page?t=AwlpNO9Vqxq3nLhg-20&fullscreen=1"
+            target="_blank"
+            rel="noopener"
+            class="case-study__figma-link"
+          >
+            <span class="case-study__figma-dot"></span>
+            Explore the interactive prototype →
+          </a>
+        </div>
+
+        <div class="case-study__img-wrap fade-in">
+          <img
+            src="../images/filters/filter3.jpg"
+            alt="Filters Makeover — screen detail 2"
+            class="case-study__img-thumb"
+          />
+        </div>
+
+        <div class="case-study__section fade-in">
+          <h2 class="case-study__section-title">Revise the filters calculation logic</h2>
+          <p>
+            Calculate values based on the <strong>underlying findings that compose each remediation item</strong>, rather than relying on representative attributes.
+          </p>
+          <p>
+            Retain a <strong>limited set</strong> of calculated fields only where a single unified value is required for specific use cases (e.g., ticketing attributes that apply consistently across all grouped findings, as illustrated in the following slides).
+          </p>
+        </div>
+
+        <div class="concept-visual fade-in">
+          <div class="concept-visual__pill concept-visual__pill--left">
+            <span class="concept-visual__pill-icon">🗂️</span>
+            <div>
+              <div class="concept-visual__pill-title">Remediation Attributes</div>
+              <div class="concept-visual__pill-sub">Severity · Status · Assignee · SLA</div>
             </div>
-            <div class="case-study__meta-item">
-              <span class="case-study__meta-label">Duration</span>
-              <span class="case-study__meta-value">3 months</span>
+          </div>
+
+          <div class="concept-visual__plus">+</div>
+
+          <div class="concept-visual__pill concept-visual__pill--right">
+            <span class="concept-visual__pill-icon">🔍</span>
+            <div>
+              <div class="concept-visual__pill-title">Findings Attributes</div>
+              <div class="concept-visual__pill-sub">CVE · Asset · Source · Score</div>
             </div>
-            <div class="case-study__meta-item">
-              <span class="case-study__meta-label">Team</span>
-              <span class="case-study__meta-value">Designer, 2 Engineers, PM</span>
+          </div>
+
+          <div class="concept-visual__arrow">→</div>
+
+          <div class="concept-visual__result">
+            <div class="concept-visual__result-badges">
+              <span class="concept-visual__badge concept-visual__badge--accuracy">✓ Most Accurate Results</span>
+              <span class="concept-visual__badge concept-visual__badge--ux">✦ Clear UI Experience</span>
             </div>
           </div>
         </div>
 
-        <!-- Hero image placeholder -->
-        <div class="case-study__image fade-in">
-          <span class="case-study__image-label">Hero screenshot placeholder</span>
-        </div>
-
-        <!-- Overview -->
         <div class="case-study__section fade-in">
-          <h2 class="case-study__section-title">Overview</h2>
-          <p>
-            The existing filtering system was limited in question types and struggled with
-            large-scale enterprise data. Users needed a more flexible approach to filtering
-            that could handle complex queries while maintaining clarity and speed.
-          </p>
+          <h2 class="case-study__section-title">Clearly communicate the updated logic while simplifying complexity</h2>
         </div>
 
-        <!-- Problem -->
+        <div class="before-after fade-in">
+
+          <!-- BEFORE — full-width strip -->
+          <div class="before-after__row">
+            <div class="before-after__label before-after__label--before">Before</div>
+            <img
+              src="../images/filters/filter5.jpg"
+              alt="Before — old filter UI"
+              class="case-study__img-thumb before-after__img-strip"
+            />
+          </div>
+
+          <div class="before-after__divider">
+            <span class="before-after__divider-arrow">↓</span>
+            <span class="before-after__divider-text">After</span>
+            <span class="before-after__divider-arrow">↓</span>
+          </div>
+
+          <!-- AFTER — two images side by side -->
+          <div class="before-after__row">
+            <div class="before-after__after-grid">
+              <img
+                src="../images/filters/filter6.jpg"
+                alt="After — new filter UI"
+                class="case-study__img-thumb"
+              />
+              <img
+                src="../images/filters/filter7.jpg"
+                alt="After — new filter UI detail"
+                class="case-study__img-thumb"
+              />
+            </div>
+          </div>
+
+        </div>
+
         <div class="case-study__section fade-in">
-          <h2 class="case-study__section-title">Problem</h2>
-          <p>
-            Enterprise users working with thousands of data points found the existing filter
-            interface inadequate. Common pain points included limited filter types, inability
-            to save or share filter configurations, and poor performance when dealing with
-            complex nested conditions.
-          </p>
+          <h2 class="case-study__section-title">What about AI? <span class="ai-sparkle">✦</span></h2>
         </div>
 
-        <!-- Screenshot placeholder -->
-        <div class="case-study__image fade-in">
-          <span class="case-study__image-label">Before state — existing filter interface</span>
+        <div class="case-study__img-wrap fade-in">
+          <img
+            src="../images/filters/filter8.jpg"
+            alt="AI-powered filtering"
+            class="case-study__img-thumb"
+          />
         </div>
 
-        <!-- Design Process -->
         <div class="case-study__section fade-in">
-          <h2 class="case-study__section-title">Design Process</h2>
-          <p>
-            Research involved interviewing power users and analyzing usage patterns. Key insights
-            showed that users needed hierarchical filter grouping, more question types (date ranges,
-            multi-select, custom fields), and the ability to save and reuse filter configurations.
-            Iterative prototyping and usability testing refined the interaction model.
-          </p>
+          <h2 class="case-study__section-title">Anything else?</h2>
         </div>
 
-        <!-- Screenshot placeholder -->
-        <div class="case-study__image fade-in">
-          <span class="case-study__image-label">Design exploration — wireframes &amp; prototypes</span>
-        </div>
-
-        <!-- Screenshot placeholder -->
-        <div class="case-study__image fade-in">
-          <span class="case-study__image-label">Final design — new filter interface</span>
-        </div>
-
-        <!-- Outcome -->
-        <div class="case-study__section fade-in">
-          <h2 class="case-study__section-title">Outcome &amp; Impact</h2>
-          <p>
-            The redesigned filter system supported 8+ new question types and introduced
-            enterprise-level organization with saved views and shared filter sets. User
-            satisfaction scores improved significantly, and the time to configure complex
-            filters was reduced by approximately 40%.
-          </p>
+        <div class="case-study__img-grid fade-in">
+          <img
+            src="../images/filters/filter9.png"
+            alt="Additional filter detail"
+            class="case-study__img-thumb"
+          />
+          <img
+            src="../images/filters/filter10.png"
+            alt="Additional filter detail 2"
+            class="case-study__img-thumb"
+          />
         </div>
 
       </div>
     </section>
 
   </main>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Image preview">
+    <button class="lightbox__close" id="lightboxClose" aria-label="Close">✕</button>
+    <img class="lightbox__img" id="lightboxImg" src="" alt="" />
+  </div>
 
   <!-- ===== Footer ===== -->
   <footer class="footer">
