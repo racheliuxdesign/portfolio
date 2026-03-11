@@ -1229,6 +1229,12 @@ h1, h2, h3, h4, h5, h6 {
   animation: hero-dot-pulse 1.6s ease-out infinite;
 }
 
+.timeline__dot--highlighted {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  box-shadow: 0 0 0 4px var(--color-accent-subtle);
+}
+
 .timeline__dot--secondary {
   width: 8px;
   height: 8px;
@@ -1265,6 +1271,45 @@ h1, h2, h3, h4, h5, h6 {
 .timeline__card:hover {
   border-color: var(--color-border-hover);
   background: var(--color-bg-card-hover);
+}
+
+.timeline__card--featured {
+  border-left: 3px solid var(--color-accent);
+  background: linear-gradient(135deg, var(--color-bg-card) 0%, rgba(91, 140, 247, 0.04) 100%);
+  padding: var(--space-lg) var(--space-xl);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  transition: border-color var(--transition-fast), background var(--transition-fast),
+              transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.timeline__card--featured:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25), 0 0 0 1px var(--color-border-hover);
+  border-left-color: var(--color-accent-hover);
+  background: linear-gradient(135deg, var(--color-bg-card-hover) 0%, rgba(91, 140, 247, 0.07) 100%);
+}
+
+.timeline__card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xs);
+}
+
+.timeline__card-header h3 {
+  margin-bottom: 0;
+}
+
+.timeline__badge {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-accent);
+  background: var(--color-accent-subtle);
+  padding: 2px var(--space-sm);
+  border-radius: 100px;
+  white-space: nowrap;
 }
 
 .timeline__card--compact {
