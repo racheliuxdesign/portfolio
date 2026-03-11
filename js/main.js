@@ -170,6 +170,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  /* ---------- Copy to clipboard (contact page) ---------- */
+  document.querySelectorAll('.contact-card__copy').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const text = btn.dataset.copy;
+      navigator.clipboard.writeText(text).then(() => {
+        btn.classList.add('contact-card__copy--copied');
+        setTimeout(() => btn.classList.remove('contact-card__copy--copied'), 1500);
+      });
+    });
+  });
 
 });
 
