@@ -59,19 +59,32 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  /* ---------- Sticky case-study header ---------- */
-  const caseHeader = document.querySelector('.case-study__header');
-  const caseTitle  = document.querySelector('.case-study__title');
-  const caseBack   = document.querySelector('.case-study__back');
+  /* ---------- Sticky page header ---------- */
+  // Detect which page we're on and find the header + title
+  const stickyConfig = [
+    { header: '.case-study__header', title: '.case-study__title', back: '.case-study__back' },
+    { header: '.resume-header',      title: '.resume-header__title' },
+    { header: '.contact-header',     title: '.contact-header__title' },
+  ];
 
-  if (caseHeader && caseTitle && caseBack) {
-    // Build the sticky bar
+  for (const cfg of stickyConfig) {
+    const header = document.querySelector(cfg.header);
+    const title  = document.querySelector(cfg.title);
+    if (!header || !title) continue;
+
+    const back = cfg.back ? document.querySelector(cfg.back) : null;
+
     const stickyBar = document.createElement('div');
     stickyBar.className = 'sticky-title-bar';
+
+    const backHtml = back
+      ? `<a href="${back.getAttribute('href')}" class="sticky-title-bar__back">← Back to Projects</a>`
+      : '';
+
     stickyBar.innerHTML = `
       <div class="container sticky-title-bar__inner">
-        <a href="${caseBack.getAttribute('href')}" class="sticky-title-bar__back">← Back to Projects</a>
-        <span class="sticky-title-bar__title">${caseTitle.textContent}</span>
+        ${backHtml}
+        <span class="sticky-title-bar__title">${title.textContent}</span>
       </div>
     `;
     document.body.appendChild(stickyBar);
@@ -80,7 +93,8 @@ document.addEventListener('DOMContentLoaded', () => {
       stickyBar.classList.toggle('sticky-title-bar--visible', !entry.isIntersecting);
     }, { threshold: 0, rootMargin: `-${getComputedStyle(document.documentElement).getPropertyValue('--nav-height').trim() || '64px'} 0px 0px 0px` });
 
-    observer.observe(caseHeader);
+    observer.observe(header);
+    break; // Only one config will match per page
   }
 
   /* ---------- Parallax on project card images ---------- */
