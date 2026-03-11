@@ -714,7 +714,7 @@ h1, h2, h3, h4, h5, h6 {
   grid-template-columns: 1fr 1fr;
   gap: var(--space-xl);
   margin-bottom: var(--space-2xl);
-  align-items: start;
+  align-items: stretch;
 }
 
 .case-study__two-col--asymmetric {
@@ -722,7 +722,15 @@ h1, h2, h3, h4, h5, h6 {
   grid-template-columns: 1fr 2fr;
   gap: var(--space-xl);
   margin-bottom: var(--space-2xl);
-  align-items: start;
+  align-items: stretch;
+}
+
+.case-study__two-col--asymmetric-reverse {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: var(--space-xl);
+  margin-bottom: var(--space-2xl);
+  align-items: stretch;
 }
 
 .case-study__two-col--asymmetric .case-study__img-wrap:first-child {
@@ -774,10 +782,26 @@ h1, h2, h3, h4, h5, h6 {
   line-height: 1.7;
 }
 
+.value-card ul {
+  list-style: disc;
+  padding-left: var(--space-lg);
+  margin-top: var(--space-sm);
+}
+
+.value-card ul li {
+  font-size: 0.9375rem;
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+  margin-bottom: var(--space-xs);
+}
+
 /* In two-col grids, left-align content for readability */
-.case-study__two-col .value-card {
+.case-study__two-col .value-card,
+.case-study__two-col--asymmetric .value-card,
+.case-study__two-col--asymmetric-reverse .value-card {
   align-items: flex-start;
   text-align: left;
+  justify-content: flex-start;
 }
 
 .case-study__section-title {
@@ -864,6 +888,14 @@ h1, h2, h3, h4, h5, h6 {
 .case-study__img-thumb:hover {
   opacity: 0.88;
   transform: scale(1.005);
+}
+
+.case-study__img-caption {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+  margin-top: var(--space-sm);
+  font-style: italic;
 }
 
 /* --- Lightbox --- */
@@ -1824,6 +1856,10 @@ h1, h2, h3, h4, h5, h6 {
   }
 
   .case-study__two-col--asymmetric {
+    grid-template-columns: 1fr;
+  }
+
+  .case-study__two-col--asymmetric-reverse {
     grid-template-columns: 1fr;
   }
 
