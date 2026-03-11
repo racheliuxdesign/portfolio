@@ -1285,16 +1285,11 @@ h1, h2, h3, h4, h5, h6 {
   max-width: 500px;
 }
 
-.contact-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-2xl);
-}
-
 .contact-methods {
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
+  max-width: 480px;
 }
 
 .contact-card {
@@ -1343,73 +1338,6 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--color-text-secondary);
 }
 
-/* Contact form placeholder */
-.contact-form {
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-xl);
-}
-
-.contact-form__title {
-  font-size: 1.0625rem;
-  font-weight: 600;
-  margin-bottom: var(--space-lg);
-}
-
-.form-group {
-  margin-bottom: var(--space-md);
-}
-
-.form-group label {
-  display: block;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--color-text-secondary);
-  margin-bottom: var(--space-xs);
-}
-
-.form-group input,
-.form-group textarea {
-  width: 100%;
-  background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  padding: var(--space-sm) var(--space-md);
-  font-family: var(--font-sans);
-  font-size: 0.875rem;
-  color: var(--color-text-primary);
-  transition: border-color var(--transition-fast);
-  outline: none;
-}
-
-.form-group input:focus,
-.form-group textarea:focus {
-  border-color: var(--color-accent);
-}
-
-.form-group textarea {
-  resize: vertical;
-  min-height: 100px;
-}
-
-.form-submit {
-  background: var(--color-accent);
-  color: #fff;
-  font-family: var(--font-sans);
-  font-size: 0.875rem;
-  font-weight: 600;
-  border: none;
-  border-radius: var(--radius-sm);
-  padding: var(--space-sm) var(--space-xl);
-  cursor: pointer;
-  transition: background var(--transition-fast), transform var(--transition-fast);
-}
-
-.form-submit:hover {
-  background: var(--color-accent-hover);
-  transform: translateY(-1px);
-}
 
 /* ---------- Footer ---------- */
 .footer {
@@ -1539,9 +1467,6 @@ h1, h2, h3, h4, h5, h6 {
     gap: var(--space-sm);
   }
 
-  .contact-grid {
-    grid-template-columns: 1fr;
-  }
 
   .case-study__meta {
     flex-direction: column;
