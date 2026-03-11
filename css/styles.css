@@ -639,6 +639,62 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* ---------- Case Study Page ---------- */
+
+/* --- Sticky title bar --- */
+.sticky-title-bar {
+  position: fixed;
+  top: var(--nav-height);
+  left: 0;
+  right: 0;
+  z-index: 999;
+  background: rgba(15, 17, 23, 0.82);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sticky-title-bar--visible {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.sticky-title-bar__inner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  padding-top: var(--space-sm);
+  padding-bottom: var(--space-sm);
+}
+
+.sticky-title-bar__back {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  transition: color var(--transition-fast);
+}
+
+.sticky-title-bar__back:hover {
+  color: var(--color-text-primary);
+}
+
+.sticky-title-bar__title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .case-study {
   padding: var(--space-2xl) 0 var(--space-3xl);
 }
@@ -1849,6 +1905,14 @@ h1, h2, h3, h4, h5, h6 {
   .case-study__meta {
     flex-direction: column;
     gap: var(--space-md);
+  }
+
+  .sticky-title-bar__title {
+    font-size: 0.875rem;
+  }
+
+  .sticky-title-bar__back {
+    font-size: 0.75rem;
   }
 
   .case-study__two-col {

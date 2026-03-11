@@ -59,6 +59,30 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  /* ---------- Sticky case-study header ---------- */
+  const caseHeader = document.querySelector('.case-study__header');
+  const caseTitle  = document.querySelector('.case-study__title');
+  const caseBack   = document.querySelector('.case-study__back');
+
+  if (caseHeader && caseTitle && caseBack) {
+    // Build the sticky bar
+    const stickyBar = document.createElement('div');
+    stickyBar.className = 'sticky-title-bar';
+    stickyBar.innerHTML = `
+      <div class="container sticky-title-bar__inner">
+        <a href="${caseBack.getAttribute('href')}" class="sticky-title-bar__back">← Back to Projects</a>
+        <span class="sticky-title-bar__title">${caseTitle.textContent}</span>
+      </div>
+    `;
+    document.body.appendChild(stickyBar);
+
+    const observer = new IntersectionObserver(([entry]) => {
+      stickyBar.classList.toggle('sticky-title-bar--visible', !entry.isIntersecting);
+    }, { threshold: 0, rootMargin: `-${getComputedStyle(document.documentElement).getPropertyValue('--nav-height').trim() || '64px'} 0px 0px 0px` });
+
+    observer.observe(caseHeader);
+  }
+
   /* ---------- Parallax on project card images ---------- */
   const parallaxTargets = document.querySelectorAll('.project-card__image');
   if (parallaxTargets.length) {
