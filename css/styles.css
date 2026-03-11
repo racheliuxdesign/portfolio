@@ -717,12 +717,67 @@ h1, h2, h3, h4, h5, h6 {
   align-items: start;
 }
 
+.case-study__two-col--asymmetric {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: var(--space-xl);
+  margin-bottom: var(--space-2xl);
+  align-items: start;
+}
+
+.case-study__two-col--asymmetric .case-study__img-wrap:first-child {
+  margin-top: 0;
+}
+
 .case-study__three-col {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: var(--space-xl);
   margin-bottom: var(--space-2xl);
-  align-items: start;
+  align-items: stretch;
+}
+
+/* --- Value Card (icon + text blocks used in multi-col grids) --- */
+.value-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.value-card:hover {
+  border-color: var(--color-border-hover);
+  box-shadow: var(--shadow-card);
+}
+
+.value-card__icon {
+  display: block;
+  font-size: 1.75rem;
+  margin-bottom: var(--space-md);
+}
+
+.value-card h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: var(--space-sm);
+}
+
+.value-card p {
+  font-size: 0.9375rem;
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+}
+
+/* In two-col grids, left-align content for readability */
+.case-study__two-col .value-card {
+  align-items: flex-start;
+  text-align: left;
 }
 
 .case-study__section-title {
@@ -1762,6 +1817,18 @@ h1, h2, h3, h4, h5, h6 {
   .case-study__meta {
     flex-direction: column;
     gap: var(--space-md);
+  }
+
+  .case-study__two-col {
+    grid-template-columns: 1fr;
+  }
+
+  .case-study__two-col--asymmetric {
+    grid-template-columns: 1fr;
+  }
+
+  .case-study__three-col {
+    grid-template-columns: 1fr;
   }
 
   .footer__inner {
