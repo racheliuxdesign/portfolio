@@ -678,13 +678,13 @@ h1, h2, h3, h4, h5, h6 {
 .sticky-title-bar__back {
   font-size: 0.8125rem;
   font-weight: 500;
-  color: var(--color-text-secondary);
+  color: var(--color-text-primary);
   white-space: nowrap;
   transition: color var(--transition-fast);
 }
 
 .sticky-title-bar__back:hover {
-  color: var(--color-text-primary);
+  color: #ffffff;
 }
 
 .sticky-title-bar__title {
@@ -695,6 +695,21 @@ h1, h2, h3, h4, h5, h6 {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+}
+
+.sticky-title-bar__next {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  transition: color var(--transition-fast);
+  margin-left: auto;
+}
+
+.sticky-title-bar__next:hover {
+  color: #ffffff;
 }
 
 .case-study {
@@ -968,6 +983,37 @@ h1, h2, h3, h4, h5, h6 {
 .case-study__img-thumb:hover {
   opacity: 0.88;
   transform: scale(1.005);
+}
+
+/* --- Expand-icon overlay on thumbnail hover --- */
+.img-expand-wrap {
+  position: relative;
+  display: block;
+}
+
+.img-expand-wrap::after {
+  content: '';
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  background: rgba(0, 0, 0, 0.55);
+  border-radius: var(--radius-sm);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+  /* expand / arrows-out icon via inline SVG */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='1.8' stroke='%23ffffff'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 18px 18px;
+}
+
+.img-expand-wrap:hover::after {
+  opacity: 1;
 }
 
 .case-study__img-caption {
@@ -1936,6 +1982,10 @@ h1, h2, h3, h4, h5, h6 {
   }
 
   .sticky-title-bar__back {
+    font-size: 0.75rem;
+  }
+
+  .sticky-title-bar__next {
     font-size: 0.75rem;
   }
 

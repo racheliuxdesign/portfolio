@@ -60,6 +60,16 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   /* ---------- Sticky page header ---------- */
+  // Project order matching the main page
+  const projectOrder = [
+    { file: 'filters-makeover.html',         name: 'Filters Makeover' },
+    { file: 'rules-facelift.html',           name: 'Rules Facelift' },
+    { file: 'scopes-hierarchy.html',         name: 'Scopes Hierarchy Creator' },
+    { file: 'product-ai-chat.html',          name: 'Product AI Chat' },
+    { file: 'attack-route.html',             name: 'Attack Route Visualization' },
+    { file: 'cyber-risk-quantification.html', name: 'Cyber Risk Quantification' },
+  ];
+
   // Detect which page we're on and find the header + title
   const stickyConfig = [
     { header: '.case-study__header', title: '.case-study__title', back: '.case-study__back' },
@@ -81,10 +91,20 @@ document.addEventListener('DOMContentLoaded', () => {
       ? `<a href="${back.getAttribute('href')}" class="sticky-title-bar__back">← Back to Projects</a>`
       : '';
 
+    // Determine "Next Project" link for project pages
+    let nextHtml = '';
+    const currentFile = window.location.pathname.split('/').pop();
+    const currentIdx = projectOrder.findIndex(p => p.file === currentFile);
+    if (currentIdx !== -1) {
+      const next = projectOrder[(currentIdx + 1) % projectOrder.length];
+      nextHtml = `<a href="${next.file}" class="sticky-title-bar__next">${next.name} →</a>`;
+    }
+
     stickyBar.innerHTML = `
       <div class="container sticky-title-bar__inner">
         ${backHtml}
         <span class="sticky-title-bar__title">${title.textContent}</span>
+        ${nextHtml}
       </div>
     `;
     document.body.appendChild(stickyBar);
@@ -144,6 +164,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Open lightbox ---
     document.querySelectorAll('.case-study__img-thumb').forEach(img => {
+      // Wrap image in a container for the expand-icon overlay
+      const wrapper = document.createElement('span');
+      wrapper.className = 'img-expand-wrap';
+      img.parentNode.insertBefore(wrapper, img);
+      wrapper.appendChild(img);
+
       img.addEventListener('click', () => {
         lightboxImg.src = img.src;
         lightboxImg.alt = img.alt;
