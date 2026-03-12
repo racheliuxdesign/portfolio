@@ -783,6 +783,28 @@ h1, h2, h3, h4, h5, h6 {
   align-items: stretch;
 }
 
+.case-study__two-col--asymmetric > .value-card {
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.case-study__two-col--asymmetric > div:not(.value-card) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.case-study__two-col--asymmetric > div:not(.value-card) .case-study__img-wrap {
+  margin: 0;
+  flex: 1;
+}
+
+.case-study__two-col--asymmetric > div:not(.value-card) .case-study__img-thumb {
+  height: 100%;
+  max-height: none;
+  object-fit: cover;
+}
+
 .case-study__two-col--asymmetric-reverse {
   display: grid;
   grid-template-columns: 2fr 1fr;
