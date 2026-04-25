@@ -58,13 +58,43 @@
       </div>
     </section>
 
+    <!-- Impact Dashboard Section -->
+    <section class="impact-dashboard" aria-labelledby="impact-dashboard-title">
+      <div class="container">
+        <div class="impact-dashboard__panel fade-in">
+          <div class="impact-dashboard__intro">
+            <p class="impact-dashboard__eyebrow">Product leadership brief</p>
+            <h2 id="impact-dashboard-title" class="impact-dashboard__title">Designing clarity for high-stakes cyber products</h2>
+            <p class="impact-dashboard__description">
+              A focused view of the signals I bring into senior product design roles: strategy,
+              systems thinking, stakeholder alignment, and crisp execution in complex security workflows.
+            </p>
+          </div>
+          <div class="impact-dashboard__grid" aria-label="Portfolio impact highlights">
+            <article class="impact-metric">
+              <span class="impact-metric__value">15</span>
+              <span class="impact-metric__label">Years of rich and diverse experience</span>
+            </article>
+            <article class="impact-metric">
+              <span class="impact-metric__value">7+</span>
+              <span class="impact-metric__label">Years in Israeli Cybersecurity startups</span>
+            </article>
+            <article class="impact-metric">
+              <span class="impact-metric__value">6</span>
+              <span class="impact-metric__label">Case-studies from recent years</span>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Projects Section -->
     <section class="section">
       <div class="container">
         <hr class="divider">
         <div class="section__header fade-in">
           <h2 class="section__title">Recent Projects</h2>
-          <p class="section__subtitle">Selected case studies from recent work</p>
+          <p class="section__subtitle">Mission Control cards for complex cybersecurity product challenges</p>
         </div>
 
         <div class="company-group fade-in">
@@ -80,7 +110,7 @@
         <div class="projects-grid stagger-children">
 
           <!-- Project 1 -->
-          <a href="projects/filters-makeover.html" class="project-card fade-in">
+          <a href="projects/filters-makeover.html" class="project-card project-card--mission fade-in" aria-label="View Filters Makeover case study">
             <div class="project-card__image">
               <div class="project-card__placeholder">
                 <div class="project-card__placeholder-icon">
@@ -91,14 +121,22 @@
               </div>
             </div>
             <div class="project-card__body">
+              <div class="project-card__meta">
+                <span>Data UX</span>
+                <span>Enterprise scale</span>
+              </div>
               <h3 class="project-card__title">Filters Makeover</h3>
               <p class="project-card__description">Added greater flexibility for handling more question types. Introduced enterprise-level filter organization for large-scale data.</p>
+              <ul class="project-card__signals" aria-label="Design focus areas">
+                <li>Information architecture</li>
+                <li>Power-user workflows</li>
+              </ul>
               <span class="project-card__arrow">View case study →</span>
             </div>
           </a>
 
           <!-- Project 2 -->
-          <a href="projects/rules-facelift.html" class="project-card fade-in">
+          <a href="projects/rules-facelift.html" class="project-card project-card--mission fade-in" aria-label="View Rules Facelift case study">
             <div class="project-card__image">
               <div class="project-card__placeholder">
                 <div class="project-card__placeholder-icon">
@@ -109,14 +147,22 @@
               </div>
             </div>
             <div class="project-card__body">
+              <div class="project-card__meta">
+                <span>Rule logic</span>
+                <span>UX clarity</span>
+              </div>
               <h3 class="project-card__title">Rules Facelift</h3>
               <p class="project-card__description">Added new abilities, made rule logic easier to understand, and upgraded the overall visual experience.</p>
+              <ul class="project-card__signals" aria-label="Design focus areas">
+                <li>Complex logic modeling</li>
+                <li>Visual system upgrade</li>
+              </ul>
               <span class="project-card__arrow">View case study →</span>
             </div>
           </a>
 
           <!-- Project 3 -->
-          <a href="projects/scopes-hierarchy.html" class="project-card fade-in">
+          <a href="projects/scopes-hierarchy.html" class="project-card project-card--mission fade-in" aria-label="View Scopes Hierarchy Creator case study">
             <div class="project-card__image">
               <div class="project-card__placeholder">
                 <div class="project-card__placeholder-icon">
@@ -127,14 +173,22 @@
               </div>
             </div>
             <div class="project-card__body">
+              <div class="project-card__meta">
+                <span>Hierarchy builder</span>
+                <span>Time-to-value</span>
+              </div>
               <h3 class="project-card__title">Scopes Hierarchy Creator</h3>
               <p class="project-card__description">Builds resource hierarchies quickly and boosts users' time-to-value.</p>
+              <ul class="project-card__signals" aria-label="Design focus areas">
+                <li>Workflow acceleration</li>
+                <li>Structured resource mapping</li>
+              </ul>
               <span class="project-card__arrow">View case study →</span>
             </div>
           </a>
 
           <!-- Project 4 -->
-          <a href="projects/product-ai-chat.html" class="project-card fade-in">
+          <a href="projects/product-ai-chat.html" class="project-card project-card--mission fade-in" aria-label="View Product AI Chat case study">
             <div class="project-card__image">
               <div class="project-card__placeholder">
                 <div class="project-card__placeholder-icon">
@@ -145,8 +199,16 @@
               </div>
             </div>
             <div class="project-card__body">
+              <div class="project-card__meta">
+                <span>AI product</span>
+                <span>Collaboration</span>
+              </div>
               <h3 class="project-card__title">Product AI Chat</h3>
               <p class="project-card__description">Real-time messaging system for product teams to collaborate, share feedback, and streamline communication workflows.</p>
+              <ul class="project-card__signals" aria-label="Design focus areas">
+                <li>Conversational UX</li>
+                <li>Product team operations</li>
+              </ul>
               <span class="project-card__arrow">View case study →</span>
             </div>
           </a>
@@ -154,6 +216,7 @@
         </div><!-- /projects-grid Company A -->
 
         <div class="company-group fade-in">
+          <span class="company-group__dot company-group__dot--b"></span>
           <span class="company-group__label">CYE — Cyber Risk Quantification</span>
           <a href="https://cyesec.com/" target="_blank" rel="noopener" class="company-group__link" aria-label="Visit CYE website">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="14" height="14">
@@ -165,7 +228,7 @@
         <div class="projects-grid stagger-children">
 
           <!-- Project 5 -->
-          <a href="projects/attack-route.html" class="project-card fade-in">
+          <a href="projects/attack-route.html" class="project-card project-card--mission fade-in" aria-label="View Attack Route Visualization case study">
             <div class="project-card__image">
               <div class="project-card__placeholder">
                 <div class="project-card__placeholder-icon">
@@ -176,14 +239,22 @@
               </div>
             </div>
             <div class="project-card__body">
+              <div class="project-card__meta">
+                <span>Attack paths</span>
+                <span>Risk prioritization</span>
+              </div>
               <h3 class="project-card__title">Attack Route Visualization</h3>
               <p class="project-card__description">Interactive visualization of attack paths and routes to help security teams understand and prioritize vulnerabilities.</p>
+              <ul class="project-card__signals" aria-label="Design focus areas">
+                <li>Graph-based exploration</li>
+                <li>Security decision support</li>
+              </ul>
               <span class="project-card__arrow">View case study →</span>
             </div>
           </a>
 
           <!-- Project 6 -->
-          <a href="projects/cyber-risk-quantification.html" class="project-card fade-in">
+          <a href="projects/cyber-risk-quantification.html" class="project-card project-card--mission fade-in" aria-label="View Cyber Risk Quantification case study">
             <div class="project-card__image">
               <div class="project-card__placeholder">
                 <div class="project-card__placeholder-icon">
@@ -194,8 +265,16 @@
               </div>
             </div>
             <div class="project-card__body">
+              <div class="project-card__meta">
+                <span>Risk modeling</span>
+                <span>Executive insight</span>
+              </div>
               <h3 class="project-card__title">Cyber Risk Quantification</h3>
               <p class="project-card__description">Data-driven approach to quantify and measure cyber risks, enabling better decision-making and resource allocation.</p>
+              <ul class="project-card__signals" aria-label="Design focus areas">
+                <li>Quantitative storytelling</li>
+                <li>Business-risk translation</li>
+              </ul>
               <span class="project-card__arrow">View case study →</span>
             </div>
           </a>
