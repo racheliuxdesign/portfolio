@@ -13,6 +13,31 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { passive: true });
   }
 
+  /* ---------- Attack surface background parallax ---------- */
+  const reduceBackgroundMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!reduceBackgroundMotion) {
+    const root = document.documentElement;
+    let bgParallaxTicking = false;
+
+    const updateBackgroundParallax = () => {
+      const scrollY = window.scrollY || window.pageYOffset || 0;
+      root.style.setProperty('--bg-map-shift-y', `${(scrollY * -0.018).toFixed(2)}px`);
+      root.style.setProperty('--bg-map-shift-x', `${(scrollY * 0.008).toFixed(2)}px`);
+      root.style.setProperty('--bg-route-shift-y', `${(scrollY * -0.034).toFixed(2)}px`);
+      root.style.setProperty('--bg-route-shift-x', `${(scrollY * 0.014).toFixed(2)}px`);
+      bgParallaxTicking = false;
+    };
+
+    window.addEventListener('scroll', () => {
+      if (!bgParallaxTicking) {
+        requestAnimationFrame(updateBackgroundParallax);
+        bgParallaxTicking = true;
+      }
+    }, { passive: true });
+
+    updateBackgroundParallax();
+  }
+
   /* ---------- Mobile menu toggle ---------- */
   const toggle = document.querySelector('.nav__toggle');
   const links = document.querySelector('.nav__links');
@@ -206,7 +231,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Mouse-pan while zoomed ---
     lightbox.addEventListener('mousemove', e => {
       if (!isZoomed) return;
-      const rect = lightboxImg.getBoundingClientRect();
 
       // Map cursor position over the whole viewport to a pan origin on the image
       const xPct = (e.clientX / window.innerWidth  * 100).toFixed(2);
