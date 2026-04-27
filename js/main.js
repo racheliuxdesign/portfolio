@@ -75,6 +75,21 @@ document.addEventListener('DOMContentLoaded', () => {
     faders.forEach(el => observer.observe(el));
   }
 
+  /* ---------- Impact card reveal (cs-impact) ---------- */
+  const impactCards = document.querySelectorAll('.cs-impact__card');
+  if (impactCards.length) {
+    const impactObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          impactObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+    impactCards.forEach(card => impactObserver.observe(card));
+  }
+
   /* ---------- Active nav link ---------- */
   const currentPage = window.location.pathname.split('/').pop() || 'index.html';
   document.querySelectorAll('.nav__link').forEach(link => {

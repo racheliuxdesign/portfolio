@@ -30,7 +30,7 @@
 
   /* Sizing */
   --container-max: 1200px;
-  --container-narrow: 800px;
+  --container-narrow: 900px;
   --nav-height: 64px;
 
   /* Spacing */
@@ -257,12 +257,10 @@ body::after {
   cursor: default;
   user-select: none;
   /* Gradient text */
-  background: linear-gradient(110deg, #e040a0 0%, #b94fd6 38%, #7c3aed 72%, #5b2fe0 100%);
+  background: linear-gradient(110deg, #ff6a00 0%, #ff4500 40%, #e63000 75%, #c42000 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  /* Soft matching glow behind the text */
-  filter: drop-shadow(0 0 10px rgba(185, 79, 214, 0.45));
 }
 
 .nav__links {
@@ -433,11 +431,10 @@ body::after {
 }
 
 .hero__title span {
-  background: linear-gradient(110deg, #e040a0 0%, #b94fd6 38%, #7c3aed 72%, #5b2fe0 100%);
+  background: linear-gradient(110deg, #ff6a00 0%, #ff4500 40%, #e63000 75%, #c42000 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 14px rgba(185, 79, 214, 0.5));
 }
 
 .hero__description {
@@ -1082,6 +1079,18 @@ body::after {
   line-height: 1.7;
 }
 
+.case-study__summary-list {
+  list-style: disc;
+  padding-left: var(--space-lg);
+  font-size: 1.125rem;
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+}
+
+.case-study__summary-list li + li {
+  margin-top: var(--space-sm);
+}
+
 .case-study__meta {
   display: flex;
   gap: var(--space-xl);
@@ -1244,6 +1253,12 @@ body::after {
   color: #7a7d8e;
   font-style: italic;
   margin-top: calc(-1 * var(--space-xs));
+}
+
+.case-study__section ul {
+  list-style: disc;
+  padding-left: var(--space-lg);
+  margin-bottom: var(--space-md);
 }
 
 .case-study__section p,
@@ -1420,6 +1435,78 @@ body::after {
 
 .lightbox__close:hover {
   background: var(--color-bg-card-hover);
+}
+
+
+/* --- Case Study Impact Cards --- */
+@keyframes cs-impact-rise {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.cs-impact {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-lg);
+  margin-bottom: var(--space-2xl);
+}
+
+.cs-impact__card {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: var(--space-xl) var(--space-lg);
+  background: linear-gradient(160deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-md);
+  opacity: 0;
+  transform: translateY(28px);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.cs-impact__card.is-visible {
+  animation: cs-impact-rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.cs-impact__card--1.is-visible { animation-delay: 0s; }
+.cs-impact__card--2.is-visible { animation-delay: 0.12s; }
+.cs-impact__card--3.is-visible { animation-delay: 0.24s; }
+
+.cs-impact__card:hover {
+  border-color: rgba(255, 255, 255, 0.22);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+  transform: translateY(-4px);
+}
+
+.cs-impact__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary);
+}
+
+.cs-impact__title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #ffffff;
+  line-height: 1.35;
+}
+
+.cs-impact__text {
+  font-size: 0.9375rem;
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .cs-impact {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* --- Figma prototype CTA --- */
