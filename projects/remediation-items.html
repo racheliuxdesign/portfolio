@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Remediation Items - Racheli Klots</title>
+  <meta name="robots" content="noindex, nofollow">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+
+  <!-- ===== Navigation ===== -->
+  <nav class="nav" role="navigation" aria-label="Main navigation">
+    <div class="container nav__inner">
+      <a href="../index.html" class="nav__logo">Racheli's Portfolio</a>
+      <button class="nav__toggle" aria-label="Toggle menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="nav__links">
+        <a href="../index.html" class="nav__link">Projects</a>
+        <a href="../resume.html" class="nav__link">Resume</a>
+        <a href="../contact.html" class="nav__link">Contact Me</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===== Page ===== -->
+  <main class="page">
+
+    <section class="case-study">
+      <div class="container">
+
+        <a href="../index.html" class="case-study__back fade-in">← Back to Projects</a>
+
+        <div class="case-study__header fade-in">
+          <h1 class="case-study__title">Remediation Items</h1>
+          <p class="case-study__summary">
+            Findings, aggregated by their remediation.
+          </p>
+        </div>
+
+        <!-- How findings (and aggregations) work -->
+        <div class="case-study__section fade-in">
+          <h2 class="case-study__section-title">How findings (and aggregations) work</h2>
+          <p>
+            A single finding is straightforward — one value per attribute.
+            <em>Priority: High · Status: Open.</em>
+          </p>
+          <p>
+            But surfacing every finding individually creates noise. So Seemplicity bundles similar
+            findings into a single <strong>aggregated finding</strong> — fewer rows, same information.
+          </p>
+          <p>
+            Because one aggregation stands in for many findings, its attributes can hold multiple
+            values at once:
+            <em>Priority: <span class="sev sev--critical">Critical</span> / <span class="sev sev--high">High</span> / <span class="sev sev--medium">Medium</span> · Status: Open / In Progress / Done.</em>
+          </p>
+        </div>
+
+        <!-- Problem / Solution -->
+        <div class="case-study__two-col fade-in">
+          <div class="value-card">
+            <h3>The problem</h3>
+            <p>
+              Aggregation makes the list readable — but the row only shows
+              <em>representative</em> values, not every finding behind it.
+              When users filter, results seem to vanish for no clear reason.
+            </p>
+            <ul>
+              <li><strong>Merged attributes</strong> hide real variance inside a group.</li>
+              <li><strong>Dashboards mislead</strong> — decisions get made on partial context.</li>
+              <li><strong>Hard to fix</strong> — the logic ripples across the whole system.</li>
+            </ul>
+          </div>
+
+          <div class="value-card">
+            <h3>The solution</h3>
+            <p>
+              Reframe the page from “Findings” to <strong>Remediation Items</strong>,
+              and rebuild the logic underneath it.
+            </p>
+            <ul>
+              <li>Rework filter calculations so results match what users see.</li>
+              <li>Make the new logic transparent — simple on the surface, honest underneath.</li>
+              <li>Expand filtering for sharper accuracy and org-level control.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Visuals -->
+        <div class="case-study__img-wrap fade-in">
+          <img src="../images/remediation/ri1.png" alt="Remediation Items — view 1" class="case-study__img-thumb" />
+        </div>
+        <div class="case-study__img-wrap fade-in">
+          <img src="../images/remediation/ri2.png" alt="Remediation Items — view 2" class="case-study__img-thumb" />
+        </div>
+        <div class="case-study__img-wrap fade-in">
+          <img src="../images/remediation/ri3.png" alt="Remediation Items — view 3" class="case-study__img-thumb case-study__img-thumb--natural" />
+        </div>
+        <div class="case-study__img-wrap fade-in">
+          <img src="../images/remediation/ri4.png" alt="Remediation Items — view 4" class="case-study__img-thumb" />
+        </div>
+        <div class="case-study__img-wrap fade-in">
+          <img src="../images/remediation/ri5.png" alt="Remediation Items — view 5" class="case-study__img-thumb" />
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Image preview">
+    <button class="lightbox__close" id="lightboxClose" aria-label="Close">✕</button>
+    <img class="lightbox__img" id="lightboxImg" src="" alt="" />
+  </div>
+
+  <!-- ===== Footer ===== -->
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p class="footer__copy">© 2026 Racheli Klots. All rights reserved.</p>
+      <div class="footer__links">
+        <a href="https://www.linkedin.com/in/racheli-klots-72456a73/" class="footer__link" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="mailto:racheli.klots@gmail.com" class="footer__link">Email</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../js/main.js"></script>
+</body>
+</html>

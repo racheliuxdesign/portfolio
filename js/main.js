@@ -102,8 +102,8 @@ document.addEventListener('DOMContentLoaded', () => {
   /* ---------- Sticky page header ---------- */
   // Project order matching the main page
   const projectOrder = [
-    { file: 'filters-makeover.html',         name: 'Filters Makeover' },
-    { file: 'rules-facelift.html',           name: 'Rules Facelift' },
+    { file: 'filters-makeover.html',         name: 'Filters' },
+    { file: 'rules-facelift.html',           name: 'Rules and Policies' },
     { file: 'scopes-hierarchy.html',         name: 'Scopes Hierarchy Creator' },
     { file: 'product-ai-chat.html',          name: 'Product AI Chat' },
     { file: 'attack-route.html',             name: 'Attack Route Visualization' },
@@ -201,6 +201,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (lightbox && lightboxImg) {
     let isZoomed = false;
+    let isNatural = false;
+
+    const updateNaturalPan = (clientX, clientY) => {
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const iw = lightboxImg.naturalWidth;
+      const ih = lightboxImg.naturalHeight;
+      const xRatio = Math.min(1, Math.max(0, clientX / vw));
+      const yRatio = Math.min(1, Math.max(0, clientY / vh));
+      const tx = iw > vw ? -(iw - vw) * xRatio : (vw - iw) / 2;
+      const ty = ih > vh ? -(ih - vh) * yRatio : (vh - ih) / 2;
+      lightboxImg.style.transform = `translate(${tx}px, ${ty}px)`;
+    };
 
     // --- Open lightbox ---
     document.querySelectorAll('.case-study__img-thumb').forEach(img => {
@@ -214,16 +227,26 @@ document.addEventListener('DOMContentLoaded', () => {
         lightboxImg.src = img.src;
         lightboxImg.alt = img.alt;
         lightboxImg.style.transformOrigin = '50% 50%';
+        lightboxImg.style.transform = '';
         isZoomed = false;
+        isNatural = img.classList.contains('case-study__img-thumb--natural');
         lightbox.classList.remove('is-zoomed');
+        lightbox.classList.toggle('lightbox--natural', isNatural);
         lightbox.classList.add('is-open');
         document.body.style.overflow = 'hidden';
+        if (isNatural) {
+          // Start panning from center once the image is loaded
+          const init = () => updateNaturalPan(window.innerWidth / 2, window.innerHeight / 2);
+          if (lightboxImg.complete) init();
+          else lightboxImg.addEventListener('load', init, { once: true });
+        }
       });
     });
 
     // --- Toggle zoom on image click ---
     lightboxImg.addEventListener('click', e => {
       e.stopPropagation();
+      if (isNatural) return; // natural mode: no click-zoom
 
       if (!isZoomed) {
         // Calculate click position relative to the image as a %
@@ -243,8 +266,12 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // --- Mouse-pan while zoomed ---
+    // --- Mouse-pan ---
     lightbox.addEventListener('mousemove', e => {
+      if (isNatural) {
+        updateNaturalPan(e.clientX, e.clientY);
+        return;
+      }
       if (!isZoomed) return;
 
       // Map cursor position over the whole viewport to a pan origin on the image
@@ -256,8 +283,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Close ---
     const closeLightbox = () => {
       isZoomed = false;
-      lightbox.classList.remove('is-open', 'is-zoomed');
+      isNatural = false;
+      lightbox.classList.remove('is-open', 'is-zoomed', 'lightbox--natural');
       lightboxImg.style.transformOrigin = '50% 50%';
+      lightboxImg.style.transform = '';
       document.body.style.overflow = '';
     };
 
