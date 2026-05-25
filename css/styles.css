@@ -2551,3 +2551,18 @@ body::after {
   background: rgba(255, 193, 90, 0.12);
   border-color: rgba(255, 193, 90, 0.28);
 }
+.sev--open {
+  color: #9fbaff;
+  background: rgba(91, 140, 247, 0.12);
+  border-color: rgba(91, 140, 247, 0.32);
+}
+.sev--progress {
+  color: #c4b1ff;
+  background: rgba(167, 139, 250, 0.12);
+  border-color: rgba(167, 139, 250, 0.32);
+}
+.sev--done {
+  color: #86efac;
+  background: rgba(74, 222, 128, 0.12);
+  border-color: rgba(74, 222, 128, 0.32);
+}
