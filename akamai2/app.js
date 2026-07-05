@@ -17,75 +17,75 @@
  * ========================================================================== */
 
 (function () {
-  "use strict";
+    "use strict";
 
-  const M = window.MOCK;
-  const $ = (s, r = document) => r.querySelector(s);
-  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
-  const STORE_KEY = "akamai_investigation_v1";
-  const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const M = window.MOCK;
+    const $ = (s, r = document) => r.querySelector(s);
+    const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+    const STORE_KEY = "akamai_investigation_v1";
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  const icons = () => { try { window.lucide && window.lucide.createIcons(); } catch (e) {} };
+    const icons = () => { try { window.lucide && window.lucide.createIcons(); } catch (e) {} };
 
-  /* ---------------- Persistent state ------------------------------------- */
-  const defaultState = () => ({ status: "open", completed: [], audit: [] });
-  let state = load();
+    /* ---------------- Persistent state ------------------------------------- */
+    const defaultState = () => ({ status: "open", completed: [], audit: [] });
+    let state = load();
 
-  function load() {
-    try {
-      const raw = localStorage.getItem(STORE_KEY);
-      if (raw) return Object.assign(defaultState(), JSON.parse(raw));
-    } catch (e) {}
-    return defaultState();
-  }
-  function save() { try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {} }
-  function resetState() { state = defaultState(); save(); }
-
-  /* ---------------- Theme (dark / light) --------------------------------- */
-  const THEME_KEY = "akamai_theme";
-  function currentTheme() {
-    return document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
-  }
-  function applyTheme(theme, announce) {
-    const light = theme === "light";
-    document.documentElement.setAttribute("data-theme", light ? "light" : "dark");
-    try { localStorage.setItem(THEME_KEY, light ? "light" : "dark"); } catch (e) {}
-    const btn = $("#themeToggle");
-    if (btn) {
-      // Icon shows the mode you'll switch TO.
-      btn.innerHTML = `<i data-lucide="${light ? "moon" : "sun"}"></i>`;
-      btn.setAttribute("title", light ? "Switch to dark theme" : "Switch to light theme");
-      icons();
+    function load() {
+        try {
+            const raw = localStorage.getItem(STORE_KEY);
+            if (raw) return Object.assign(defaultState(), JSON.parse(raw));
+        } catch (e) {}
+        return defaultState();
     }
-    if (announce) toast("info", light ? "Light mode" : "Dark mode", light
-      ? "Switched to the light theme."
-      : "Switched to the dark theme — optimised for low-light SOC rooms.");
-  }
-  function toggleTheme() { applyTheme(currentTheme() === "light" ? "dark" : "light", true); }
+    function save() { try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {} }
+    function resetState() { state = defaultState(); save(); }
 
-  function nowClock() {
-    const d = new Date();
-    return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
-  }
+    /* ---------------- Theme (dark / light) --------------------------------- */
+    const THEME_KEY = "akamai_theme";
+    function currentTheme() {
+        return document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
+    }
+    function applyTheme(theme, announce) {
+        const light = theme === "light";
+        document.documentElement.setAttribute("data-theme", light ? "light" : "dark");
+        try { localStorage.setItem(THEME_KEY, light ? "light" : "dark"); } catch (e) {}
+        const btn = $("#themeToggle");
+        if (btn) {
+            // Icon shows the mode you'll switch TO.
+            btn.innerHTML = `<i data-lucide="${light ? "moon" : "sun"}"></i>`;
+            btn.setAttribute("title", light ? "Switch to dark theme" : "Switch to light theme");
+            icons();
+        }
+        if (announce) toast("info", light ? "Light mode" : "Dark mode", light
+            ? "Switched to the light theme."
+            : "Switched to the dark theme — optimised for low-light SOC rooms.");
+    }
+    function toggleTheme() { applyTheme(currentTheme() === "light" ? "dark" : "light", true); }
 
-  /* ---------------- SOC background (context) ----------------------------- */
-  function renderSOC() {
-    $("#socKpis").innerHTML = M.soc.kpis.map(k => `
+    function nowClock() {
+        const d = new Date();
+        return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
+    }
+
+    /* ---------------- SOC background (context) ----------------------------- */
+    function renderSOC() {
+        $("#socKpis").innerHTML = M.soc.kpis.map(k => `
       <div class="kpi ${k.tone === "critical" ? "kpi--critical" : ""}">
         <span class="kpi__icon"><i data-lucide="${k.icon}"></i></span>
         <div><div class="kpi__val">${k.value}</div><div class="kpi__label">${k.label}</div></div>
       </div>`).join("");
 
-    const head = `
+        const head = `
       <div class="qrow qrow--head" role="row">
         <span class="qrow__col--id">Alert</span><span>Detection</span>
         <span class="qrow__col--entity">Entity</span><span>Severity</span>
         <span class="qrow__col--score">Risk</span><span></span>
       </div>`;
 
-    const rows = M.soc.queue.map(a => {
-      const c = severityColor(a.severity);
-      return `
+        const rows = M.soc.queue.map(a => {
+            const c = severityColor(a.severity);
+            return `
       <div class="qrow ${a.primary ? "qrow--primary" : ""} qrow--clickable" role="row" data-alert="${a.id}" data-primary="${!!a.primary}" tabindex="0">
         <span class="qrow__id qrow__col--id">${a.id}</span>
         <span class="qrow__title">${a.primary ? '<i data-lucide="flame" class="flare"></i>' : ""}${a.title}</span>
@@ -97,195 +97,234 @@
         </span>
         <span class="qrow__cta"><i data-lucide="chevron-right"></i></span>
       </div>`;
-    }).join("");
+        }).join("");
 
-    $("#socQueue").innerHTML = head + rows;
+        $("#socQueue").innerHTML = head + rows;
 
-    $$("#socQueue .qrow--clickable").forEach(row => {
-      const open = () => {
-        if (row.dataset.primary === "true") openPanel();
-        else toast("info", "Focused demo", "This prototype focuses on the Critical “Suspicious Data Download” alert. Click that row to investigate.");
-      };
-      row.addEventListener("click", open);
-      row.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } });
-    });
-  }
+        $$("#socQueue .qrow--clickable").forEach(row => {
+            const open = () => {
+                if (row.dataset.primary === "true") openPanel();
+                else toast("info", "Focused demo", "This prototype focuses on the Critical “Suspicious Data Download” alert. Click that row to investigate.");
+            };
+            row.addEventListener("click", open);
+            row.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } });
+        });
+    }
 
-  function severityColor(s) {
-    return ({ critical: "var(--crit)", high: "var(--orange)", medium: "var(--amber)", low: "var(--cyan)" })[s] || "var(--cyan)";
-  }
-  function initials(name) { return name.split(/\s+/).map(w => w[0]).join("").slice(0, 2).toUpperCase(); }
+    function severityColor(s) {
+        return ({ critical: "var(--crit)", high: "var(--orange)", medium: "var(--amber)", low: "var(--cyan)" })[s] || "var(--cyan)";
+    }
+    function initials(name) { return name.split(/\s+/).map(w => w[0]).join("").slice(0, 2).toUpperCase(); }
 
-  /* ---------------- Panel: open / close ---------------------------------- */
-  let panelBuilt = false;
-  let lastFocus = null;
+    /* ---------------- Panel: open / close ---------------------------------- */
+    let panelBuilt = false;
+    let lastFocus = null;
 
-  function openPanel() {
-    lastFocus = document.activeElement;
-    document.body.classList.add("panel-open");
-    const panel = $("#panel"), backdrop = $("#backdrop");
-    backdrop.hidden = false; panel.hidden = false;
-    requestAnimationFrame(() => { backdrop.classList.add("is-open"); panel.classList.add("is-open"); });
+    function openPanel() {
+        lastFocus = document.activeElement;
+        document.body.classList.add("panel-open");
+        const panel = $("#panel"), backdrop = $("#backdrop");
+        backdrop.hidden = false; panel.hidden = false;
+        requestAnimationFrame(() => { backdrop.classList.add("is-open"); panel.classList.add("is-open"); });
 
-    hydratePanelStatics();
-    renderStateDrivenBits();   // actions, audit, status (reflect persisted state)
-    animateGauge(M.alert.riskScore);
-    streamSummary();
-    icons();
-    setTimeout(() => $("#btnClose").focus(), 480);
-  }
+        hydratePanelStatics();
+        renderStateDrivenBits();   // actions, audit, status (reflect persisted state)
+        animateGauge(M.alert.riskScore);
+        streamSummary();
+        icons();
+        setTimeout(() => $("#btnClose").focus(), 480);
+    }
 
-  function closePanel() {
-    closeDrill(true);
-    const panel = $("#panel"), backdrop = $("#backdrop");
-    panel.classList.remove("is-open"); backdrop.classList.remove("is-open");
-    document.body.classList.remove("panel-open");
-    setTimeout(() => { panel.hidden = true; backdrop.hidden = true; }, 500);
-    if (lastFocus && lastFocus.focus) lastFocus.focus();
-  }
+    function closePanel() {
+        closeDrill(true);
+        const panel = $("#panel"), backdrop = $("#backdrop");
+        panel.classList.remove("is-open"); backdrop.classList.remove("is-open");
+        document.body.classList.remove("panel-open");
+        setTimeout(() => { panel.hidden = true; backdrop.hidden = true; }, 500);
+        if (lastFocus && lastFocus.focus) lastFocus.focus();
+    }
 
-  /* ---------------- Panel: static hydration (once) ----------------------- */
-  function hydratePanelStatics() {
-    $("#panelAlertId").textContent = M.alert.id;
-    $("#panelAvatar").textContent = M.entity.initials;
-    $("#panelEntityName").textContent = M.entity.name;
-    $("#panelEntityRole").textContent = `${M.entity.title} · ${M.entity.department}`;
-    $("#panelAlertTitle").textContent = M.alert.title;
-    $("#panelDetected").textContent = `detected ${M.alert.detectedAt}`;
-    $("#panelMitre").innerHTML = M.alert.mitre.map(t =>
-      `<span class="mitre-tag"><i data-lucide="crosshair"></i>${t.id} · ${t.label}</span>`).join("");
+    /* ---------------- Panel: static hydration (once) ----------------------- */
+    function hydratePanelStatics() {
+        $("#panelAlertId").textContent = M.alert.id;
+        $("#panelAvatar").textContent = M.entity.initials;
+        $("#panelEntityName").textContent = M.entity.name;
+        $("#panelEntityRole").textContent = `${M.entity.title} · ${M.entity.department}`;
+        $("#panelAlertTitle").textContent = M.alert.title;
+        $("#panelDetected").textContent = `detected ${M.alert.detectedAt}`;
+        $("#panelMitre").innerHTML = M.alert.mitre.map(t =>
+            `<span class="mitre-tag"><i data-lucide="crosshair"></i>${t.id} · ${t.label}</span>`).join("");
 
-    if (panelBuilt) return;
-    panelBuilt = true;
+        if (panelBuilt) return;
+        panelBuilt = true;
 
-    renderKeyFacts();
-    renderFactors();
-    renderPivots();
-    renderAskSuggest();
-    wirePanelEvents();
-  }
+        renderKeyFacts();
+        renderAttackPath();
+        renderFactors();
+        renderPivots();
+        renderAskSuggest();
+        wirePanelEvents();
+    }
 
-  function renderKeyFacts() {
-    $("#keyFacts").innerHTML = M.keyFacts.map(f => `
+    function renderKeyFacts() {
+        $("#keyFacts").innerHTML = M.keyFacts.map(f => `
       <div class="kf ${f.tone === "critical" ? "kf--critical" : f.tone === "warn" ? "kf--warn" : ""}">
         <div class="kf__icon"><i data-lucide="${f.icon}"></i></div>
         <div class="kf__val">${f.value}</div>
         <div class="kf__label">${f.label}</div>
       </div>`).join("");
-  }
+    }
 
-  /* ---------------- AI summary streaming --------------------------------- */
-  function segmentText(text, marks) {
-    let segs = [{ t: text }];
-    marks.forEach(m => {
-      const next = [];
-      segs.forEach(seg => {
-        if (seg.c) { next.push(seg); return; }
-        const parts = seg.t.split(m.p);
-        for (let i = 0; i < parts.length; i++) {
-          if (parts[i]) next.push({ t: parts[i] });
-          if (i < parts.length - 1) next.push({ t: m.p, c: m.c });
-        }
-      });
-      segs = next;
-    });
-    return segs;
-  }
+    /* ---------------- Attack / exfiltration path graph --------------------- */
+    function renderAttackPath() {
+        const ap = M.attackPath;
+        $("#attackMitre").innerHTML = `<i data-lucide="crosshair"></i>${ap.mitre}`;
+        let html = '<div class="attack__flow">';
+        ap.nodes.forEach((n, i) => {
+            const clickable = !!n.pivot;
+            const mono = n.id === "exfil" ? " mono" : "";
+            html += `
+        <div class="agnode agnode--${n.tone} ${clickable ? "agnode--clickable" : "agnode--static"}"${clickable ? ` data-pivot="${n.pivot}" role="button" tabindex="0" aria-label="Inspect ${n.label}"` : ""}>
+          ${clickable ? '<i class="agnode__pivot" data-lucide="maximize-2"></i>' : ""}
+          <span class="agnode__ring"><i data-lucide="${n.icon}"></i></span>
+          <span class="agnode__meta">
+            <span class="agnode__label${mono}">${n.label}</span>
+            <span class="agnode__sub">${n.sub}</span>
+            <span class="agnode__tag">${n.tag}</span>
+          </span>
+        </div>`;
+            if (i < ap.links.length) {
+                const lk = ap.links[i];
+                html += `
+          <div class="aglink ${lk.danger ? "aglink--danger" : ""}">
+            <span class="aglink__label">${lk.label}</span>
+            <span class="aglink__line"></span>
+            <i class="aglink__arrow" data-lucide="chevron-right"></i>
+          </div>`;
+            }
+        });
+        html += "</div>";
+        $("#attackPath").innerHTML = html;
 
-  function summaryTokens() {
-    const marks = [
-      { p: "50 GB", c: "hl-crit" },
-      { p: "250× her typical daily volume", c: "hl-crit" },
-      { p: "02:03 AM PST", c: "hl" },
-      { p: "unmanaged Windows 11 device", c: "hl" },
-      { p: "residential network outside the corporate perimeter", c: "hl" },
-      { p: "data-exfiltration patterns", c: "hl" },
-      { p: "immediate containment", c: "hl-crit" },
-    ];
-    const segs = segmentText(M.aiSummary.text, marks);
-    const tokens = [];
-    segs.forEach(s => {
-      const words = s.t.match(/\S+\s*|\s+/g) || [s.t];
-      words.forEach(w => tokens.push({ t: w, c: s.c }));
-    });
-    return tokens;
-  }
+        $$("#attackPath .agnode--clickable").forEach(el => {
+            const go = () => openDrill(el.dataset.pivot);
+            el.addEventListener("click", go);
+            el.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } });
+        });
+    }
 
-  function streamSummary() {
-    const box = $("#aiSummary");
-    const foot = $("#aiSummaryFoot");
-    const conf = $("#summaryConfidence");
-    foot.hidden = true; conf.hidden = true;
-    $("#genTime").textContent = "";
+    /* ---------------- AI summary streaming --------------------------------- */
+    function segmentText(text, marks) {
+        let segs = [{ t: text }];
+        marks.forEach(m => {
+            const next = [];
+            segs.forEach(seg => {
+                if (seg.c) { next.push(seg); return; }
+                const parts = seg.t.split(m.p);
+                for (let i = 0; i < parts.length; i++) {
+                    if (parts[i]) next.push({ t: parts[i] });
+                    if (i < parts.length - 1) next.push({ t: m.p, c: m.c });
+                }
+            });
+            segs = next;
+        });
+        return segs;
+    }
 
-    // 1) skeleton
-    box.innerHTML = `
+    function summaryTokens() {
+        const marks = [
+            { p: "50 GB", c: "hl-crit" },
+            { p: "250× her typical daily volume", c: "hl-crit" },
+            { p: "02:03 AM PST", c: "hl" },
+            { p: "unmanaged Windows 11 device", c: "hl" },
+            { p: "residential network outside the corporate perimeter", c: "hl" },
+            { p: "data-exfiltration patterns", c: "hl" },
+            { p: "immediate containment", c: "hl-crit" },
+        ];
+        const segs = segmentText(M.aiSummary.text, marks);
+        const tokens = [];
+        segs.forEach(s => {
+            const words = s.t.match(/\S+\s*|\s+/g) || [s.t];
+            words.forEach(w => tokens.push({ t: w, c: s.c }));
+        });
+        return tokens;
+    }
+
+    function streamSummary() {
+        const box = $("#aiSummary");
+        const foot = $("#aiSummaryFoot");
+        const conf = $("#summaryConfidence");
+        foot.hidden = true; conf.hidden = true;
+        $("#genTime").textContent = "";
+
+        // 1) skeleton
+        box.innerHTML = `
       <div class="ai-thinking"><span class="orbits"><span></span><span></span><span></span></span>
         Analysing Sarah's 18-month behavioural baseline…</div>
       <div class="skeleton">
         <div class="skln w-90"></div><div class="skln w-80"></div>
         <div class="skln w-90"></div><div class="skln w-60"></div>
       </div>`;
-    icons();
+        icons();
 
-    const tokens = summaryTokens();
+        const tokens = summaryTokens();
 
-    const startType = () => {
-      box.innerHTML = "";
-      const cursor = document.createElement("span");
-      cursor.className = "cursor";
-      box.appendChild(cursor);
-      let i = 0;
-      const step = () => {
-        if (i >= tokens.length) {
-          cursor.remove();
-          conf.querySelector("span").textContent = `${M.aiSummary.confidence}% confidence`;
-          conf.hidden = false;
-          $("#genTime").textContent = `${tokens.length} tokens · ${M.aiSummary.generatedIn}`;
-          foot.hidden = false; icons();
-          return;
-        }
-        const burst = prefersReduced ? tokens.length : 1;
-        for (let b = 0; b < burst && i < tokens.length; b++, i++) {
-          const sp = document.createElement("span");
-          sp.textContent = tokens[i].t;
-          if (tokens[i].c) sp.className = tokens[i].c;
-          box.insertBefore(sp, cursor);
-        }
-        setTimeout(step, 22 + Math.random() * 22);
-      };
-      step();
-    };
+        const startType = () => {
+            box.innerHTML = "";
+            const cursor = document.createElement("span");
+            cursor.className = "cursor";
+            box.appendChild(cursor);
+            let i = 0;
+            const step = () => {
+                if (i >= tokens.length) {
+                    cursor.remove();
+                    conf.querySelector("span").textContent = `${M.aiSummary.confidence}% confidence`;
+                    conf.hidden = false;
+                    $("#genTime").textContent = `${tokens.length} tokens · ${M.aiSummary.generatedIn}`;
+                    foot.hidden = false; icons();
+                    return;
+                }
+                const burst = prefersReduced ? tokens.length : 1;
+                for (let b = 0; b < burst && i < tokens.length; b++, i++) {
+                    const sp = document.createElement("span");
+                    sp.textContent = tokens[i].t;
+                    if (tokens[i].c) sp.className = tokens[i].c;
+                    box.insertBefore(sp, cursor);
+                }
+                setTimeout(step, 22 + Math.random() * 22);
+            };
+            step();
+        };
 
-    setTimeout(startType, prefersReduced ? 0 : 1150);
-  }
+        setTimeout(startType, prefersReduced ? 0 : 1150);
+    }
 
-  /* ---------------- Radial risk gauge ------------------------------------ */
-  function animateGauge(score) {
-    const fill = $("#gaugeFill");
-    const num = $("#gaugeScore");
-    const C = 2 * Math.PI * 52;
-    fill.style.strokeDasharray = C.toFixed(1);
-    fill.style.strokeDashoffset = C.toFixed(1);
-    // trigger transition to target
-    requestAnimationFrame(() => {
-      fill.style.strokeDashoffset = (C * (1 - score / 100)).toFixed(1);
-    });
-    if (prefersReduced) { num.textContent = score; return; }
-    const dur = 1400, t0 = performance.now();
-    const tick = (t) => {
-      const p = Math.min(1, (t - t0) / dur);
-      const eased = 1 - Math.pow(1 - p, 3);
-      num.textContent = Math.round(eased * score);
-      if (p < 1) requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
-  }
+    /* ---------------- Radial risk gauge ------------------------------------ */
+    function animateGauge(score) {
+        const fill = $("#gaugeFill");
+        const num = $("#gaugeScore");
+        const C = 2 * Math.PI * 52;
+        fill.style.strokeDasharray = C.toFixed(1);
+        fill.style.strokeDashoffset = C.toFixed(1);
+        // trigger transition to target
+        requestAnimationFrame(() => {
+            fill.style.strokeDashoffset = (C * (1 - score / 100)).toFixed(1);
+        });
+        if (prefersReduced) { num.textContent = score; return; }
+        const dur = 1400, t0 = performance.now();
+        const tick = (t) => {
+            const p = Math.min(1, (t - t0) / dur);
+            const eased = 1 - Math.pow(1 - p, 3);
+            num.textContent = Math.round(eased * score);
+            if (p < 1) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+    }
 
-  /* ---------------- Explainable AI: risk factors ------------------------- */
-  function renderFactors() {
-    const host = $("#riskFactors");
-    host.innerHTML = M.riskFactors.map(f => `
+    /* ---------------- Explainable AI: risk factors ------------------------- */
+    function renderFactors() {
+        const host = $("#riskFactors");
+        host.innerHTML = M.riskFactors.map(f => `
       <div class="factor factor--${f.severity}" data-factor="${f.id}">
         <div class="factor__main" role="button" tabindex="0" aria-expanded="false">
           <div class="factor__icon"><i data-lucide="${f.icon}"></i></div>
@@ -327,30 +366,30 @@
         <span class="factors-total__val">${M.alert.riskScore}<small>/100</small></span>
       </div>`;
 
-    $$("#riskFactors .factor").forEach(fEl => {
-      const main = $(".factor__main", fEl);
-      const toggle = () => toggleFactor(fEl);
-      main.addEventListener("click", toggle);
-      main.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); } });
-    });
-  }
-
-  function toggleFactor(fEl, force) {
-    const open = force === undefined ? !fEl.classList.contains("is-open") : force;
-    fEl.classList.toggle("is-open", open);
-    $(".factor__main", fEl).setAttribute("aria-expanded", String(open));
-    if (open) {
-      $$(".devbar__fill", fEl).forEach(bar => {
-        requestAnimationFrame(() => { bar.style.width = bar.dataset.w; });
-      });
+        $$("#riskFactors .factor").forEach(fEl => {
+            const main = $(".factor__main", fEl);
+            const toggle = () => toggleFactor(fEl);
+            main.addEventListener("click", toggle);
+            main.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); } });
+        });
     }
-  }
 
-  /* ---------------- Recommended actions ---------------------------------- */
-  function renderActions() {
-    $("#actions").innerHTML = M.actions.map(a => {
-      const done = state.completed.includes(a.id);
-      return `
+    function toggleFactor(fEl, force) {
+        const open = force === undefined ? !fEl.classList.contains("is-open") : force;
+        fEl.classList.toggle("is-open", open);
+        $(".factor__main", fEl).setAttribute("aria-expanded", String(open));
+        if (open) {
+            $$(".devbar__fill", fEl).forEach(bar => {
+                requestAnimationFrame(() => { bar.style.width = bar.dataset.w; });
+            });
+        }
+    }
+
+    /* ---------------- Recommended actions ---------------------------------- */
+    function renderActions() {
+        $("#actions").innerHTML = M.actions.map(a => {
+            const done = state.completed.includes(a.id);
+            return `
       <div class="action ${a.recommended ? "action--recommended" : ""} ${done ? "is-done" : ""}" data-action="${a.id}">
         ${a.recommended ? '<span class="action__rec-flag">AI Recommended</span>' : ""}
         <div class="action__icon"><i data-lucide="${a.icon}"></i></div>
@@ -366,60 +405,60 @@
           ${done ? '<i data-lucide="check"></i>Done' : '<i data-lucide="' + a.icon + '"></i>Take action'}
         </button>
       </div>`;
-    }).join("");
+        }).join("");
 
-    $$("#actions [data-run]").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const a = M.actions.find(x => x.id === btn.dataset.run);
-        if (a && !state.completed.includes(a.id)) openConfirm(a);
-      });
-    });
-  }
+        $$("#actions [data-run]").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const a = M.actions.find(x => x.id === btn.dataset.run);
+                if (a && !state.completed.includes(a.id)) openConfirm(a);
+            });
+        });
+    }
 
-  /* ---------------- Pivots / drill-down ---------------------------------- */
-  function renderPivots() {
-    $("#pivots").innerHTML = M.pivots.map(p => `
+    /* ---------------- Pivots / drill-down ---------------------------------- */
+    function renderPivots() {
+        $("#pivots").innerHTML = M.pivots.map(p => `
       <button class="pivot" data-pivot="${p.id}">
         <span class="pivot__icon"><i data-lucide="${p.icon}"></i></span>
         <span class="pivot__meta"><span class="pivot__title">${p.title}</span><span class="pivot__sub">${p.meta}</span></span>
         <i class="pivot__go" data-lucide="arrow-right"></i>
       </button>`).join("");
-    $$("#pivots .pivot").forEach(b => b.addEventListener("click", () => openDrill(b.dataset.pivot)));
-  }
+        $$("#pivots .pivot").forEach(b => b.addEventListener("click", () => openDrill(b.dataset.pivot)));
+    }
 
-  let drillFocus = null;
-  function openDrill(id) {
-    const p = M.pivots.find(x => x.id === id);
-    const builders = { files: buildFiles, device: buildDevice, timeline: buildTimeline, baseline: buildBaseline };
-    $("#drillTitle").innerHTML = `<h3><span class="pivot__icon" style="width:32px;height:32px"><i data-lucide="${p.icon}"></i></span>${p.title}</h3><p>${drillSub(id)}</p>`;
-    $("#drillBody").innerHTML = (builders[id] || (() => ""))();
-    $("#drillCrumb").textContent = `${M.entity.name} · ${M.alert.id}`;
-    const drill = $("#drill");
-    drill.classList.add("is-open");
-    drill.setAttribute("aria-hidden", "false");
-    drillFocus = document.activeElement;
-    icons();
-    setTimeout(() => $("#drillBack").focus(), 300);
-  }
-  function closeDrill(instant) {
-    const drill = $("#drill");
-    if (!drill.classList.contains("is-open")) return;
-    drill.classList.remove("is-open");
-    drill.setAttribute("aria-hidden", "true");
-    if (!instant && drillFocus && drillFocus.focus) drillFocus.focus();
-  }
-  function drillSub(id) {
-    return ({
-      files: "Exact objects transferred from the corporate Cloud Drive — ranked by size.",
-      device: "The endpoint that initiated the transfer — assessed against corporate trust policy.",
-      timeline: "Reconstructed sequence of the session, from first auth to detection.",
-      baseline: "Tonight's activity measured against Sarah's established 18-month profile.",
-    })[id] || "";
-  }
+    let drillFocus = null;
+    function openDrill(id) {
+        const p = M.pivots.find(x => x.id === id);
+        const builders = { files: buildFiles, device: buildDevice, timeline: buildTimeline, baseline: buildBaseline };
+        $("#drillTitle").innerHTML = `<h3><span class="pivot__icon" style="width:32px;height:32px"><i data-lucide="${p.icon}"></i></span>${p.title}</h3><p>${drillSub(id)}</p>`;
+        $("#drillBody").innerHTML = (builders[id] || (() => ""))();
+        $("#drillCrumb").textContent = `${M.entity.name} · ${M.alert.id}`;
+        const drill = $("#drill");
+        drill.classList.add("is-open");
+        drill.setAttribute("aria-hidden", "false");
+        drillFocus = document.activeElement;
+        icons();
+        setTimeout(() => $("#drillBack").focus(), 300);
+    }
+    function closeDrill(instant) {
+        const drill = $("#drill");
+        if (!drill.classList.contains("is-open")) return;
+        drill.classList.remove("is-open");
+        drill.setAttribute("aria-hidden", "true");
+        if (!instant && drillFocus && drillFocus.focus) drillFocus.focus();
+    }
+    function drillSub(id) {
+        return ({
+            files: "Exact objects transferred from the corporate Cloud Drive — ranked by size.",
+            device: "The endpoint that initiated the transfer — assessed against corporate trust policy.",
+            timeline: "Reconstructed sequence of the session, from first auth to detection.",
+            baseline: "Tonight's activity measured against Sarah's established 18-month profile.",
+        })[id] || "";
+    }
 
-  function buildFiles() {
-    const s = M.fileSummary;
-    const bar = `
+    function buildFiles() {
+        const s = M.fileSummary;
+        const bar = `
       <div class="filebar">
         <span class="filebar__total">${s.total}</span>
         <span class="filebar__label">across ${M.files.length} files</span>
@@ -429,21 +468,21 @@
           <span class="classpill classpill--internal">${s.internal} Internal</span>
         </span>
       </div>`;
-    const list = M.files.map(f => `
+        const list = M.files.map(f => `
       <div class="fileitem">
         <span class="fileitem__icon ext-${f.type}"><span class="fileitem__ext">${f.type.toUpperCase()}</span></span>
         <div><div class="fileitem__name">${f.name}</div><div class="fileitem__records">${f.records} · <span class="classpill classpill--${f.class}" style="padding:1px 6px">${f.class}</span></div></div>
         <span class="fileitem__size">${f.size}</span>
         <i data-lucide="download" style="color:var(--tx-3)"></i>
       </div>`).join("");
-    return bar + `<div class="filelist">${list}</div>`;
-  }
+        return bar + `<div class="filelist">${list}</div>`;
+    }
 
-  function buildDevice() {
-    const d = M.device;
-    const cell = (k, v, icon, cls) => `<div class="dcell"><div class="dcell__k"><i data-lucide="${icon}"></i>${k}</div><div class="dcell__v ${cls || ""}">${v}</div></div>`;
-    const flags = d.flags.map(f => `<div class="dflag dflag--${f.tone}"><i data-lucide="${f.tone === "critical" ? "shield-x" : "alert-triangle"}"></i>${f.label}</div>`).join("");
-    return `
+    function buildDevice() {
+        const d = M.device;
+        const cell = (k, v, icon, cls) => `<div class="dcell"><div class="dcell__k"><i data-lucide="${icon}"></i>${k}</div><div class="dcell__v ${cls || ""}">${v}</div></div>`;
+        const flags = d.flags.map(f => `<div class="dflag dflag--${f.tone}"><i data-lucide="${f.tone === "critical" ? "shield-x" : "alert-triangle"}"></i>${f.label}</div>`).join("");
+        return `
       <div class="device-hero">
         <span class="device-hero__icon"><i data-lucide="monitor-x"></i></span>
         <div><div class="device-hero__name">${d.hostname}</div><div class="device-hero__sub">${d.os} · ${d.browser}</div></div>
@@ -460,18 +499,18 @@
         ${cell("MFA", d.mfa, "key-round", "")}
       </div>
       <div class="dflags">${flags}</div>`;
-  }
+    }
 
-  function buildTimeline() {
-    return `<div class="tl">` + M.timeline.map(t => `
+    function buildTimeline() {
+        return `<div class="tl">` + M.timeline.map(t => `
       <div class="tlitem tlitem--${t.tone}">
         <div class="tlitem__node"><i data-lucide="${t.tone === "critical" ? "alert-triangle" : t.tone === "warn" ? "activity" : "log-in"}"></i></div>
         <div><div class="tlitem__time">${t.time}</div><div class="tlitem__title">${t.title}</div><div class="tlitem__detail">${t.detail}</div></div>
       </div>`).join("") + `</div>`;
-  }
+    }
 
-  function buildBaseline() {
-    return `<div class="bl">` + M.baseline.map(b => `
+    function buildBaseline() {
+        return `<div class="bl">` + M.baseline.map(b => `
       <div class="blrow">
         <div class="blrow__label">${b.label}</div>
         <div class="blrow__cmp">
@@ -480,235 +519,235 @@
           <div class="blcol blcol--tonight"><div class="blcol__tag">Tonight</div><div class="blcol__val">${b.tonight}</div></div>
         </div>
       </div>`).join("") + `</div>`;
-  }
-
-  /* ---------------- Confirmation modal (guardrail) ----------------------- */
-  let pendingAction = null;
-  function openConfirm(a) {
-    pendingAction = a;
-    const c = a.confirm;
-    $("#modalHeading").textContent = c.heading;
-    $("#modalBody").textContent = c.body;
-    $("#modalImpacts").innerHTML = c.impacts.map(i => `<li>${i}</li>`).join("");
-    $("#modalNote").innerHTML = `<i data-lucide="undo-2"></i>${c.reversibleNote}`;
-    const btn = $("#modalConfirm");
-    btn.textContent = c.confirmLabel;
-    const highImpact = a.impact === "high";
-    btn.className = "btn " + (highImpact ? "btn--danger" : "btn--warn");
-    $("#modalIcon").className = "modal__icon " + (highImpact ? "" : "warn");
-    $("#modalIcon").innerHTML = `<i data-lucide="${highImpact ? "alert-octagon" : "alert-triangle"}"></i>`;
-    $("#modalAck").checked = false;
-    btn.disabled = true;
-
-    const wrap = $("#modalWrap");
-    wrap.hidden = false;
-    requestAnimationFrame(() => wrap.classList.add("is-open"));
-    icons();
-    setTimeout(() => $("#modalAck").focus(), 120);
-  }
-  function closeConfirm() {
-    const wrap = $("#modalWrap");
-    wrap.classList.remove("is-open");
-    setTimeout(() => { wrap.hidden = true; }, 240);
-    pendingAction = null;
-  }
-  function confirmAction() {
-    const a = pendingAction;
-    if (!a) return;
-    closeConfirm();
-    executeAction(a);
-  }
-
-  function executeAction(a) {
-    if (!state.completed.includes(a.id)) state.completed.push(a.id);
-    state.audit.unshift({
-      tone: "ok",
-      text: `<b>${a.title}</b> executed`,
-      by: `${M.soc.analyst.name} · via AI recommendation (${a.confidence}% confidence)`,
-      time: nowClock(),
-    });
-    updateStatusFromActions();
-    save();
-    renderStateDrivenBits();
-    toast("success", a.title, a.successToast);
-    icons();
-  }
-
-  function updateStatusFromActions() {
-    const c = state.completed;
-    const contained = c.some(id => ["suspend", "block-device", "revoke-sessions", "quarantine-files", "escalate"].includes(id));
-    if (c.includes("suspend") && c.includes("block-device")) {
-      if (state.status !== "resolved") {
-        state.status = "resolved";
-        state.audit.unshift({ tone: "ok", text: "Threat <b>contained &amp; resolved</b> — account suspended and device blocked", by: "Akamai AI Behavioral Engine", time: nowClock() });
-      }
-    } else if (contained) {
-      state.status = "contained";
     }
-  }
 
-  function renderStateDrivenBits() {
-    renderActions();
-    renderAudit();
-    renderStatusPill();
-    icons();
-  }
+    /* ---------------- Confirmation modal (guardrail) ----------------------- */
+    let pendingAction = null;
+    function openConfirm(a) {
+        pendingAction = a;
+        const c = a.confirm;
+        $("#modalHeading").textContent = c.heading;
+        $("#modalBody").textContent = c.body;
+        $("#modalImpacts").innerHTML = c.impacts.map(i => `<li>${i}</li>`).join("");
+        $("#modalNote").innerHTML = `<i data-lucide="undo-2"></i>${c.reversibleNote}`;
+        const btn = $("#modalConfirm");
+        btn.textContent = c.confirmLabel;
+        const highImpact = a.impact === "high";
+        btn.className = "btn " + (highImpact ? "btn--danger" : "btn--warn");
+        $("#modalIcon").className = "modal__icon " + (highImpact ? "" : "warn");
+        $("#modalIcon").innerHTML = `<i data-lucide="${highImpact ? "alert-octagon" : "alert-triangle"}"></i>`;
+        $("#modalAck").checked = false;
+        btn.disabled = true;
 
-  function renderStatusPill() {
-    const pill = $("#panelStatus");
-    const map = {
-      open: { i: "loader", t: "Open" },
-      contained: { i: "shield-check", t: "Contained" },
-      resolved: { i: "check-circle-2", t: "Resolved" },
-    };
-    const s = map[state.status] || map.open;
-    pill.dataset.status = state.status;
-    pill.innerHTML = `<i data-lucide="${s.i}"></i><span>${s.t}</span>`;
-  }
-
-  function renderAudit() {
-    const host = $("#audit");
-    const resetBtn = $("#resetBtn");
-    if (!state.audit.length) {
-      host.innerHTML = `<div class="audit__empty"><i data-lucide="history"></i>No response actions taken yet. AI recommendations above are one click away — each is confirmed &amp; reversible.</div>`;
-      resetBtn.hidden = true;
-      return;
+        const wrap = $("#modalWrap");
+        wrap.hidden = false;
+        requestAnimationFrame(() => wrap.classList.add("is-open"));
+        icons();
+        setTimeout(() => $("#modalAck").focus(), 120);
     }
-    resetBtn.hidden = false;
-    host.innerHTML = state.audit.map(a => `
+    function closeConfirm() {
+        const wrap = $("#modalWrap");
+        wrap.classList.remove("is-open");
+        setTimeout(() => { wrap.hidden = true; }, 240);
+        pendingAction = null;
+    }
+    function confirmAction() {
+        const a = pendingAction;
+        if (!a) return;
+        closeConfirm();
+        executeAction(a);
+    }
+
+    function executeAction(a) {
+        if (!state.completed.includes(a.id)) state.completed.push(a.id);
+        state.audit.unshift({
+            tone: "ok",
+            text: `<b>${a.title}</b> executed`,
+            by: `${M.soc.analyst.name} · via AI recommendation (${a.confidence}% confidence)`,
+            time: nowClock(),
+        });
+        updateStatusFromActions();
+        save();
+        renderStateDrivenBits();
+        toast("success", a.title, a.successToast);
+        icons();
+    }
+
+    function updateStatusFromActions() {
+        const c = state.completed;
+        const contained = c.some(id => ["suspend", "block-device", "revoke-sessions", "quarantine-files", "escalate"].includes(id));
+        if (c.includes("suspend") && c.includes("block-device")) {
+            if (state.status !== "resolved") {
+                state.status = "resolved";
+                state.audit.unshift({ tone: "ok", text: "Threat <b>contained &amp; resolved</b> — account suspended and device blocked", by: "Akamai AI Behavioral Engine", time: nowClock() });
+            }
+        } else if (contained) {
+            state.status = "contained";
+        }
+    }
+
+    function renderStateDrivenBits() {
+        renderActions();
+        renderAudit();
+        renderStatusPill();
+        icons();
+    }
+
+    function renderStatusPill() {
+        const pill = $("#panelStatus");
+        const map = {
+            open: { i: "loader", t: "Open" },
+            contained: { i: "shield-check", t: "Contained" },
+            resolved: { i: "check-circle-2", t: "Resolved" },
+        };
+        const s = map[state.status] || map.open;
+        pill.dataset.status = state.status;
+        pill.innerHTML = `<i data-lucide="${s.i}"></i><span>${s.t}</span>`;
+    }
+
+    function renderAudit() {
+        const host = $("#audit");
+        const resetBtn = $("#resetBtn");
+        if (!state.audit.length) {
+            host.innerHTML = `<div class="audit__empty"><i data-lucide="history"></i>No response actions taken yet. AI recommendations above are one click away — each is confirmed &amp; reversible.</div>`;
+            resetBtn.hidden = true;
+            return;
+        }
+        resetBtn.hidden = false;
+        host.innerHTML = state.audit.map(a => `
       <div class="audit__item">
         <span class="audit__dot ${a.tone === "info" ? "audit__dot--info" : ""}"><i data-lucide="${a.tone === "info" ? "info" : "check"}"></i></span>
         <div><div class="audit__txt">${a.text}</div><div class="audit__by">${a.by}</div></div>
         <span class="audit__time">${a.time}</span>
       </div>`).join("");
-  }
+    }
 
-  /* ---------------- Ask the AI ------------------------------------------- */
-  function renderAskSuggest() {
-    $("#askSuggest").innerHTML = M.askAI.suggestions.map(s => `<button class="ask__chip" data-q="${s}">${s}</button>`).join("");
-    $$("#askSuggest .ask__chip").forEach(c => c.addEventListener("click", () => askQuestion(c.dataset.q)));
-  }
+    /* ---------------- Ask the AI ------------------------------------------- */
+    function renderAskSuggest() {
+        $("#askSuggest").innerHTML = M.askAI.suggestions.map(s => `<button class="ask__chip" data-q="${s}">${s}</button>`).join("");
+        $$("#askSuggest .ask__chip").forEach(c => c.addEventListener("click", () => askQuestion(c.dataset.q)));
+    }
 
-  function askQuestion(q) {
-    q = (q || "").trim();
-    if (!q) return;
-    const thread = $("#askThread");
-    thread.insertAdjacentHTML("beforeend", `
+    function askQuestion(q) {
+        q = (q || "").trim();
+        if (!q) return;
+        const thread = $("#askThread");
+        thread.insertAdjacentHTML("beforeend", `
       <div class="ask__msg ask__msg--user"><span class="ask__ava ask__ava--user">${M.soc.analyst.initials}</span><div class="ask__bubble">${escapeHtml(q)}</div></div>`);
-    const typing = document.createElement("div");
-    typing.className = "ask__msg ask__msg--ai";
-    typing.innerHTML = `<span class="ask__ava ask__ava--ai"><i data-lucide="sparkles"></i></span><div class="ask__bubble"><span class="orbits" style="display:inline-flex;gap:4px"><span style="width:6px;height:6px;border-radius:50%;background:var(--cyan);display:inline-block"></span><span style="width:6px;height:6px;border-radius:50%;background:var(--cyan);display:inline-block"></span><span style="width:6px;height:6px;border-radius:50%;background:var(--cyan);display:inline-block"></span></span></div>`;
-    thread.appendChild(typing);
-    icons();
-    scrollAsk();
+        const typing = document.createElement("div");
+        typing.className = "ask__msg ask__msg--ai";
+        typing.innerHTML = `<span class="ask__ava ask__ava--ai"><i data-lucide="sparkles"></i></span><div class="ask__bubble"><span class="orbits" style="display:inline-flex;gap:4px"><span style="width:6px;height:6px;border-radius:50%;background:var(--cyan);display:inline-block"></span><span style="width:6px;height:6px;border-radius:50%;background:var(--cyan);display:inline-block"></span><span style="width:6px;height:6px;border-radius:50%;background:var(--cyan);display:inline-block"></span></span></div>`;
+        thread.appendChild(typing);
+        icons();
+        scrollAsk();
 
-    const key = q.toLowerCase().replace(/\s+/g, " ").trim();
-    const ans = M.askAI.answers[key] || M.askAI.answers._default;
-    setTimeout(() => {
-      typing.querySelector(".ask__bubble").textContent = ans;
-      scrollAsk();
-    }, prefersReduced ? 0 : 750);
-  }
-  function scrollAsk() {
-    const sc = $("#panelScroll");
-    setTimeout(() => { $("#askForm").scrollIntoView({ behavior: prefersReduced ? "auto" : "smooth", block: "nearest" }); }, 30);
-  }
+        const key = q.toLowerCase().replace(/\s+/g, " ").trim();
+        const ans = M.askAI.answers[key] || M.askAI.answers._default;
+        setTimeout(() => {
+            typing.querySelector(".ask__bubble").textContent = ans;
+            scrollAsk();
+        }, prefersReduced ? 0 : 750);
+    }
+    function scrollAsk() {
+        const sc = $("#panelScroll");
+        setTimeout(() => { $("#askForm").scrollIntoView({ behavior: prefersReduced ? "auto" : "smooth", block: "nearest" }); }, 30);
+    }
 
-  /* ---------------- Toasts ----------------------------------------------- */
-  function toast(kind, title, msg) {
-    const host = $("#toasts");
-    const el = document.createElement("div");
-    el.className = `toast toast--${kind}`;
-    el.innerHTML = `
+    /* ---------------- Toasts ----------------------------------------------- */
+    function toast(kind, title, msg) {
+        const host = $("#toasts");
+        const el = document.createElement("div");
+        el.className = `toast toast--${kind}`;
+        el.innerHTML = `
       <span class="toast__icon"><i data-lucide="${kind === "success" ? "check-circle-2" : "info"}"></i></span>
       <div class="toast__body"><div class="toast__title">${title}</div><div class="toast__msg">${msg}</div></div>
       <button class="toast__x" aria-label="Dismiss"><i data-lucide="x"></i></button>`;
-    host.appendChild(el);
-    icons();
-    const kill = () => { el.classList.add("is-out"); setTimeout(() => el.remove(), 350); };
-    el.querySelector(".toast__x").addEventListener("click", kill);
-    setTimeout(kill, 5200);
-  }
-
-  function escapeHtml(s) { const d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
-
-  /* ---------------- Panel-scoped event wiring ---------------------------- */
-  function wirePanelEvents() {
-    $("#btnClose").addEventListener("click", closePanel);
-    $("#backdrop").addEventListener("click", () => { if (!$("#btnPin").classList.contains("is-active")) closePanel(); });
-    $("#btnPin").addEventListener("click", () => {
-      const b = $("#btnPin");
-      b.classList.toggle("is-active");
-      toast("info", b.classList.contains("is-active") ? "Panel pinned" : "Panel unpinned",
-        b.classList.contains("is-active") ? "Backdrop clicks won't dismiss the investigation." : "Click outside to dismiss.");
-    });
-
-    $("#drillBack").addEventListener("click", () => closeDrill());
-
-    // factor "show details" toggles all
-    $("#toggleFactorDetail").addEventListener("click", () => {
-      const btn = $("#toggleFactorDetail");
-      const anyClosed = $$("#riskFactors .factor").some(f => !f.classList.contains("is-open"));
-      $$("#riskFactors .factor").forEach(f => toggleFactor(f, anyClosed));
-      btn.innerHTML = anyClosed ? '<i data-lucide="list-collapse"></i><span>Hide details</span>' : '<i data-lucide="list-tree"></i><span>Show details</span>';
-      icons();
-    });
-
-    // modal
-    $("#modalCancel").addEventListener("click", closeConfirm);
-    $("#modalConfirm").addEventListener("click", confirmAction);
-    $("#modalAck").addEventListener("change", e => { $("#modalConfirm").disabled = !e.target.checked; });
-    $("#modalWrap").addEventListener("click", e => { if (e.target === $("#modalWrap")) closeConfirm(); });
-
-    // ask
-    $("#askForm").addEventListener("submit", e => {
-      e.preventDefault();
-      const inp = $("#askInput");
-      askQuestion(inp.value);
-      inp.value = "";
-    });
-
-    // reset
-    $("#resetBtn").addEventListener("click", () => {
-      resetState();
-      $("#btnPin").classList.remove("is-active");
-      renderStateDrivenBits();
-      icons();
-      toast("info", "Demo reset", "Investigation state cleared. All AI actions are available again.");
-    });
-  }
-
-  /* ---------------- View navigation -------------------------------------- */
-  function switchView(name) {
-    $$(".navtab").forEach(t => {
-      const on = t.dataset.view === name;
-      t.classList.toggle("is-active", on);
-      t.setAttribute("aria-selected", String(on));
-    });
-    $$(".view").forEach(v => {
-      const on = v.dataset.view === name;
-      v.classList.toggle("is-active", on);
-      v.hidden = !on;
-    });
-    if (name === "case" && !document.body.classList.contains("panel-open")) {
-      // ensure panel isn't lingering
+        host.appendChild(el);
+        icons();
+        const kill = () => { el.classList.add("is-out"); setTimeout(() => el.remove(), 350); };
+        el.querySelector(".toast__x").addEventListener("click", kill);
+        setTimeout(kill, 5200);
     }
-    if (name !== "demo") closePanel();
-    window.scrollTo({ top: 0, behavior: "auto" });
-  }
 
-  /* ---------------- Case study ------------------------------------------- */
-  function renderCase() {
-    $("#caseRoot").innerHTML = caseHTML();
-    $$("#caseRoot [data-goto]").forEach(b => b.addEventListener("click", () => {
-      switchView("demo");
-      if (b.dataset.goto === "panel") setTimeout(openPanel, 260);
-    }));
-    icons();
-  }
+    function escapeHtml(s) { const d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
 
-  function caseHTML() {
-    return `
+    /* ---------------- Panel-scoped event wiring ---------------------------- */
+    function wirePanelEvents() {
+        $("#btnClose").addEventListener("click", closePanel);
+        $("#backdrop").addEventListener("click", () => { if (!$("#btnPin").classList.contains("is-active")) closePanel(); });
+        $("#btnPin").addEventListener("click", () => {
+            const b = $("#btnPin");
+            b.classList.toggle("is-active");
+            toast("info", b.classList.contains("is-active") ? "Panel pinned" : "Panel unpinned",
+                b.classList.contains("is-active") ? "Backdrop clicks won't dismiss the investigation." : "Click outside to dismiss.");
+        });
+
+        $("#drillBack").addEventListener("click", () => closeDrill());
+
+        // factor "show details" toggles all
+        $("#toggleFactorDetail").addEventListener("click", () => {
+            const btn = $("#toggleFactorDetail");
+            const anyClosed = $$("#riskFactors .factor").some(f => !f.classList.contains("is-open"));
+            $$("#riskFactors .factor").forEach(f => toggleFactor(f, anyClosed));
+            btn.innerHTML = anyClosed ? '<i data-lucide="list-collapse"></i><span>Hide details</span>' : '<i data-lucide="list-tree"></i><span>Show details</span>';
+            icons();
+        });
+
+        // modal
+        $("#modalCancel").addEventListener("click", closeConfirm);
+        $("#modalConfirm").addEventListener("click", confirmAction);
+        $("#modalAck").addEventListener("change", e => { $("#modalConfirm").disabled = !e.target.checked; });
+        $("#modalWrap").addEventListener("click", e => { if (e.target === $("#modalWrap")) closeConfirm(); });
+
+        // ask
+        $("#askForm").addEventListener("submit", e => {
+            e.preventDefault();
+            const inp = $("#askInput");
+            askQuestion(inp.value);
+            inp.value = "";
+        });
+
+        // reset
+        $("#resetBtn").addEventListener("click", () => {
+            resetState();
+            $("#btnPin").classList.remove("is-active");
+            renderStateDrivenBits();
+            icons();
+            toast("info", "Demo reset", "Investigation state cleared. All AI actions are available again.");
+        });
+    }
+
+    /* ---------------- View navigation -------------------------------------- */
+    function switchView(name) {
+        $$(".navtab").forEach(t => {
+            const on = t.dataset.view === name;
+            t.classList.toggle("is-active", on);
+            t.setAttribute("aria-selected", String(on));
+        });
+        $$(".view").forEach(v => {
+            const on = v.dataset.view === name;
+            v.classList.toggle("is-active", on);
+            v.hidden = !on;
+        });
+        if (name === "case" && !document.body.classList.contains("panel-open")) {
+            // ensure panel isn't lingering
+        }
+        if (name !== "demo") closePanel();
+        window.scrollTo({ top: 0, behavior: "auto" });
+    }
+
+    /* ---------------- Case study ------------------------------------------- */
+    function renderCase() {
+        $("#caseRoot").innerHTML = caseHTML();
+        $$("#caseRoot [data-goto]").forEach(b => b.addEventListener("click", () => {
+            switchView("demo");
+            if (b.dataset.goto === "panel") setTimeout(openPanel, 260);
+        }));
+        icons();
+    }
+
+    function caseHTML() {
+        return `
     <section class="case-hero">
       <span class="case-hero__eyebrow"><i data-lucide="sparkles"></i>Product Design Home Assignment · Akamai</span>
       <h1>Investigating a threat in 5 seconds,<br>then acting with confidence.</h1>
@@ -848,7 +887,7 @@
           <div class="challenge__solve">
             <span class="challenge__q">Information hierarchy &amp; AI summary</span>
             <h3>The verdict lands before the details</h3>
-            <p>The header answers <strong>who / what / how bad</strong> instantly — entity identity, a radial <strong>95/100</strong> risk gauge, and the alert title. Directly below, a streaming <strong>AI summary</strong> narrates the incident in plain language with a confidence score, followed by five scannable <strong>key-fact chips</strong> (50 GB · 2:03 AM · 11 files · Unrecognized · Customer PII).</p>
+            <p>The header answers <strong>who / what / how bad</strong> instantly — entity identity, a radial <strong>95/100</strong> risk gauge, and the alert title. Directly below sit <strong>five scannable key-indicator chips</strong> (50 GB · 2:03 AM · 11 files · Unrecognized · Customer PII) — the raw facts Daniel needs first. The streaming <strong>AI summary</strong> then narrates the incident in plain language with a confidence score, layering the AI's interpretation <em>after</em> the ground truth.</p>
             <div class="solve-chips"><span class="solve-chip"><i data-lucide="gauge"></i>Radial risk gauge</span><span class="solve-chip"><i data-lucide="sparkles"></i>Streamed AI summary</span><span class="solve-chip"><i data-lucide="badge-check"></i>Confidence score</span></div>
           </div>
         </div>
@@ -878,8 +917,8 @@
           <div class="challenge__solve">
             <span class="challenge__q">Drill-down navigation (pivot)</span>
             <h3>Go deep without leaving</h3>
-            <p>Pivots into the <strong>11 downloaded files</strong>, the <strong>unrecognized device</strong>, the <strong>event timeline</strong>, or the <strong>user baseline</strong> slide in as a layer <em>over</em> the panel. A single <strong>“Back to investigation”</strong> button and breadcrumb return Daniel to exactly where he was — context preserved.</p>
-            <div class="solve-chips"><span class="solve-chip"><i data-lucide="git-branch"></i>In-panel drill-down layer</span><span class="solve-chip"><i data-lucide="arrow-left"></i>One-tap return</span><span class="solve-chip"><i data-lucide="layers"></i>Zero context loss</span></div>
+            <p>Pivots into the <strong>11 downloaded files</strong>, the <strong>unrecognized device</strong>, the <strong>event timeline</strong>, or the <strong>user baseline</strong> slide in as a layer <em>over</em> the panel. An interactive <strong>exfiltration-path graph</strong> (Identity → Device → Cloud Drive → external IP) doubles as a visual launchpad — clicking any node opens its drill-down. A single <strong>“Back to investigation”</strong> button and breadcrumb return Daniel to exactly where he was — context preserved.</p>
+            <div class="solve-chips"><span class="solve-chip"><i data-lucide="workflow"></i>Interactive attack-path graph</span><span class="solve-chip"><i data-lucide="git-branch"></i>In-panel drill-down layer</span><span class="solve-chip"><i data-lucide="arrow-left"></i>One-tap return</span><span class="solve-chip"><i data-lucide="layers"></i>Zero context loss</span></div>
           </div>
         </div>
       </section>
@@ -938,33 +977,33 @@
         Runs 100% client-side — no backend, no build step.
       </div>
     </div>`;
-  }
+    }
 
-  /* ---------------- Global wiring & init --------------------------------- */
-  function init() {
-    applyTheme(currentTheme(), false);
-    renderSOC();
-    renderCase();
+    /* ---------------- Global wiring & init --------------------------------- */
+    function init() {
+        applyTheme(currentTheme(), false);
+        renderSOC();
+        renderCase();
 
-    $$(".navtab").forEach(t => t.addEventListener("click", () => switchView(t.dataset.view)));
-    $("#themeToggle").addEventListener("click", toggleTheme);
+        $$(".navtab").forEach(t => t.addEventListener("click", () => switchView(t.dataset.view)));
+        $("#themeToggle").addEventListener("click", toggleTheme);
 
-    document.addEventListener("keydown", e => {
-      if (e.key !== "Escape") return;
-      if (!$("#modalWrap").hidden) { closeConfirm(); return; }
-      if ($("#drill").classList.contains("is-open")) { closeDrill(); return; }
-      if (!$("#panel").hidden && $("#panel").classList.contains("is-open")) closePanel();
-    });
+        document.addEventListener("keydown", e => {
+            if (e.key !== "Escape") return;
+            if (!$("#modalWrap").hidden) { closeConfirm(); return; }
+            if ($("#drill").classList.contains("is-open")) { closeDrill(); return; }
+            if (!$("#panel").hidden && $("#panel").classList.contains("is-open")) closePanel();
+        });
 
-    icons();
+        icons();
 
-    // Auto-open the deliverable shortly after load so offline reviewers see it,
-    // while still glimpsing the queue it slides over.
-    setTimeout(() => {
-      if ($("#view-demo").classList.contains("is-active") && !document.body.classList.contains("panel-open")) openPanel();
-    }, prefersReduced ? 200 : 850);
-  }
+        // Auto-open the deliverable shortly after load so offline reviewers see it,
+        // while still glimpsing the queue it slides over.
+        setTimeout(() => {
+            if ($("#view-demo").classList.contains("is-active") && !document.body.classList.contains("panel-open")) openPanel();
+        }, prefersReduced ? 200 : 850);
+    }
 
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
-  else init();
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+    else init();
 })();
