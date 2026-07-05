@@ -15,6 +15,15 @@
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 
   <link rel="stylesheet" href="styles.css" />
+  <script>
+    // Apply saved theme before first paint to avoid a flash.
+    (function () {
+      try {
+        var t = localStorage.getItem("akamai_theme");
+        if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+      } catch (e) {}
+    })();
+  </script>
 </head>
 <body>
   <!-- ================= TOP BAR ================= -->
@@ -39,6 +48,9 @@
     <div class="topbar__right">
       <span class="conn-chip"><span class="dot dot--live"></span>Engine live</span>
       <span class="conn-chip conn-chip--enc"><i data-lucide="lock"></i>Encrypted</span>
+      <button class="theme-btn" id="themeToggle" title="Toggle light / dark theme" aria-label="Toggle light or dark theme">
+        <i data-lucide="moon"></i>
+      </button>
       <div class="analyst-chip" id="analystChip" title="Signed-in analyst">
         <span class="avatar avatar--sm">DM</span>
         <span class="analyst-chip__meta">

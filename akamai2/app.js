@@ -41,6 +41,28 @@
   function save() { try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {} }
   function resetState() { state = defaultState(); save(); }
 
+  /* ---------------- Theme (dark / light) --------------------------------- */
+  const THEME_KEY = "akamai_theme";
+  function currentTheme() {
+    return document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
+  }
+  function applyTheme(theme, announce) {
+    const light = theme === "light";
+    document.documentElement.setAttribute("data-theme", light ? "light" : "dark");
+    try { localStorage.setItem(THEME_KEY, light ? "light" : "dark"); } catch (e) {}
+    const btn = $("#themeToggle");
+    if (btn) {
+      // Icon shows the mode you'll switch TO.
+      btn.innerHTML = `<i data-lucide="${light ? "moon" : "sun"}"></i>`;
+      btn.setAttribute("title", light ? "Switch to dark theme" : "Switch to light theme");
+      icons();
+    }
+    if (announce) toast("info", light ? "Light mode" : "Dark mode", light
+      ? "Switched to the light theme."
+      : "Switched to the dark theme — optimised for low-light SOC rooms.");
+  }
+  function toggleTheme() { applyTheme(currentTheme() === "light" ? "dark" : "light", true); }
+
   function nowClock() {
     const d = new Date();
     return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
@@ -920,10 +942,12 @@
 
   /* ---------------- Global wiring & init --------------------------------- */
   function init() {
+    applyTheme(currentTheme(), false);
     renderSOC();
     renderCase();
 
     $$(".navtab").forEach(t => t.addEventListener("click", () => switchView(t.dataset.view)));
+    $("#themeToggle").addEventListener("click", toggleTheme);
 
     document.addEventListener("keydown", e => {
       if (e.key !== "Escape") return;
