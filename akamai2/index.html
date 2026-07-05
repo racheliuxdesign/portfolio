@@ -142,7 +142,19 @@
       <!-- Scroll body -->
       <div class="panel__scroll" id="panelScroll">
 
-        <!-- 1. AI SUMMARY -->
+        <!-- 1. KEY INDICATORS (most important — lead the panel) -->
+        <section class="block">
+          <div class="block__head">
+            <div class="block__title">
+              <span class="ai-glyph ai-glyph--act"><i data-lucide="gauge"></i></span>
+              Key Indicators
+            </div>
+            <span class="muted" style="font-size:12px">The 5-second glance</span>
+          </div>
+          <div class="keyfacts" id="keyFacts"></div>
+        </section>
+
+        <!-- 2. AI SUMMARY -->
         <section class="block block--ai" id="blockSummary">
           <div class="block__head">
             <div class="block__title">
@@ -162,12 +174,20 @@
           </div>
         </section>
 
-        <!-- 2. KEY FACTS -->
+        <!-- 3. ATTACK / EXFILTRATION PATH -->
         <section class="block">
-          <div class="keyfacts" id="keyFacts"></div>
+          <div class="block__head">
+            <div class="block__title">
+              <span class="ai-glyph ai-glyph--x"><i data-lucide="workflow"></i></span>
+              Exfiltration Path
+            </div>
+            <span class="mitre-tag" id="attackMitre"><i data-lucide="crosshair"></i></span>
+          </div>
+          <p class="block__lead">How the data left the perimeter — <span class="muted">click any node to inspect.</span></p>
+          <div class="attack" id="attackPath"></div>
         </section>
 
-        <!-- 3. EXPLAINABLE AI -->
+        <!-- 4. EXPLAINABLE AI -->
         <section class="block">
           <div class="block__head">
             <div class="block__title">

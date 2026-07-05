@@ -408,6 +408,59 @@ body.panel-open .soc { filter: blur(3px) saturate(0.8) brightness(0.6); transfor
 .factors-total__val { font-family: var(--ff-mono); font-size: 20px; font-weight: 700; color: var(--crit); }
 .factors-total__val small { font-size: 12px; color: var(--tx-3); }
 
+/* ---------- Attack / exfiltration path graph ----------------------------- */
+.attack {
+  padding: 18px 14px 16px; border-radius: var(--r-lg);
+  border: 1px solid var(--line); background: var(--glass);
+  overflow-x: auto; overflow-y: visible;
+}
+.attack__flow { display: flex; align-items: flex-start; min-width: 460px; }
+.agnode {
+  flex: 0 0 92px; display: flex; flex-direction: column; align-items: center; text-align: center;
+  gap: 6px; padding: 4px 2px; border-radius: var(--r-md); transition: transform 0.2s var(--ease);
+  background: none; position: relative;
+}
+.agnode--clickable { cursor: pointer; }
+.agnode--clickable:hover { transform: translateY(-3px); }
+.agnode__ring {
+  display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; font-size: 20px;
+  background: var(--bg-surface); border: 1.5px solid var(--line-strong); transition: all 0.2s var(--ease);
+}
+.agnode--neutral .agnode__ring { color: var(--cyan); border-color: rgba(34, 211, 238, 0.5); box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.08); }
+.agnode--high .agnode__ring { color: var(--orange); border-color: rgba(255, 122, 69, 0.55); box-shadow: 0 0 0 4px rgba(255, 122, 69, 0.09); }
+.agnode--warn .agnode__ring { color: var(--amber); border-color: rgba(245, 166, 35, 0.55); box-shadow: 0 0 0 4px rgba(245, 166, 35, 0.09); }
+.agnode--critical .agnode__ring { color: var(--crit); border-color: rgba(255, 59, 87, 0.6); box-shadow: 0 0 0 4px rgba(255, 59, 87, 0.1); }
+.agnode--clickable:hover .agnode__ring { box-shadow: 0 0 0 5px rgba(34, 211, 238, 0.14), var(--shadow-1); }
+.agnode--high.agnode--clickable:hover .agnode__ring { box-shadow: 0 0 0 5px rgba(255, 122, 69, 0.16), var(--shadow-1); }
+.agnode--warn.agnode--clickable:hover .agnode__ring { box-shadow: 0 0 0 5px rgba(245, 166, 35, 0.16), var(--shadow-1); }
+.agnode__label { font-size: 11px; font-weight: 700; line-height: 1.2; word-break: break-word; }
+.agnode__label.mono { font-family: var(--ff-mono); font-size: 10px; }
+.agnode__sub { font-size: 9.5px; color: var(--tx-3); line-height: 1.25; min-height: 23px; }
+.agnode__tag { font-size: 8.5px; font-weight: 700; letter-spacing: 0.3px; text-transform: uppercase; padding: 2px 6px; border-radius: 5px; margin-top: 1px; white-space: nowrap; }
+.agnode--neutral .agnode__tag { color: var(--cyan); background: rgba(34, 211, 238, 0.12); }
+.agnode--high .agnode__tag { color: var(--orange); background: rgba(255, 122, 69, 0.12); }
+.agnode--warn .agnode__tag { color: var(--amber); background: rgba(245, 166, 35, 0.12); }
+.agnode--critical .agnode__tag { color: var(--crit); background: rgba(255, 59, 87, 0.12); }
+.agnode__pivot { position: absolute; top: 2px; right: 8px; font-size: 11px; color: var(--tx-mute); opacity: 0; transition: opacity 0.2s; }
+.agnode--clickable:hover .agnode__pivot { opacity: 1; }
+
+.aglink { flex: 1 1 auto; min-width: 46px; position: relative; height: 46px; display: flex; align-items: center; }
+.aglink__line {
+  width: 100%; height: 2px; border-radius: 2px;
+  background: repeating-linear-gradient(90deg, var(--line-strong) 0 5px, transparent 5px 11px);
+  background-size: 22px 2px; animation: march 0.9s linear infinite;
+}
+.aglink--danger .aglink__line { background: repeating-linear-gradient(90deg, var(--crit) 0 6px, transparent 6px 12px); background-size: 24px 2px; box-shadow: 0 0 8px rgba(255, 59, 87, 0.35); }
+@keyframes march { to { background-position: -22px 0; } }
+.aglink__arrow { position: absolute; right: -2px; top: 50%; transform: translateY(-50%); font-size: 13px; color: var(--tx-3); }
+.aglink--danger .aglink__arrow { color: var(--crit); }
+.aglink__label {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -138%); white-space: nowrap;
+  font-size: 9px; font-weight: 600; color: var(--tx-2); padding: 2px 7px; border-radius: 20px;
+  background: var(--bg-surface); border: 1px solid var(--line);
+}
+.aglink--danger .aglink__label { color: var(--crit); border-color: rgba(255, 59, 87, 0.35); }
+
 /* ---------- Recommended actions ------------------------------------------ */
 .actions { display: grid; gap: 10px; }
 .action {
@@ -749,6 +802,22 @@ body.panel-open .soc { filter: blur(3px) saturate(0.8) brightness(0.6); transfor
   .panel__header { padding: 16px 16px 14px; }
   .entity { flex-direction: column; align-items: flex-start; }
   .cgrid--4 { grid-template-columns: 1fr; }
+
+  /* Attack path -> vertical flow on narrow panels */
+  .attack { overflow-x: visible; }
+  .attack__flow { flex-direction: column; align-items: stretch; min-width: 0; }
+  .agnode { flex: none; flex-direction: row; align-items: center; gap: 12px; text-align: left; width: 100%; padding: 8px 6px; }
+  .agnode__meta { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; }
+  .agnode__sub { min-height: 0; }
+  .agnode__tag { margin-top: 3px; }
+  .agnode--clickable:hover { transform: translateX(3px); }
+  .agnode__pivot { top: 50%; transform: translateY(-50%); }
+  .aglink { flex: none; width: 46px; height: 26px; justify-content: center; }
+  .aglink__line { width: 2px; height: 100%; background: repeating-linear-gradient(180deg, var(--line-strong) 0 5px, transparent 5px 11px); background-size: 2px 22px; animation: marchv 0.9s linear infinite; }
+  .aglink--danger .aglink__line { background: repeating-linear-gradient(180deg, var(--crit) 0 6px, transparent 6px 12px); background-size: 2px 24px; }
+  .aglink__arrow { right: auto; top: auto; bottom: -3px; left: 50%; transform: translateX(-50%) rotate(90deg); }
+  .aglink__label { left: 50%; top: 50%; transform: translate(14px, -50%); }
+  @keyframes marchv { to { background-position: 0 -22px; } }
 }
 
 /* ---------- Reduced motion ----------------------------------------------- */

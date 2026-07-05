@@ -68,6 +68,22 @@ const MOCK = {
     { icon: "shield-alert", label: "Data class", value: "Customer PII", tone: "critical" },
   ],
 
+  /* ----- Exfiltration path graph (relational view of the incident) ------- */
+  attackPath: {
+    mitre: "T1567 · Exfiltration Over Web Service",
+    nodes: [
+      { id: "identity", icon: "user-round", label: "Sarah Chen", sub: "Identity · Finance", tone: "neutral", pivot: "baseline", tag: "Insider" },
+      { id: "device", icon: "monitor-x", label: "DESKTOP-7F3K2L9", sub: "Unmanaged endpoint", tone: "high", pivot: "device", tag: "Trust 8" },
+      { id: "data", icon: "database", label: "Cloud Drive", sub: "Customer data · 11 files", tone: "warn", pivot: "files", tag: "Sensitive" },
+      { id: "exfil", icon: "globe", label: "73.140.22.18", sub: "Residential · Oakland", tone: "critical", pivot: null, tag: "Off-network" },
+    ],
+    links: [
+      { label: "02:01 · SSO + MFA" },
+      { label: "02:03 · bulk read" },
+      { label: "50 GB out", danger: true },
+    ],
+  },
+
   /* ----- Explainable AI: why the score is 95 (contributions sum to 95) --- */
   riskFactors: [
     {

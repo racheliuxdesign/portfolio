@@ -159,6 +159,7 @@
     panelBuilt = true;
 
     renderKeyFacts();
+    renderAttackPath();
     renderFactors();
     renderPivots();
     renderAskSuggest();
@@ -172,6 +173,44 @@
         <div class="kf__val">${f.value}</div>
         <div class="kf__label">${f.label}</div>
       </div>`).join("");
+  }
+
+  /* ---------------- Attack / exfiltration path graph --------------------- */
+  function renderAttackPath() {
+    const ap = M.attackPath;
+    $("#attackMitre").innerHTML = `<i data-lucide="crosshair"></i>${ap.mitre}`;
+    let html = '<div class="attack__flow">';
+    ap.nodes.forEach((n, i) => {
+      const clickable = !!n.pivot;
+      const mono = n.id === "exfil" ? " mono" : "";
+      html += `
+        <div class="agnode agnode--${n.tone} ${clickable ? "agnode--clickable" : "agnode--static"}"${clickable ? ` data-pivot="${n.pivot}" role="button" tabindex="0" aria-label="Inspect ${n.label}"` : ""}>
+          ${clickable ? '<i class="agnode__pivot" data-lucide="maximize-2"></i>' : ""}
+          <span class="agnode__ring"><i data-lucide="${n.icon}"></i></span>
+          <span class="agnode__meta">
+            <span class="agnode__label${mono}">${n.label}</span>
+            <span class="agnode__sub">${n.sub}</span>
+            <span class="agnode__tag">${n.tag}</span>
+          </span>
+        </div>`;
+      if (i < ap.links.length) {
+        const lk = ap.links[i];
+        html += `
+          <div class="aglink ${lk.danger ? "aglink--danger" : ""}">
+            <span class="aglink__label">${lk.label}</span>
+            <span class="aglink__line"></span>
+            <i class="aglink__arrow" data-lucide="chevron-right"></i>
+          </div>`;
+      }
+    });
+    html += "</div>";
+    $("#attackPath").innerHTML = html;
+
+    $$("#attackPath .agnode--clickable").forEach(el => {
+      const go = () => openDrill(el.dataset.pivot);
+      el.addEventListener("click", go);
+      el.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } });
+    });
   }
 
   /* ---------------- AI summary streaming --------------------------------- */
@@ -848,7 +887,7 @@
           <div class="challenge__solve">
             <span class="challenge__q">Information hierarchy &amp; AI summary</span>
             <h3>The verdict lands before the details</h3>
-            <p>The header answers <strong>who / what / how bad</strong> instantly — entity identity, a radial <strong>95/100</strong> risk gauge, and the alert title. Directly below, a streaming <strong>AI summary</strong> narrates the incident in plain language with a confidence score, followed by five scannable <strong>key-fact chips</strong> (50 GB · 2:03 AM · 11 files · Unrecognized · Customer PII).</p>
+            <p>The header answers <strong>who / what / how bad</strong> instantly — entity identity, a radial <strong>95/100</strong> risk gauge, and the alert title. Directly below sit <strong>five scannable key-indicator chips</strong> (50 GB · 2:03 AM · 11 files · Unrecognized · Customer PII) — the raw facts Daniel needs first. The streaming <strong>AI summary</strong> then narrates the incident in plain language with a confidence score, layering the AI's interpretation <em>after</em> the ground truth.</p>
             <div class="solve-chips"><span class="solve-chip"><i data-lucide="gauge"></i>Radial risk gauge</span><span class="solve-chip"><i data-lucide="sparkles"></i>Streamed AI summary</span><span class="solve-chip"><i data-lucide="badge-check"></i>Confidence score</span></div>
           </div>
         </div>
@@ -878,8 +917,8 @@
           <div class="challenge__solve">
             <span class="challenge__q">Drill-down navigation (pivot)</span>
             <h3>Go deep without leaving</h3>
-            <p>Pivots into the <strong>11 downloaded files</strong>, the <strong>unrecognized device</strong>, the <strong>event timeline</strong>, or the <strong>user baseline</strong> slide in as a layer <em>over</em> the panel. A single <strong>“Back to investigation”</strong> button and breadcrumb return Daniel to exactly where he was — context preserved.</p>
-            <div class="solve-chips"><span class="solve-chip"><i data-lucide="git-branch"></i>In-panel drill-down layer</span><span class="solve-chip"><i data-lucide="arrow-left"></i>One-tap return</span><span class="solve-chip"><i data-lucide="layers"></i>Zero context loss</span></div>
+            <p>Pivots into the <strong>11 downloaded files</strong>, the <strong>unrecognized device</strong>, the <strong>event timeline</strong>, or the <strong>user baseline</strong> slide in as a layer <em>over</em> the panel. An interactive <strong>exfiltration-path graph</strong> (Identity → Device → Cloud Drive → external IP) doubles as a visual launchpad — clicking any node opens its drill-down. A single <strong>“Back to investigation”</strong> button and breadcrumb return Daniel to exactly where he was — context preserved.</p>
+            <div class="solve-chips"><span class="solve-chip"><i data-lucide="workflow"></i>Interactive attack-path graph</span><span class="solve-chip"><i data-lucide="git-branch"></i>In-panel drill-down layer</span><span class="solve-chip"><i data-lucide="arrow-left"></i>One-tap return</span><span class="solve-chip"><i data-lucide="layers"></i>Zero context loss</span></div>
           </div>
         </div>
       </section>
