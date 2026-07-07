@@ -4443,7 +4443,7 @@ function Frame27() {
 
 function Frame95() {
   return (
-    <div className="content-stretch flex flex-col gap-[41px] h-[3259px] items-end relative shrink-0 w-[963px]">
+    <div className="content-stretch flex flex-col gap-[41px] min-h-[3259px] items-end relative shrink-0 w-[963px] pb-[48px]">
       <Frame72 />
       <Frame124 />
       <DetailesPaneMitigationStepsTab />
