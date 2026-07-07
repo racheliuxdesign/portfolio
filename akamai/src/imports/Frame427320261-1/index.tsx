@@ -85,10 +85,10 @@ function Button() {
   return (
     <div className="relative rounded-[4px] shrink-0 w-full" data-name="Button">
       <div aria-hidden className="absolute bg-white inset-0 pointer-events-none rounded-[4px]" />
-      <div aria-hidden className="absolute border border-black border-solid inset-0 pointer-events-none rounded-[4px]" />
+      <div aria-hidden className="absolute border border-[#0035E4] border-solid inset-0 pointer-events-none rounded-[4px]" />
       <div className="flex flex-row items-center size-full">
         <div className="content-stretch flex items-center px-[16px] py-[10px] relative size-full">
-          <p className="[word-break:break-word] font-['Heebo:Bold',sans-serif] font-bold leading-[normal] relative shrink-0 text-[12.5px] text-black text-center whitespace-nowrap">Mark as False Positive</p>
+          <p className="[word-break:break-word] font-['Heebo:Bold',sans-serif] font-bold leading-[normal] relative shrink-0 text-[12.5px] text-[#0035E4] text-center whitespace-nowrap">Mark as False Positive</p>
         </div>
       </div>
       <div className="absolute inset-0 pointer-events-none rounded-[inherit] shadow-[inset_0px_0px_0px_0px_rgba(15,23,42,0.17)]" />
