@@ -778,11 +778,19 @@ function Frame112() {
 
 function Section1() {
   return (
-    <div className="h-[207px] relative rounded-[8px] shrink-0 w-full" style={{ backgroundImage: "linear-gradient(115.399deg, rgba(0, 0, 0, 0.05) 12%, rgba(182, 13, 16, 0.03) 78.118%)" }} data-name="Section">
-      <div aria-hidden className="absolute border border-[#ff9898] border-solid inset-0 pointer-events-none rounded-[8px]" />
-      <div className="content-stretch flex flex-col items-start p-[19px] relative size-full">
-        <Container4 />
-        <Frame112 />
+    <div
+      className="h-[207px] relative rounded-[8px] shrink-0 w-full p-px"
+      style={{ backgroundImage: "linear-gradient(90deg, #FC98FF 0%, #42024D 100%)" }}
+      data-name="Section"
+    >
+      <div
+        className="h-full relative rounded-[7px] size-full"
+        style={{ backgroundImage: "linear-gradient(115.399deg, rgba(0, 0, 0, 0.05) 12%, rgba(182, 13, 16, 0.03) 78.118%)" }}
+      >
+        <div className="content-stretch flex flex-col items-start p-[19px] relative size-full">
+          <Container4 />
+          <Frame112 />
+        </div>
       </div>
     </div>
   );
