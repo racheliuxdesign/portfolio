@@ -1718,6 +1718,14 @@ function CaseQuote({ children }: { children: React.ReactNode }) {
 }
 
 function CasePic({ label, ratio = "16/9", src, video }: { label: string; ratio?: string; src?: string; video?: string }) {
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+
   if (video) {
     return (
       <figure style={{ margin: "20px 0 26px" }}>
@@ -1737,16 +1745,54 @@ function CasePic({ label, ratio = "16/9", src, video }: { label: string; ratio?:
     return (
       <figure style={{ margin: "20px 0 26px" }}>
         <div
+          onClick={() => setOpen(true)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setOpen(true); } }}
           style={{
             width: "100%", borderRadius: 12, border: "1px solid #e9edf5", background: "#fff",
-            boxShadow: "0 6px 20px rgba(15,23,42,0.06)", overflow: "hidden",
+            boxShadow: "0 6px 20px rgba(15,23,42,0.06)", overflow: "hidden", position: "relative",
+            cursor: "zoom-in",
           }}
         >
           <img src={src} alt={label} style={{ display: "block", width: "100%", height: "auto" }} />
+          <div
+            style={{
+              position: "absolute", top: 12, right: 12, width: 30, height: 30, borderRadius: 8,
+              background: "rgba(15,23,42,0.55)", display: "flex", alignItems: "center", justifyContent: "center",
+            }}
+          >
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+              <path d="M6 2H2v4M10 2h4v4M6 14H2v-4M10 14h4v-4" stroke="#fff" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
         </div>
         <figcaption style={{ fontFamily: F.medium, fontSize: 12.5, color: "#94a3b8", textAlign: "center", marginTop: 10 }}>
           {label}
         </figcaption>
+        {open && (
+          <div
+            onClick={() => setOpen(false)}
+            style={{
+              position: "fixed", inset: 0, zIndex: 60, background: "rgba(10,14,26,0.86)",
+              display: "flex", alignItems: "center", justifyContent: "center", padding: 32, cursor: "zoom-out",
+            }}
+          >
+            <img
+              src={src}
+              alt={label}
+              style={{ maxWidth: "92%", maxHeight: "88%", borderRadius: 10, boxShadow: "0 20px 60px rgba(0,0,0,0.5)" }}
+            />
+            <button
+              onClick={(e) => { e.stopPropagation(); setOpen(false); }}
+              style={{
+                position: "absolute", top: 22, right: 26, width: 36, height: 36, borderRadius: 999,
+                border: "none", background: "rgba(255,255,255,0.12)", color: "#fff", fontSize: 18,
+                cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+              }}
+            >×</button>
+          </div>
+        )}
       </figure>
     );
   }
