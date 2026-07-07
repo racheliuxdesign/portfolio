@@ -551,11 +551,45 @@ function Tabs1() {
   );
 }
 
+function AskAnythingButton() {
+  return (
+    <div
+      className="h-[34px] relative rounded-[999px] shrink-0"
+      style={{ backgroundImage: "linear-gradient(90deg, #0b0b12 0%, #7c3aed 62%, #ec4899 100%)" }}
+      data-name="Ask AI Button"
+    >
+      <div className="flex flex-row items-center gap-[8px] h-full px-[16px]">
+        <div className="relative shrink-0 size-[14px]">
+          <svg className="absolute block inset-0 size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 15 15">
+            <g clipPath="url(#clip0_askai_sparkle)" id="Icon">
+              <path d={svgPaths.p31613e00} id="Vector" stroke="var(--stroke-0, white)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
+              <path d="M12.5 1.25V3.75" id="Vector_2" stroke="var(--stroke-0, white)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
+              <path d="M13.75 2.5H11.25" id="Vector_3" stroke="var(--stroke-0, white)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
+              <path d={svgPaths.p1aa7f900} id="Vector_4" stroke="var(--stroke-0, white)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
+            </g>
+            <defs>
+              <clipPath id="clip0_askai_sparkle">
+                <rect fill="white" height="15" width="15" />
+              </clipPath>
+            </defs>
+          </svg>
+        </div>
+        <p className="[word-break:break-word] font-['Heebo:Medium',sans-serif] font-medium leading-[normal] relative shrink-0 text-[13px] text-white whitespace-nowrap">
+          Ask anything...
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function Tabs() {
   return (
     <div className="h-[34px] relative shrink-0 w-full" data-name="Tabs">
       <div className="content-stretch flex flex-col isolate items-start px-[44px] relative size-full">
-        <Tabs1 />
+        <div className="content-stretch flex items-center justify-between relative shrink-0 w-full">
+          <Tabs1 />
+          <AskAnythingButton />
+        </div>
         <div className="h-0 relative shrink-0 w-full z-[1]">
           <div className="absolute inset-[-1px_0_0_0]">
             <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 962 1">
