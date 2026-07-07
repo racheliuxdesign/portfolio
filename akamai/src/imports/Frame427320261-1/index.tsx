@@ -4257,7 +4257,7 @@ function SecondaryButton() {
     <div className="bg-white content-stretch flex gap-[8px] h-[34px] items-center px-[16px] relative rounded-[6px] shrink-0" data-name="Secondary Button">
       <div aria-hidden className="absolute border border-[#0035E4] border-solid inset-0 pointer-events-none rounded-[6px]" />
       <Icon23 />
-      <p className="[word-break:break-word] font-['Heebo:Medium',sans-serif] font-medium leading-[20px] relative shrink-0 text-[14px] text-[#0035E4] whitespace-nowrap">Comment</p>
+      <p className="[word-break:break-word] font-['Heebo:Bold',sans-serif] font-bold leading-[20px] relative shrink-0 text-[12.5px] text-[#0035E4] whitespace-nowrap">Comment</p>
     </div>
   );
 }
