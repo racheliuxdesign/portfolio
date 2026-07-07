@@ -417,6 +417,8 @@ function IncidentDetailPane({ onViewFiles, open }: { onViewFiles: () => void; op
       [data-ai-summary] * { color: #191921 !important; }
       [data-ai-summary] .ai-link { color: #0029F8 !important; cursor: pointer; }
       @keyframes fpTypeBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+      @keyframes fpRowFlash { 0% { outline-color: rgba(96,122,255,0.9); } 100% { outline-color: rgba(96,122,255,0); } }
+      .fp-row-flash { outline: 2px solid rgba(96,122,255,0); outline-offset: -2px; border-radius: 6px; animation: fpRowFlash 1.6s ease-out; }
       .fp-type-cursor { display: inline-block; width: 2px; height: 0.95em; background: #191921; margin-left: 1px; vertical-align: text-bottom; animation: fpTypeBlink 0.9s steps(1) infinite; }
     `;
     document.head.appendChild(style);
@@ -635,30 +637,28 @@ function IncidentDetailPane({ onViewFiles, open }: { onViewFiles: () => void; op
       actionRaf = requestAnimationFrame(tryWire);
     }
 
-    // "Downloaded files" card → turn the "11 files · 50 GB" pill into a "View files"
-    // button (matching style) that slides in the Downloaded Files panel.
+    // "Downloaded files" card → replace the "11 files · 50 GB" pill/button with a
+    // subtle mini dashboard whose "N files" text opens the Downloaded Files panel.
     const filesPill = (Array.from(frame94Root.querySelectorAll("p")) as HTMLElement[])
       .find((el) => el.textContent?.trim() === "11 files · 50 GB");
     if (filesPill) {
-      filesPill.textContent = "View files";
-      filesPill.style.color = "#2f52d8";
-      filesPill.style.fontSize = "14px";
-      const filesBtn = (filesPill.closest('[data-name="Button"]') as HTMLElement | null) ?? filesPill;
-      // Task: remove the open-in-new-tab icon, leaving just the "View files" text
-      filesBtn.querySelector('[data-name="cuida:open-in-new-tab-outline"]')?.remove();
-      filesBtn.style.cursor = "pointer";
-      filesBtn.setAttribute("role", "button");
-      filesBtn.setAttribute("tabindex", "0");
-      const openFiles = (e: Event) => { e.stopPropagation(); onViewFiles(); };
-      const filesKey = (e: KeyboardEvent) => {
-        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onViewFiles(); }
-      };
-      filesBtn.addEventListener("click", openFiles);
-      filesBtn.addEventListener("keydown", filesKey as EventListener);
-      actionCleanups.push(() => {
-        filesBtn.removeEventListener("click", openFiles);
-        filesBtn.removeEventListener("keydown", filesKey as EventListener);
-      });
+      const filesCard = filesPill.closest('[data-name="Section"]') as HTMLElement | null;
+      const cardBody = filesCard?.querySelector('[class*="px-[19px]"]') as HTMLElement | null;
+
+      // Remove the old "View files" button entirely.
+      const filesBtn = filesPill.closest('[data-name="Button"]') as HTMLElement | null;
+      (filesBtn ?? filesPill).remove();
+
+      // Add the mini dashboard; its "N files" acts as the panel trigger.
+      if (cardBody && !cardBody.querySelector("[data-files-dashboard]")) {
+        const dash = document.createElement("div");
+        dash.setAttribute("data-files-dashboard", "");
+        dash.style.cssText = "width:100%;";
+        cardBody.appendChild(dash);
+        const root = createRoot(dash);
+        root.render(<DownloadedFilesMiniDashboard onViewFiles={onViewFiles} />);
+        actionCleanups.push(() => { root.unmount(); dash.remove(); });
+      }
     }
 
     // Insert a "User profile" section as the first Supportive Data sub-section
@@ -849,6 +849,49 @@ function IncidentDetailPane({ onViewFiles, open }: { onViewFiles: () => void; op
         el.classList.add("fp-nav-link-muted");
         el.addEventListener("click", scrollToSupportiveData);
       });
+
+    // Timeline device/IP labels → scroll to the relevant Supportive Data view.
+    const scrollElIntoView = (target: HTMLElement, flash = false) => {
+      const cr = frame94Root.getBoundingClientRect();
+      const sr = target.getBoundingClientRect();
+      frame94Root.scrollTo({
+        top: frame94Root.scrollTop + sr.top - cr.top - HEADER_HEIGHT,
+        behavior: "smooth",
+      });
+      if (flash) {
+        target.classList.remove("fp-row-flash");
+        void target.offsetWidth; // restart the animation
+        target.classList.add("fp-row-flash");
+      }
+    };
+    const scrollToDevice = (deviceName: string) => () => {
+      const row = frame94Root.querySelector(`[data-device="${deviceName}"]`) as HTMLElement | null;
+      const fallback = (Array.from(frame94Root.querySelectorAll("p")) as HTMLElement[])
+        .find((el) => el.textContent?.trim() === "Associated devices");
+      const target = row ?? fallback;
+      if (target) scrollElIntoView(target, !!row);
+    };
+    const scrollToDownloadedFiles = () => {
+      const dl = (Array.from(frame94Root.querySelectorAll("p")) as HTMLElement[])
+        .find((el) => el.textContent?.trim() === "Downloaded files");
+      if (dl) scrollElIntoView(dl);
+    };
+    const timelineLinks: Array<{ text: string; handler: () => void }> = [
+      { text: "DESKTOP-A7K2", handler: scrollToDevice("DESKTOP-A7K2") },
+      { text: "win11-A7K2", handler: scrollToDevice("win11-A7K2") },
+      { text: "192.167.1.50:5987", handler: scrollToDevice("win11-A7K2") },
+      { text: "srv-fileserver01", handler: scrollToDownloadedFiles },
+    ];
+    timelineLinks.forEach(({ text, handler }) => {
+      (Array.from(frame94Root.querySelectorAll("p")) as HTMLElement[])
+        .filter((el) => el.textContent?.trim() === text)
+        .forEach((el) => {
+          el.classList.add("fp-nav-link");
+          el.style.cursor = "pointer";
+          el.addEventListener("click", handler);
+          actionCleanups.push(() => el.removeEventListener("click", handler));
+        });
+    });
 
     // "Unknown device" → scroll to the "Associated devices" section
     const unknownDeviceLabel = (Array.from(frame94Root.querySelectorAll("p")) as HTMLElement[])
@@ -1255,6 +1298,7 @@ function AssociatedDevicesTable() {
         return (
           <div
             key={d.name}
+            data-device={d.name}
             title={d.suspicious ? "Suspicious device used to download the files" : undefined}
             style={{
               display: "grid", gridTemplateColumns: ASSOC_GRID, alignItems: "center",
@@ -1324,6 +1368,66 @@ function DownloadIcon({ color = "#94a3b8" }: { color?: string }) {
       <path d="M8 2.5v7m0 0L5.2 6.7M8 9.5l2.8-2.8" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
       <path d="M3 11v1.5A1.5 1.5 0 0 0 4.5 14h7a1.5 1.5 0 0 0 1.5-1.5V11" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
+  );
+}
+
+// Mini dashboard injected into the main-panel "Downloaded files" card.
+// Reuses CLASS_STYLE (secondary Downloaded Files panel colors) for the chips.
+function DownloadedFilesMiniDashboard({ onViewFiles }: { onViewFiles: () => void }) {
+  const total = DOWNLOADED_FILES.length;
+  const counts = { RESTRICTED: 0, CONFIDENTIAL: 0, INTERNAL: 0 } as Record<DownloadedFile["cls"], number>;
+  DOWNLOADED_FILES.forEach((f) => { counts[f.cls] += 1; });
+  const totalGB = DOWNLOADED_FILES.reduce((sum, f) => sum + (parseFloat(f.size) || 0), 0);
+
+  const chip = (label: string, n: number, cls: DownloadedFile["cls"]) => (
+    <span
+      key={cls}
+      style={{
+        display: "inline-flex", alignItems: "center", gap: 5,
+        background: CLASS_STYLE[cls].bg, color: CLASS_STYLE[cls].text,
+        fontFamily: F.bold, fontSize: 10.5, letterSpacing: "0.03em",
+        borderRadius: 999, padding: "4px 10px", whiteSpace: "nowrap",
+      }}
+    >
+      <span style={{ fontFamily: F.extrabold, fontSize: 11.5 }}>{n}</span>
+      {label}
+    </span>
+  );
+
+  return (
+    <div
+      style={{
+        width: "100%", marginTop: 18,
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        gap: 16, flexWrap: "wrap",
+        background: "#ffffff",
+        border: "1px solid #eef1f6", borderRadius: 12, padding: "13px 16px",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+        <span style={{ fontFamily: F.extrabold, fontSize: 18, color: "#ec2a3f", letterSpacing: "0.3px" }}>
+          {totalGB.toFixed(1)} GB
+        </span>
+        <span style={{ fontFamily: F.medium, fontSize: 12.5, color: "#64748b" }}>total ·</span>
+        <span
+          role="button"
+          tabIndex={0}
+          onClick={(e) => { e.stopPropagation(); onViewFiles(); }}
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onViewFiles(); } }}
+          style={{ display: "inline-flex", alignItems: "center", gap: 3, fontFamily: F.semibold, fontSize: 12.5, color: "#2f52d8", cursor: "pointer" }}
+        >
+          {total} files
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ flexShrink: 0, marginTop: 1 }}>
+            <path d="M4.5 2.5L8 6l-3.5 3.5" stroke="#2f52d8" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </span>
+      </div>
+      <div style={{ display: "flex", gap: 7, flexWrap: "wrap" }}>
+        {chip("RESTRICTED", counts.RESTRICTED, "RESTRICTED")}
+        {chip("CONFIDENTIAL", counts.CONFIDENTIAL, "CONFIDENTIAL")}
+        {chip("INTERNAL", counts.INTERNAL, "INTERNAL")}
+      </div>
+    </div>
   );
 }
 

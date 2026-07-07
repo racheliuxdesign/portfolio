@@ -4240,10 +4240,10 @@ function Icon23() {
         <div className="relative size-[15px]" data-name="Icon">
           <svg className="absolute block inset-0 size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 15 15">
             <g id="Icon">
-              <path d={svgPaths.p64f0440} id="Vector" stroke="var(--stroke-0, black)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
-              <path d="M7.5 6.875H7.50625" id="Vector_2" stroke="var(--stroke-0, black)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
-              <path d="M10 6.875H10.0063" id="Vector_3" stroke="var(--stroke-0, black)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
-              <path d="M5 6.875H5.00625" id="Vector_4" stroke="var(--stroke-0, black)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
+              <path d={svgPaths.p64f0440} id="Vector" stroke="var(--stroke-0, #0035E4)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
+              <path d="M7.5 6.875H7.50625" id="Vector_2" stroke="var(--stroke-0, #0035E4)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
+              <path d="M10 6.875H10.0063" id="Vector_3" stroke="var(--stroke-0, #0035E4)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
+              <path d="M5 6.875H5.00625" id="Vector_4" stroke="var(--stroke-0, #0035E4)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
             </g>
           </svg>
         </div>
@@ -4255,9 +4255,9 @@ function Icon23() {
 function SecondaryButton() {
   return (
     <div className="bg-white content-stretch flex gap-[8px] h-[34px] items-center px-[16px] relative rounded-[6px] shrink-0" data-name="Secondary Button">
-      <div aria-hidden className="absolute border border-black border-solid inset-0 pointer-events-none rounded-[6px]" />
+      <div aria-hidden className="absolute border border-[#0035E4] border-solid inset-0 pointer-events-none rounded-[6px]" />
       <Icon23 />
-      <p className="[word-break:break-word] font-['Heebo:Medium',sans-serif] font-medium leading-[20px] relative shrink-0 text-[14px] text-black whitespace-nowrap">Comment</p>
+      <p className="[word-break:break-word] font-['Heebo:Medium',sans-serif] font-medium leading-[20px] relative shrink-0 text-[14px] text-[#0035E4] whitespace-nowrap">Comment</p>
     </div>
   );
 }
