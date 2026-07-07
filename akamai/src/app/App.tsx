@@ -2,6 +2,7 @@ import Frame94 from "@/imports/Frame427320261-1/index";
 import NewMitigationTab from "@/imports/DetailesPaneMitigationStepsTab1/index";
 import { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
+import fiveSecondSummaryImg from "@/assets/case-study/5-second-summary.png";
 
 // ── Recommended-mitigation action definitions (card order) ────────────────────
 type MitigationAction = {
@@ -1641,33 +1642,106 @@ function TopNav({ tab, onTab }: { tab: TopTab; onTab: (t: TopTab) => void }) {
 }
 
 // ── Case study presentation (Tab 2) ──────────────────────────────────────────
-const CASE_SECTIONS: { n: string; title: string; body: string }[] = [
-  {
-    n: "01",
-    title: "The challenge",
-    body: "Security analysts drown in a flood of look-alike alerts. Each one demands manual pivoting across consoles, logs, and identity tools before a decision can even begin — leading to slow triage, alert fatigue, and real threats slipping through the noise. The challenge was to compress that entire investigation into a single, glanceable moment.",
-  },
-  {
-    n: "02",
-    title: "The solution",
-    body: "A focused incident workspace that surfaces the whole story on one screen — risk scoring, behavioral baseline, timeline, supporting evidence, and recommended actions. Everything an analyst needs to understand what happened and respond is one click away, so investigation and action collapse from hours into seconds.",
-  },
-  {
-    n: "03",
-    title: "Design process",
-    body: "I started from the analyst's real questions — 'Is this real? How bad is it? What do I do now?' — and worked backward into an information hierarchy. Low-fidelity flows validated the narrative order, then iterative high-fidelity prototypes tuned density, motion, and the exact moment the detail panel reveals itself.",
-  },
-  {
-    n: "04",
-    title: "Leveraging AI in the design process",
-    body: "AI accelerated every stage — generating realistic incident data and copy, exploring layout variations, and pressure-testing the interface against edge cases. It acted as a tireless design partner, letting me spend more time on judgment and craft and less on repetitive production work.",
-  },
-  {
-    n: "05",
-    title: "Cyber-native visual language",
-    body: "The visual system speaks the language of the SOC: high-signal severity colors, restrained typography, and purposeful accenting that pulls the eye to what matters — the suspicious device, the off-hours login, the exfiltrated files. Motion is used sparingly to guide attention, never to decorate.",
-  },
-];
+
+// Shared editorial building blocks ------------------------------------------------
+
+function CaseH2({ n, title }: { n: string; title: string }) {
+  return (
+    <div style={{ display: "flex", alignItems: "baseline", gap: 18, margin: "56px 0 22px" }}>
+      <span style={{ fontFamily: F.extrabold, fontSize: 15, color: "#607aff", letterSpacing: "0.08em", flexShrink: 0 }}>{n}</span>
+      <h2 style={{ fontFamily: F.extrabold, fontSize: 27, color: "#0f172a", margin: 0 }}>{title}</h2>
+    </div>
+  );
+}
+
+function CaseH3({ children }: { children: React.ReactNode }) {
+  return (
+    <h3 style={{ fontFamily: F.bold, fontSize: 17.5, color: "#0f172a", margin: "30px 0 10px" }}>{children}</h3>
+  );
+}
+
+function CaseH4({ children }: { children: React.ReactNode }) {
+  return (
+    <h4 style={{ fontFamily: F.bold, fontSize: 14.5, color: "#0f172a", margin: "20px 0 8px", letterSpacing: "0.01em" }}>{children}</h4>
+  );
+}
+
+function CaseP({ children }: { children: React.ReactNode }) {
+  return (
+    <p style={{ fontFamily: F.regular, fontSize: 15, color: "#51607a", lineHeight: 1.75, margin: "0 0 14px" }}>{children}</p>
+  );
+}
+
+function CaseList({ items }: { items: (string | { lead: string; rest: string })[] }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 11, margin: "8px 0 18px" }}>
+      {items.map((item, i) => (
+        <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 11 }}>
+          <span style={{ width: 6, height: 6, borderRadius: 999, background: "#607aff", marginTop: 8, flexShrink: 0 }} />
+          <span style={{ fontFamily: F.regular, fontSize: 14.5, color: "#41425a", lineHeight: 1.65 }}>
+            {typeof item === "string" ? item : (
+              <>
+                <span style={{ fontFamily: F.bold, color: "#0f172a" }}>{item.lead}</span>
+                {" — "}{item.rest}
+              </>
+            )}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function CaseQuote({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      style={{
+        margin: "18px 0 22px", padding: "18px 22px", borderLeft: "3px solid #607aff",
+        background: "#f7f8fc", borderRadius: "0 10px 10px 0",
+      }}
+    >
+      <p style={{ fontFamily: F.semibold, fontSize: 16.5, color: "#0f172a", fontStyle: "italic", margin: 0, lineHeight: 1.5 }}>
+        “{children}”
+      </p>
+    </div>
+  );
+}
+
+function CasePic({ label, ratio = "16/9", src }: { label: string; ratio?: string; src?: string }) {
+  if (src) {
+    return (
+      <figure style={{ margin: "20px 0 26px" }}>
+        <div
+          style={{
+            width: "100%", borderRadius: 12, border: "1px solid #e9edf5", background: "#fff",
+            boxShadow: "0 6px 20px rgba(15,23,42,0.06)", overflow: "hidden",
+          }}
+        >
+          <img src={src} alt={label} style={{ display: "block", width: "100%", height: "auto" }} />
+        </div>
+        <figcaption style={{ fontFamily: F.medium, fontSize: 12.5, color: "#94a3b8", textAlign: "center", marginTop: 10 }}>
+          {label}
+        </figcaption>
+      </figure>
+    );
+  }
+  return (
+    <div
+      style={{
+        margin: "20px 0 26px", aspectRatio: ratio, width: "100%", borderRadius: 12,
+        border: "1.5px dashed #c7d0e0", background: "#f7f8fc",
+        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8,
+      }}
+    >
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
+        <rect x="2.5" y="4.5" width="19" height="15" rx="2" stroke="#c7d0e0" strokeWidth="1.6" />
+        <circle cx="8" cy="10" r="1.7" stroke="#c7d0e0" strokeWidth="1.6" />
+        <path d="M4 16.5l5-5 4 4 3-3 4.5 4.5" stroke="#c7d0e0" strokeWidth="1.6" strokeLinejoin="round" />
+      </svg>
+      <span style={{ fontFamily: F.semibold, fontSize: 12.5, color: "#94a3b8", textAlign: "center", padding: "0 20px" }}>{label}</span>
+    </div>
+  );
+}
 
 function CaseStudyPresentation({ onViewDemo }: { onViewDemo: () => void }) {
   return (
@@ -1684,11 +1758,11 @@ function CaseStudyPresentation({ onViewDemo }: { onViewDemo: () => void }) {
           CASE STUDY
         </span>
         <h1 style={{ fontFamily: F.extrabold, fontSize: 40, lineHeight: 1.15, color: "#0f172a", margin: "0 auto 18px", maxWidth: 820 }}>
-          Investigate a threat in 5 seconds <span style={{ color: "#607aff" }}>→</span> Act with confidence
+          Designing the Details Pane <span style={{ color: "#607aff" }}>→</span> A verdict in 5 seconds
         </h1>
         <p style={{ fontFamily: F.regular, fontSize: 17, lineHeight: 1.6, color: "#64748b", margin: "0 auto 32px", maxWidth: 680 }}>
-          A concept SOC experience that turns overwhelming alert noise into a guided, one-glance investigation —
-          so analysts can decide and act in seconds, not hours.
+          How I designed an incident details pane that lets a security analyst absorb the essential facts,
+          trust the system's reasoning, and know the next best action — in five seconds.
         </p>
         <button
           onClick={onViewDemo}
@@ -1705,19 +1779,222 @@ function CaseStudyPresentation({ onViewDemo }: { onViewDemo: () => void }) {
       </div>
 
       {/* Sections */}
-      <div style={{ maxWidth: 900, margin: "0 auto", padding: "18px 40px 80px" }}>
-        <p style={{ fontFamily: F.semibold, fontSize: 11.5, letterSpacing: "0.1em", color: "#94a3b8", textTransform: "uppercase", margin: "28px 0 6px" }}>
-          Overview · placeholder content
-        </p>
-        {CASE_SECTIONS.map((s) => (
-          <div key={s.n} style={{ display: "flex", gap: 24, padding: "26px 0", borderBottom: "1px solid #e9edf5" }}>
-            <span style={{ fontFamily: F.extrabold, fontSize: 26, color: "#c7d0e0", lineHeight: 1, flexShrink: 0, width: 42 }}>{s.n}</span>
-            <div>
-              <h2 style={{ fontFamily: F.bold, fontSize: 20, color: "#0f172a", margin: "0 0 8px" }}>{s.title}</h2>
-              <p style={{ fontFamily: F.regular, fontSize: 15, color: "#51607a", lineHeight: 1.7, margin: 0 }}>{s.body}</p>
-            </div>
-          </div>
-        ))}
+      <div style={{ maxWidth: 780, margin: "0 auto", padding: "18px 40px 100px" }}>
+
+        {/* 01 — The Goal ------------------------------------------------------ */}
+        <CaseH2 n="01" title="The Goal of the Details Pane" />
+        <CaseP>
+          The goal of the details pane is to allow the user to make a verdict in 5 seconds. I wanted to achieve that by:
+        </CaseP>
+        <CaseList
+          items={[
+            { lead: "Getting the essence across", rest: "surface the most significant information in a very short and focused way." },
+            { lead: "Giving the user confidence", rest: "show the reasoning behind the system's conclusions, not just the verdict." },
+            { lead: "Removing the need to think about the next step", rest: "recommend the best course of action." },
+          ]}
+        />
+
+        {/* 02 — The Solution & Work Process ----------------------------------- */}
+        <CaseH2 n="02" title="The Solution & Work Process" />
+
+        <CaseH3>Getting the essence of the most significant information — very short and focused</CaseH3>
+        <CaseP>
+          This part of the details pane was the most challenging. I constantly changed the content and hierarchy
+          (see the trade-off examples). I kept asking myself: what are the absolute minimum things the user needs
+          to know to make a good decision? I also struggled with how to present everything when the user only has
+          about 5 seconds to absorb the information.
+        </CaseP>
+        <CaseP>Eventually, I decided on this structure.</CaseP>
+
+        <CaseH4>Top section</CaseH4>
+        <CaseP>The very top presents the bottom line:</CaseP>
+        <CaseList
+          items={[
+            "The incident title",
+            "What mitigation steps have already been taken",
+            "A False Positive button that's always visible",
+          ]}
+        />
+        <CaseP>
+          I intentionally kept the False Positive action outside of the tabs. If a user scans only the header and
+          already knows this is a false positive, they shouldn't have to dig through the interface just to find
+          that action.
+        </CaseP>
+
+        <CaseH4>The 5-second summary</CaseH4>
+        <CaseP>I organized the information by importance:</CaseP>
+        <CaseList
+          items={[
+            { lead: "Bottom line first", rest: "severity and score, with the system confidence shown as secondary information." },
+            { lead: "What happened", rest: "in the shortest wording possible (for example, Data Exfiltration)." },
+            { lead: "Where it happened", rest: "the affected asset and its location." },
+            { lead: "Who is involved", rest: "the compromised user." },
+            { lead: "What the system concluded", rest: "for example, Behavior Anomaly." },
+          ]}
+        />
+        <CaseP>
+          I felt this combination gives users enough context to quickly decide whether this incident is serious and
+          worth investigating further — or whether it's likely a false positive.
+        </CaseP>
+        <CasePic label="The 5-second summary layout" ratio="16/10" src={fiveSecondSummaryImg} />
+
+        <CaseH4>Trade-offs</CaseH4>
+        <CasePic label="Trade-off examples explored for content & hierarchy" ratio="16/10" />
+
+        <CaseH3>Giving users confidence in the system's conclusion through transparency</CaseH3>
+        <CaseP>I wanted users to trust the system, not just accept its verdict.</CaseP>
+        <CaseP>
+          To achieve that, I broke the score into the different signals that contributed to it. By showing the
+          weight and severity of each factor, users can understand why the system reached its conclusion instead of
+          treating it as a black box.
+        </CaseP>
+        <CasePic label="Score breakdown by contributing signal" ratio="16/9" />
+        <CaseP>Another way to build trust is through the timeline.</CaseP>
+        <CaseP>
+          Showing chronological evidence — timestamps, who was involved, and what happened at each stage — helps
+          users validate the investigation themselves. Once they understand the evidence, they're much more likely
+          to trust both the score and the recommended mitigation.
+        </CaseP>
+        <CasePic label="Chronological timeline of evidence" ratio="16/9" />
+
+        <CaseH4>Info Banner</CaseH4>
+        <CaseP>
+          The details pane contains many contextual links. Almost every entity in the incident — for example,
+          Sarah's name or a device name — is clickable.
+        </CaseP>
+        <CaseP>
+          These links don't take the user to another page. Instead, they jump directly to the relevant section
+          within the details pane, providing additional background and supporting evidence. I'll talk more about
+          this later in the Supportive Data section.
+        </CaseP>
+
+        <CaseH3>The user shouldn't have to think about the next action</CaseH3>
+        <CaseP>This section also went through many iterations.</CaseP>
+        <CaseList
+          items={[
+            "At first, I organized recommendations by mitigation order.",
+            "Then I grouped them into tactical versus strategic recommendations.",
+            "Later I tried separating AI recommendations from system recommendations.",
+          ]}
+        />
+        <CaseP>Eventually, I realized something important: the user doesn't want to analyze different recommendation categories. They simply want to know:</CaseP>
+        <CaseQuote>What is the best thing I should do right now?</CaseQuote>
+        <CaseP>
+          That doesn't mean the other recommendations aren't valuable — they're still important for improving the
+          organization's overall security posture. But in the current moment, one action matters more than the
+          others.
+        </CaseP>
+        <CaseP>
+          So I separated the top recommendation into its own section called <strong style={{ color: "#0f172a", fontFamily: F.semibold }}>Most Recommended Mitigation Plan</strong>, followed by the rest of the recommendations.
+        </CaseP>
+        <CasePic label="Most Recommended Mitigation Plan, separated from the rest" ratio="16/9" />
+
+        <CaseH4>Building confidence before taking action</CaseH4>
+        <CaseP>
+          Next, I designed the guardrails that would appear after clicking Take Action. The original idea was to
+          show the list of actions the system would perform, along with the consequences.
+        </CaseP>
+        <CaseP>Then I realized another UX problem.</CaseP>
+        <CaseP>
+          Users might never click Take Action because they may assume the action is executed immediately. If they
+          don't understand what will happen, they'll avoid using the feature altogether.
+        </CaseP>
+        <CaseP>Instead, I made each recommendation card expandable. Clicking the card reveals:</CaseP>
+        <CaseList
+          items={[
+            "The actions that will be performed",
+            "The expected consequences",
+            "Additional context",
+          ]}
+        />
+        <CaseP>
+          This allows users to understand exactly what they're approving before committing, giving them the
+          confidence to take real action based on knowledge rather than uncertainty.
+        </CaseP>
+        <CasePic label="Expandable recommendation card, revealing actions & consequences" ratio="16/9" />
+
+        {/* 03 — Supportive Data ------------------------------------------------ */}
+        <CaseH2 n="03" title="Supportive Data" />
+        <CaseP>This section also required several design decisions. I asked myself:</CaseP>
+        <CaseQuote>What information helps users determine whether this incident is true or false, without overwhelming the main summary?</CaseQuote>
+        <CaseP>
+          This information isn't the star of the page, but it provides the context and evidence needed to support
+          the investigation. I decided to include:
+        </CaseP>
+        <CaseList
+          items={[
+            "Information about the involved user",
+            "The affected devices",
+            "The stolen files",
+          ]}
+        />
+
+        <CaseH4>User</CaseH4>
+        <CaseP>
+          I chose to present Sarah's information as a card focused on her normal behavior rather than simply
+          listing profile details. This makes it much easier to understand why the current activity is considered
+          anomalous.
+        </CaseP>
+        <CasePic label="Sarah Chen's normal-behavior profile card" ratio="16/9" />
+
+        <CaseH4>Devices</CaseH4>
+        <CaseP>
+          I presented the devices in a table because tables are great for scanning, comparing information, and
+          scaling to many items without becoming overwhelming.
+        </CaseP>
+
+        <CaseH4>Files</CaseH4>
+        <CaseP>
+          For the stolen files, I deliberately avoided placing them directly in the main details pane. A long file
+          list can consume a lot of valuable screen space, especially for users who don't need it.
+        </CaseP>
+        <CaseP>Instead, I added a link that opens an in-context side panel (see demo) containing:</CaseP>
+        <CaseList
+          items={[
+            "All file properties",
+            "Search capabilities",
+            "Download actions",
+          ]}
+        />
+        <CaseP>
+          This approach keeps the main panel clean while still providing a much richer experience for users who
+          want to investigate the files in depth. They stay on the same page, use the full height of the panel, and
+          can comfortably browse a large number of files.
+        </CaseP>
+        <CasePic label="Downloaded files side panel" ratio="16/9" />
+
+        {/* 04 — Reflection ------------------------------------------------------ */}
+        <CaseH2 n="04" title="Reflection" />
+        <CaseP>
+          This project was especially interesting because it combined UX challenges with technical challenges while
+          I was also evolving the way I work with AI.
+        </CaseP>
+        <CaseP>
+          I used Figma (Design + Make), Claude (Chat + Code), and GitHub to create both the prototype and this
+          presentation. AI was involved throughout the entire process:
+        </CaseP>
+        <CaseList
+          items={[
+            "Learning about Zero Trust",
+            "Researching competitors",
+            "Brainstorming solutions",
+            "Exploring visual directions",
+            "Sketching ideas",
+            "Writing technical content",
+            "QA and iteration",
+          ]}
+        />
+        <CaseP>
+          Today, I honestly can't imagine my workflow without AI. It has completely changed the way I design. The
+          transition between different AI tools still isn't seamless, but each one brings unique strengths and
+          opens new possibilities.
+        </CaseP>
+        <CaseP>
+          Over time, I've built my own workflows and prompting techniques, and I'm constantly refining them. But
+          above all, the most important part is still my own judgment — knowing how to combine all these tools into
+          one coherent design that truly serves the user's goal.
+        </CaseP>
+        <CasePic label="Workflow across Figma, Claude, and GitHub" ratio="16/9" />
       </div>
     </div>
   );
