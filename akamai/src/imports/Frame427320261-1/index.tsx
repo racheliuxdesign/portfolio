@@ -783,10 +783,7 @@ function Section1() {
       style={{ backgroundImage: "linear-gradient(90deg, #FC98FF 0%, #42024D 100%)" }}
       data-name="Section"
     >
-      <div
-        className="h-full relative rounded-[7px] size-full"
-        style={{ backgroundImage: "linear-gradient(115.399deg, rgba(0, 0, 0, 0.05) 12%, rgba(182, 13, 16, 0.03) 78.118%)" }}
-      >
+      <div className="bg-white h-full relative rounded-[7px] size-full">
         <div className="content-stretch flex flex-col items-start p-[19px] relative size-full">
           <Container4 />
           <Frame112 />
