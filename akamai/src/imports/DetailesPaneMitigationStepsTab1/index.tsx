@@ -185,33 +185,12 @@ function Container3() {
   );
 }
 
-function Icon2() {
-  return (
-    <div className="relative shrink-0 size-[15px]" data-name="Icon">
-      <svg className="absolute block inset-0 size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 15 15">
-        <g clipPath="url(#clip0_15_959)" id="Icon">
-          <path d={svgPaths.p31613e00} id="Vector" stroke="var(--stroke-0, white)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
-          <path d="M12.5 1.25V3.75" id="Vector_2" stroke="var(--stroke-0, white)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
-          <path d="M13.75 2.5H11.25" id="Vector_3" stroke="var(--stroke-0, white)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
-          <path d={svgPaths.p1aa7f900} id="Vector_4" stroke="var(--stroke-0, white)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.25" />
-        </g>
-        <defs>
-          <clipPath id="clip0_15_959">
-            <rect fill="white" height="15" width="15" />
-          </clipPath>
-        </defs>
-      </svg>
-    </div>
-  );
-}
-
 function Button() {
   return (
     <div className="relative rounded-[4px] shrink-0 w-full" data-name="Button">
       <div aria-hidden className="absolute bg-[#0035e4] inset-0 pointer-events-none rounded-[4px]" />
       <div className="flex flex-row items-center size-full">
         <div className="content-stretch flex gap-[7px] items-center px-[15px] py-[9px] relative size-full">
-          <Icon2 />
           <p className="[word-break:break-word] font-['Heebo:Bold',sans-serif] font-bold leading-[normal] relative shrink-0 text-[12.5px] text-center text-white whitespace-nowrap">Take action</p>
         </div>
       </div>
