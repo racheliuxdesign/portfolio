@@ -12,7 +12,6 @@ import expandableCardImg from "@/assets/case-study/expandable-card.png";
 import userProfileCardImg from "@/assets/case-study/user-profile-card.png";
 import devicesTableImg from "@/assets/case-study/devices-table.png";
 import downloadedFilesPanelImg from "@/assets/case-study/downloaded-files-panel.png";
-import aiWorkflowVideo from "@/assets/case-study/ai-workflow.mp4";
 
 // ── Recommended-mitigation action definitions (card order) ────────────────────
 type MitigationAction = {
@@ -1573,7 +1572,7 @@ function LiveDemo() {
           maxWidth: "100vw",
           background: "white",
           transform: open ? "translateX(0)" : "translateX(100%)",
-          transition: "transform 0.55s cubic-bezier(0.22,1,0.36,1)",
+          transition: "transform 2s cubic-bezier(0.22,1,0.36,1)",
           boxShadow: open ? "-24px 0 70px rgba(15,23,42,0.28)" : "none",
         }}
       >
@@ -2097,7 +2096,6 @@ function CaseStudyPresentation({ onViewDemo }: { onViewDemo: () => void }) {
           above all, the most important part is still my own judgment — knowing how to combine all these tools into
           one coherent design that truly serves the user's goal.
         </CaseP>
-        <CasePic label="AI is giving me a hand :)" ratio="16/9" video={aiWorkflowVideo} />
       </div>
     </div>
   );
