@@ -3,6 +3,16 @@ import NewMitigationTab from "@/imports/DetailesPaneMitigationStepsTab1/index";
 import { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import fiveSecondSummaryImg from "@/assets/case-study/5-second-summary.png";
+import tradeoffsImg from "@/assets/case-study/tradeoffs.png";
+import scoreBreakdownImg from "@/assets/case-study/score-breakdown.png";
+import timelineImg from "@/assets/case-study/timeline.png";
+import infoBannerLinksImg from "@/assets/case-study/info-banner-links.png";
+import mitigationPlanImg from "@/assets/case-study/mitigation-plan.png";
+import expandableCardImg from "@/assets/case-study/expandable-card.png";
+import userProfileCardImg from "@/assets/case-study/user-profile-card.png";
+import devicesTableImg from "@/assets/case-study/devices-table.png";
+import downloadedFilesPanelImg from "@/assets/case-study/downloaded-files-panel.png";
+import aiWorkflowVideo from "@/assets/case-study/ai-workflow.mp4";
 
 // ── Recommended-mitigation action definitions (card order) ────────────────────
 type MitigationAction = {
@@ -1707,7 +1717,22 @@ function CaseQuote({ children }: { children: React.ReactNode }) {
   );
 }
 
-function CasePic({ label, ratio = "16/9", src }: { label: string; ratio?: string; src?: string }) {
+function CasePic({ label, ratio = "16/9", src, video }: { label: string; ratio?: string; src?: string; video?: string }) {
+  if (video) {
+    return (
+      <figure style={{ margin: "20px 0 26px" }}>
+        <p style={{ fontFamily: F.bold, fontSize: 15, color: "#0f172a", textAlign: "center", margin: "0 0 12px" }}>{label}</p>
+        <div
+          style={{
+            width: "100%", borderRadius: 12, border: "1px solid #e9edf5", background: "#fff",
+            boxShadow: "0 6px 20px rgba(15,23,42,0.06)", overflow: "hidden",
+          }}
+        >
+          <video src={video} controls playsInline style={{ display: "block", width: "100%", height: "auto" }} />
+        </div>
+      </figure>
+    );
+  }
   if (src) {
     return (
       <figure style={{ margin: "20px 0 26px" }}>
@@ -1838,8 +1863,8 @@ function CaseStudyPresentation({ onViewDemo }: { onViewDemo: () => void }) {
         </CaseP>
         <CasePic label="The 5-second summary layout" ratio="16/10" src={fiveSecondSummaryImg} />
 
-        <CaseH4>Trade-offs</CaseH4>
-        <CasePic label="Trade-off examples explored for content & hierarchy" ratio="16/10" />
+        <CaseH4>Some Designs I Experimented With (Trade-off)</CaseH4>
+        <CasePic label="Trade-off examples explored for content & hierarchy" ratio="16/10" src={tradeoffsImg} />
 
         <CaseH3>Giving users confidence in the system's conclusion through transparency</CaseH3>
         <CaseP>I wanted users to trust the system, not just accept its verdict.</CaseP>
@@ -1848,25 +1873,53 @@ function CaseStudyPresentation({ onViewDemo }: { onViewDemo: () => void }) {
           weight and severity of each factor, users can understand why the system reached its conclusion instead of
           treating it as a black box.
         </CaseP>
-        <CasePic label="Score breakdown by contributing signal" ratio="16/9" />
+        <CasePic label="Score breakdown by contributing signal" ratio="16/9" src={scoreBreakdownImg} />
         <CaseP>Another way to build trust is through the timeline.</CaseP>
         <CaseP>
           Showing chronological evidence — timestamps, who was involved, and what happened at each stage — helps
           users validate the investigation themselves. Once they understand the evidence, they're much more likely
           to trust both the score and the recommended mitigation.
         </CaseP>
-        <CasePic label="Chronological timeline of evidence" ratio="16/9" />
+        <CasePic label="Chronological timeline of evidence" ratio="16/9" src={timelineImg} />
 
-        <CaseH4>Info Banner</CaseH4>
-        <CaseP>
-          The details pane contains many contextual links. Almost every entity in the incident — for example,
-          Sarah's name or a device name — is clickable.
-        </CaseP>
-        <CaseP>
-          These links don't take the user to another page. Instead, they jump directly to the relevant section
-          within the details pane, providing additional background and supporting evidence. I'll talk more about
-          this later in the Supportive Data section.
-        </CaseP>
+        <div
+          style={{
+            margin: "24px 0 26px", padding: "22px 24px", borderRadius: 14,
+            background: "linear-gradient(180deg, #EEF3FF 0%, #E3EBFF 100%)",
+            border: "1px solid rgba(96,122,255,0.28)",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+            <div
+              style={{
+                width: 28, height: 28, borderRadius: 8, background: "#607aff", flexShrink: 0,
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}
+            >
+              <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+                <path d="M6.5 9.5L9.5 6.5M7.2 4.3L8 3.5a2.5 2.5 0 013.5 3.5l-.8.8M8.8 11.7l-.8.8a2.5 2.5 0 01-3.5-3.5l.8-.8" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+            <h4 style={{ fontFamily: F.bold, fontSize: 14.5, color: "#0f172a", margin: 0 }}>Note</h4>
+          </div>
+          <p style={{ fontFamily: F.regular, fontSize: 15, color: "#334066", lineHeight: 1.75, margin: "0 0 12px" }}>
+            The details pane contains many contextual links. Almost every entity in the incident — for example,
+            Sarah's name or a device name — is clickable.
+          </p>
+          <p style={{ fontFamily: F.regular, fontSize: 15, color: "#334066", lineHeight: 1.75, margin: 0 }}>
+            These links don't take the user to another page. Instead, they jump directly to the relevant section
+            within the details pane, providing additional background and supporting evidence. I'll talk more about
+            this later in the Supportive Data section.
+          </p>
+          <div
+            style={{
+              marginTop: 18, borderRadius: 10, border: "1px solid rgba(96,122,255,0.25)",
+              background: "#fff", overflow: "hidden", boxShadow: "0 4px 14px rgba(96,122,255,0.12)",
+            }}
+          >
+            <img src={infoBannerLinksImg} alt="Clickable entities inside the details pane" style={{ display: "block", width: "100%", height: "auto" }} />
+          </div>
+        </div>
 
         <CaseH3>The user shouldn't have to think about the next action</CaseH3>
         <CaseP>This section also went through many iterations.</CaseP>
@@ -1887,7 +1940,7 @@ function CaseStudyPresentation({ onViewDemo }: { onViewDemo: () => void }) {
         <CaseP>
           So I separated the top recommendation into its own section called <strong style={{ color: "#0f172a", fontFamily: F.semibold }}>Most Recommended Mitigation Plan</strong>, followed by the rest of the recommendations.
         </CaseP>
-        <CasePic label="Most Recommended Mitigation Plan, separated from the rest" ratio="16/9" />
+        <CasePic label="Most Recommended Mitigation Plan, separated from the rest" ratio="16/9" src={mitigationPlanImg} />
 
         <CaseH4>Building confidence before taking action</CaseH4>
         <CaseP>
@@ -1911,7 +1964,7 @@ function CaseStudyPresentation({ onViewDemo }: { onViewDemo: () => void }) {
           This allows users to understand exactly what they're approving before committing, giving them the
           confidence to take real action based on knowledge rather than uncertainty.
         </CaseP>
-        <CasePic label="Expandable recommendation card, revealing actions & consequences" ratio="16/9" />
+        <CasePic label="Expandable recommendation card, revealing actions & consequences" ratio="16/9" src={expandableCardImg} />
 
         {/* 03 — Supportive Data ------------------------------------------------ */}
         <CaseH2 n="03" title="Supportive Data" />
@@ -1935,13 +1988,14 @@ function CaseStudyPresentation({ onViewDemo }: { onViewDemo: () => void }) {
           listing profile details. This makes it much easier to understand why the current activity is considered
           anomalous.
         </CaseP>
-        <CasePic label="Sarah Chen's normal-behavior profile card" ratio="16/9" />
+        <CasePic label="Sarah Chen's normal-behavior profile card" ratio="16/9" src={userProfileCardImg} />
 
         <CaseH4>Devices</CaseH4>
         <CaseP>
           I presented the devices in a table because tables are great for scanning, comparing information, and
           scaling to many items without becoming overwhelming.
         </CaseP>
+        <CasePic label="Associated devices table" ratio="16/9" src={devicesTableImg} />
 
         <CaseH4>Files</CaseH4>
         <CaseP>
@@ -1961,10 +2015,10 @@ function CaseStudyPresentation({ onViewDemo }: { onViewDemo: () => void }) {
           want to investigate the files in depth. They stay on the same page, use the full height of the panel, and
           can comfortably browse a large number of files.
         </CaseP>
-        <CasePic label="Downloaded files side panel" ratio="16/9" />
+        <CasePic label="Downloaded files side panel" ratio="16/9" src={downloadedFilesPanelImg} />
 
         {/* 04 — Reflection ------------------------------------------------------ */}
-        <CaseH2 n="04" title="Reflection" />
+        <CaseH2 n="04" title="Using AI" />
         <CaseP>
           This project was especially interesting because it combined UX challenges with technical challenges while
           I was also evolving the way I work with AI.
@@ -1994,7 +2048,7 @@ function CaseStudyPresentation({ onViewDemo }: { onViewDemo: () => void }) {
           above all, the most important part is still my own judgment — knowing how to combine all these tools into
           one coherent design that truly serves the user's goal.
         </CaseP>
-        <CasePic label="Workflow across Figma, Claude, and GitHub" ratio="16/9" />
+        <CasePic label="AI is giving me a hand :)" ratio="16/9" video={aiWorkflowVideo} />
       </div>
     </div>
   );
