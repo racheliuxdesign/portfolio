@@ -190,7 +190,7 @@ function Button() {
     <div className="relative rounded-[4px] shrink-0 w-full" data-name="Button">
       <div aria-hidden className="absolute bg-[#0035e4] inset-0 pointer-events-none rounded-[4px]" />
       <div className="flex flex-row items-center size-full">
-        <div className="content-stretch flex gap-[7px] items-center px-[15px] py-[9px] relative size-full">
+        <div className="content-stretch flex gap-[7px] items-center justify-center px-[15px] py-[9px] relative size-full">
           <p className="[word-break:break-word] font-['Heebo:Bold',sans-serif] font-bold leading-[normal] relative shrink-0 text-[12.5px] text-center text-white whitespace-nowrap">Take action</p>
         </div>
       </div>
