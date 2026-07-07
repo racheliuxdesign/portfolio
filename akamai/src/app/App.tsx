@@ -96,6 +96,21 @@ function buildActionExpansion(def: MitigationAction): HTMLDivElement {
     list.appendChild(row);
   });
   panel.appendChild(list);
+
+  const askBtn = document.createElement("div");
+  askBtn.style.cssText =
+    "display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 16px;margin-top:14px;" +
+    "border-radius:999px;cursor:pointer;background-image:linear-gradient(90deg, #0b0b12 0%, #7c3aed 62%, #ec4899 100%);";
+  askBtn.innerHTML = `
+    <svg width="14" height="14" viewBox="0 0 15 15" fill="none">
+      <path d="M7.5 1.25L8.87 5.4L13.02 6.77L8.87 8.14L7.5 12.29L6.13 8.14L1.98 6.77L6.13 5.4L7.5 1.25Z" stroke="white" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M12.5 1.25V3.75" stroke="white" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M13.75 2.5H11.25" stroke="white" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span style="font-family:'Heebo:Medium',sans-serif;font-size:13px;color:#fff;white-space:nowrap;">Ask anything...</span>
+  `;
+  panel.appendChild(askBtn);
+
   return panel;
 }
 
