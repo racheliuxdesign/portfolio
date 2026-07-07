@@ -681,8 +681,8 @@ function Icon2() {
     <div className="relative shrink-0 size-[11.5px]" data-name="Icon">
       <svg className="absolute block inset-0 size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 11.5 11.5">
         <g clipPath="url(#clip0_1_3617)" id="Icon">
-          <path d={svgPaths.p252b1d00} id="Vector" stroke="var(--stroke-0, #009156)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="0.958333" />
-          <path d={svgPaths.p1945e480} id="Vector_2" stroke="var(--stroke-0, #009156)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="0.958333" />
+          <path d={svgPaths.p252b1d00} id="Vector" stroke="var(--stroke-0, #000000)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="0.958333" />
+          <path d={svgPaths.p1945e480} id="Vector_2" stroke="var(--stroke-0, #000000)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="0.958333" />
         </g>
         <defs>
           <clipPath id="clip0_1_3617">
@@ -698,7 +698,7 @@ function Text10() {
   return (
     <div className="relative shrink-0" data-name="Text">
       <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex flex-col items-start relative size-full">
-        <p className="[word-break:break-word] font-['Heebo:Bold',sans-serif] font-bold leading-[normal] relative shrink-0 text-[#009156] text-[11.5px] whitespace-nowrap">92% confidence</p>
+        <p className="[word-break:break-word] font-['Heebo:Bold',sans-serif] font-bold leading-[normal] relative shrink-0 text-[#000000] text-[11.5px] whitespace-nowrap">92% confidence</p>
       </div>
     </div>
   );
@@ -707,7 +707,7 @@ function Text10() {
 function Text9() {
   return (
     <div className="relative rounded-[20px] shrink-0" data-name="Text">
-      <div aria-hidden className="absolute bg-[rgba(22,217,138,0.1)] bg-clip-padding border-0 border-[transparent] border-solid inset-0 pointer-events-none rounded-[20px]" />
+      <div aria-hidden className="absolute bg-[#E0E0E0] bg-clip-padding border-0 border-[transparent] border-solid inset-0 pointer-events-none rounded-[20px]" />
       <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex gap-[6px] items-center px-[10px] py-[4px] relative size-full">
         <Icon2 />
         <Text10 />
