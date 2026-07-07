@@ -2073,7 +2073,7 @@ function Frame43() {
           </div>
         </div>
       </div>
-      <div className="[word-break:break-word] flex flex-col font-['Heebo:Regular',sans-serif] font-normal justify-center leading-[0] relative shrink-0 text-[#41425a] text-[12px] w-[303px]">
+      <div className="[word-break:break-word] flex flex-col font-['Heebo:Regular',sans-serif] font-normal justify-center leading-[0] relative shrink-0 text-[#41425a] text-[12px] whitespace-nowrap">
         <p className="leading-[20px]">Unmanaged endpoint connected to Cloud Drive</p>
       </div>
       <div className="bg-[rgba(0,122,255,0.15)] h-[19px] relative rounded-[4px] shrink-0 w-[136px]">
