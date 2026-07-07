@@ -801,28 +801,13 @@ function Container23() {
   );
 }
 
-function Icon7() {
-  return (
-    <div className="relative shrink-0 size-[12.5px]" data-name="Icon">
-      <svg className="absolute block inset-0 size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 12.5 12.5">
-        <g id="Icon">
-          <path d={svgPaths.p15175cb2} id="Vector" stroke="var(--stroke-0, #0035E4)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.04167" />
-          <path d={svgPaths.p17eff580} id="Vector_2" stroke="var(--stroke-0, #0035E4)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.04167" />
-          <path d={svgPaths.p1b6f8b00} id="Vector_3" stroke="var(--stroke-0, #0035E4)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.04167" />
-        </g>
-      </svg>
-    </div>
-  );
-}
-
 function Button4() {
   return (
     <div className="relative rounded-[4px] shrink-0 w-full" data-name="Button">
       <div aria-hidden className="absolute bg-white inset-0 pointer-events-none rounded-[4px]" />
       <div aria-hidden className="absolute border border-[#0035e4] border-solid inset-0 pointer-events-none rounded-[4px]" />
       <div className="flex flex-row items-center size-full">
-        <div className="content-stretch flex gap-[7px] items-center px-[16px] py-[10px] relative size-full">
-          <Icon7 />
+        <div className="content-stretch flex gap-[7px] items-center justify-center px-[16px] py-[10px] relative size-full">
           <p className="[word-break:break-word] font-['Heebo:Bold',sans-serif] font-bold leading-[normal] relative shrink-0 text-[#0035e4] text-[12.5px] text-center whitespace-nowrap">Take action</p>
         </div>
       </div>

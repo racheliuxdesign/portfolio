@@ -1936,6 +1936,10 @@ function CaseStudyPresentation({ onViewDemo }: { onViewDemo: () => void }) {
           weight and severity of each factor, users can understand why the system reached its conclusion instead of
           treating it as a black box.
         </CaseP>
+        <CaseP>
+          I used a typewriter effect to reveal the AI summary, drawing the user's eye to it so they don't skim
+          past it as static, throwaway text.
+        </CaseP>
         <CasePic label="Score breakdown by contributing signal" ratio="16/9" src={scoreBreakdownImg} />
         <CaseP>Another way to build trust is through the timeline.</CaseP>
         <CaseP>
