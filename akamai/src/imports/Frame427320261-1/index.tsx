@@ -554,7 +554,7 @@ function Tabs1() {
 function AskAnythingButton() {
   return (
     <div
-      className="h-[34px] relative rounded-[999px] shrink-0"
+      className="h-[34px] relative rounded-[999px] shrink-0 translate-y-[-6px] z-[2]"
       style={{ backgroundImage: "linear-gradient(90deg, #0b0b12 0%, #7c3aed 62%, #ec4899 100%)" }}
       data-name="Ask AI Button"
     >
@@ -2629,7 +2629,7 @@ function Icon13() {
 
 function Text50() {
   return (
-    <div className="h-[22px] relative rounded-[19px] shrink-0 w-[136px]" style={{ backgroundImage: "linear-gradient(96.4235deg, rgb(0, 0, 0) 41.563%, rgb(238, 0, 251) 110.43%)" }} data-name="Text">
+    <div className="h-[22px] relative rounded-[19px] shrink-0 w-[136px]" style={{ backgroundImage: "linear-gradient(90deg, #0b0b12 0%, #7c3aed 62%, #ec4899 100%)" }} data-name="Text">
       <Icon13 />
       <p className="[word-break:break-word] absolute font-['Heebo:ExtraBold',sans-serif] font-extrabold leading-[normal] left-[31px] text-[9px] text-white top-[5px] tracking-[0.6px] uppercase whitespace-nowrap">AI Recommended</p>
     </div>
@@ -4475,7 +4475,7 @@ function Icon24() {
 
 function Text66() {
   return (
-    <div className="absolute bg-gradient-to-r from-black h-[28px] left-[871px] rounded-[18px] to-[#ff00e9] top-[291px] w-[127px]" data-name="Text">
+    <div className="absolute h-[28px] left-[871px] rounded-[18px] top-[291px] w-[127px]" style={{ backgroundImage: "linear-gradient(90deg, #0b0b12 0%, #7c3aed 62%, #ec4899 100%)" }} data-name="Text">
       <Icon24 />
       <p className="[word-break:break-word] absolute font-['Heebo:Medium',sans-serif] font-medium leading-[normal] left-[29px] text-[14px] text-white top-[3px] tracking-[-0.2px] whitespace-nowrap">Ask anything...</p>
     </div>

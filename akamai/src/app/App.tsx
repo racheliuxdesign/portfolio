@@ -2003,6 +2003,30 @@ function CaseStudyPresentation({ onViewDemo }: { onViewDemo: () => void }) {
           </div>
         </div>
 
+        <CaseH3>Integrating the “Ask Anything” AI assistant (floating component)</CaseH3>
+        <CaseP>
+          When a user clicks an “Ask anything” button, a floating chat component appears. The chat automatically
+          carries the context in which the button was clicked, so users never have to describe or re-type that
+          context themselves — they only need to ask the question they actually want answered.
+        </CaseP>
+        <CaseP>I chose a floating component for two reasons:</CaseP>
+        <CaseList
+          items={[
+            { lead: "Consistency", rest: "the AI chat experience is identical everywhere, no matter where the user opened it from." },
+            { lead: "Navigation", rest: "the assistant's replies can take the user directly to the part of the system that holds the information they asked about." },
+          ]}
+        />
+        <CaseP>
+          I placed this trigger only in a few strategic locations within the side panel — for example, where users
+          are most likely to want more detail about a user, an endpoint, or a recommended action. This keeps the
+          experience focused: it avoids overwhelming users with AI everywhere and prevents them from getting stuck
+          in long chats, while still surfacing the assistant exactly where it's genuinely useful.
+        </CaseP>
+        <CaseP>
+          I did not design the chat component itself, as that falls slightly outside the scope of this task.
+          Defining how and where the component is used, however, sits well within it.
+        </CaseP>
+
         <CaseH3>The user shouldn't have to think about the next action</CaseH3>
         <CaseP>This section also went through many iterations.</CaseP>
         <CaseList

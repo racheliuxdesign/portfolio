@@ -62,7 +62,7 @@ function Icon() {
 
 function Text() {
   return (
-    <div className="h-[22px] relative rounded-[19px] shrink-0 w-[136px]" style={{ backgroundImage: "linear-gradient(96.4235deg, rgb(0, 0, 0) 41.563%, rgb(238, 0, 251) 110.43%)" }} data-name="Text">
+    <div className="h-[22px] relative rounded-[19px] shrink-0 w-[136px]" style={{ backgroundImage: "linear-gradient(90deg, #0b0b12 0%, #7c3aed 62%, #ec4899 100%)" }} data-name="Text">
       <Icon />
       <p className="[word-break:break-word] absolute font-['Heebo:ExtraBold',sans-serif] font-extrabold leading-[normal] left-[31px] text-[9px] text-white top-[5px] tracking-[0.6px] uppercase whitespace-nowrap">AI Recommended</p>
     </div>
