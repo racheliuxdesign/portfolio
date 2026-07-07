@@ -1774,21 +1774,24 @@ function CasePic({ label, ratio = "16/9", src, video }: { label: string; ratio?:
           <div
             onClick={() => setOpen(false)}
             style={{
-              position: "fixed", inset: 0, zIndex: 60, background: "rgba(10,14,26,0.86)",
-              display: "flex", alignItems: "center", justifyContent: "center", padding: 32, cursor: "zoom-out",
+              position: "fixed", inset: 0, zIndex: 60, background: "rgba(10,14,26,0.9)",
+              overflow: "auto", cursor: "zoom-out",
             }}
           >
-            <img
-              src={src}
-              alt={label}
-              style={{ maxWidth: "92%", maxHeight: "88%", borderRadius: 10, boxShadow: "0 20px 60px rgba(0,0,0,0.5)" }}
-            />
+            <div style={{ minHeight: "100%", display: "flex", alignItems: "center", justifyContent: "center", padding: "56px 32px" }}>
+              <img
+                src={src}
+                alt={label}
+                onClick={(e) => e.stopPropagation()}
+                style={{ width: "min(96vw, 1680px)", height: "auto", display: "block", borderRadius: 10, boxShadow: "0 20px 60px rgba(0,0,0,0.5)", cursor: "default" }}
+              />
+            </div>
             <button
               onClick={(e) => { e.stopPropagation(); setOpen(false); }}
               style={{
-                position: "absolute", top: 22, right: 26, width: 36, height: 36, borderRadius: 999,
-                border: "none", background: "rgba(255,255,255,0.12)", color: "#fff", fontSize: 18,
-                cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+                position: "fixed", top: 22, right: 26, width: 36, height: 36, borderRadius: 999,
+                border: "none", background: "rgba(255,255,255,0.14)", color: "#fff", fontSize: 18,
+                cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 61,
               }}
             >×</button>
           </div>
@@ -1850,7 +1853,7 @@ function CaseStudyPresentation({ onViewDemo }: { onViewDemo: () => void }) {
       </div>
 
       {/* Sections */}
-      <div style={{ maxWidth: 780, margin: "0 auto", padding: "18px 40px 100px" }}>
+      <div style={{ maxWidth: 860, margin: "0 auto", padding: "18px 40px 100px" }}>
 
         {/* 01 — The Goal ------------------------------------------------------ */}
         <CaseH2 n="01" title="The Goal of the Details Pane" />
