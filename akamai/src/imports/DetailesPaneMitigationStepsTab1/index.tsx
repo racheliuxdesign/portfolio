@@ -24,7 +24,7 @@ function Container() {
 function Frame15() {
   return (
     <div className="content-stretch flex gap-[8px] items-center relative shrink-0">
-      <p className="[word-break:break-word] font-['Heebo:Bold',sans-serif] font-bold leading-[normal] relative shrink-0 text-[#0f172a] text-[14px] w-[321px]">Suspend account</p>
+      <p className="[word-break:break-word] font-['Heebo:Bold',sans-serif] font-bold leading-[normal] relative shrink-0 text-[#0f172a] text-[14px] whitespace-nowrap">Suspend account</p>
       <div className="flex items-center justify-center relative shrink-0">
         <div className="-scale-y-100 flex-none">
           <div className="h-[6px] relative w-[12px]" data-name="Vector">
@@ -71,7 +71,7 @@ function Text() {
 
 function Frame16() {
   return (
-    <div className="content-stretch flex gap-[22px] items-center relative shrink-0 w-[553px]">
+    <div className="content-stretch flex gap-[22px] items-center relative shrink-0">
       <Frame15 />
       <Text />
     </div>
@@ -80,7 +80,7 @@ function Frame16() {
 
 function Frame14() {
   return (
-    <div className="relative shrink-0 w-[567px]">
+    <div className="relative shrink-0">
       <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex items-center relative size-full">
         <Frame16 />
       </div>
@@ -90,7 +90,7 @@ function Frame14() {
 
 function Container4() {
   return (
-    <div className="relative shrink-0 w-[158px]" data-name="Container">
+    <div className="relative shrink-0" data-name="Container">
       <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex items-center relative size-full">
         <Frame14 />
       </div>
