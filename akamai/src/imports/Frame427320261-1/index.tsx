@@ -148,26 +148,10 @@ function Icon() {
           <svg className="absolute block inset-0 size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 106 107">
             <g id="Icon">
               <path d={svgPaths.p35efed00} id="Vector" stroke="var(--stroke-0, #0F172A)" strokeOpacity="0.1" strokeWidth="0.766667" />
-              <g filter="url(#filter0_d_1_3624)" id="gaugeFill">
-                <path d={svgPaths.p35efed00} stroke="url(#paint0_linear_1_3624)" strokeWidth="6" />
+              <g id="gaugeFill">
+                <path d={svgPaths.p35efed00} stroke="#B81123" strokeWidth="6" />
               </g>
             </g>
-            <defs>
-              <filter colorInterpolationFilters="sRGB" filterUnits="userSpaceOnUse" height="91.7333" id="filter0_d_1_3624" width="91.7333" x="13.1333" y="9.63333">
-                <feFlood floodOpacity="0" result="BackgroundImageFix" />
-                <feColorMatrix in="SourceAlpha" result="hardAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" />
-                <feOffset dy="2" />
-                <feGaussianBlur stdDeviation="1.5" />
-                <feColorMatrix type="matrix" values="0 0 0 0 0.346079 0 0 0 0 0.00644738 0 0 0 0 0.00644738 0 0 0 0.3 0" />
-                <feBlend in2="BackgroundImageFix" mode="normal" result="effect1_dropShadow_1_3624" />
-                <feBlend in="SourceGraphic" in2="effect1_dropShadow_1_3624" mode="normal" result="shape" />
-              </filter>
-              <linearGradient gradientUnits="userSpaceOnUse" id="paint0_linear_1_3624" x1="98.8667" x2="19.1333" y1="53.5" y2="53.5">
-                <stop offset="0.0240385" stopColor="#FF273E" />
-                <stop offset="0.269231" stopColor="#BA1123" />
-                <stop offset="1" stopColor="#540810" />
-              </linearGradient>
-            </defs>
           </svg>
         </div>
       </div>
