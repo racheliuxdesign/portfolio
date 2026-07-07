@@ -1,2 +1,0 @@
-# Product Designer Home Assignment 
-
