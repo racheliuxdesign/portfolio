@@ -349,7 +349,7 @@ function ActionModal({ action, onClose }: { action: MitigationAction; onClose: (
 }
 
 // ── App ───────────────────────────────────────────────────────────────────────
-function IncidentDetailPane({ onViewFiles }: { onViewFiles: () => void }) {
+function IncidentDetailPane({ onViewFiles, open }: { onViewFiles: () => void; open: boolean }) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [showModal, setShowModal] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -365,8 +365,18 @@ function IncidentDetailPane({ onViewFiles }: { onViewFiles: () => void }) {
   const isSubmittedRef = useRef(false);
   const frame94RootRef = useRef<HTMLElement | null>(null);
   const sectionsRef = useRef<HTMLElement[]>([]);
+  const typeSummaryRef = useRef<(() => void) | null>(null); // AI-summary typewriter (also drives the risk-score count-up)
 
   useEffect(() => { isSubmittedRef.current = isSubmitted; }, [isSubmitted]);
+
+  // Trigger the AI-summary typewriter each time the panel opens.
+  useEffect(() => {
+    if (!open) return;
+    const t = window.setTimeout(() => {
+      typeSummaryRef.current?.();
+    }, 250);
+    return () => window.clearTimeout(t);
+  }, [open]);
 
   // ── Strip all underlines from the imported design ────────────────────────────
   useEffect(() => {
@@ -381,6 +391,8 @@ function IncidentDetailPane({ onViewFiles }: { onViewFiles: () => void }) {
       [data-fp-pane] .fp-nav-link-muted:hover { color: #607aff !important; }
       [data-ai-summary] * { color: #191921 !important; }
       [data-ai-summary] .ai-link { color: #0029F8 !important; cursor: pointer; }
+      @keyframes fpTypeBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+      .fp-type-cursor { display: inline-block; width: 2px; height: 0.95em; background: #191921; margin-left: 1px; vertical-align: text-bottom; animation: fpTypeBlink 0.9s steps(1) infinite; }
     `;
     document.head.appendChild(style);
     return () => style.remove();
@@ -709,6 +721,69 @@ function IncidentDetailPane({ onViewFiles }: { onViewFiles: () => void }) {
             });
           });
         });
+
+      // Prepare a typewriter reveal for the AI summary body paragraph. We reveal
+      // characters across the existing formatted spans (bold/links preserved),
+      // with a blinking cursor — like an AI chat streaming its response. The risk
+      // score (the "95" ring) is driven off the SAME progress so both finish together.
+      const scoreEl = (Array.from(frame94Root.querySelectorAll("p")) as HTMLElement[])
+        .find((el) => el.textContent?.trim() === "95" && el.className.includes("JetBrains"));
+      const setScore = (fraction: number) => {
+        if (scoreEl) scoreEl.textContent = String(Math.round(fraction * 95));
+      };
+
+      const summaryP = (Array.from(aiSummaryCard.querySelectorAll("p")) as HTMLElement[])
+        .find((el) => el.textContent?.includes("immediate containment"));
+      if (summaryP) {
+        // Collect all text nodes in order + their full text.
+        const walker = document.createTreeWalker(summaryP, NodeFilter.SHOW_TEXT);
+        const parts: { node: Text; text: string }[] = [];
+        let tn = walker.nextNode();
+        while (tn) { parts.push({ node: tn as Text, text: tn.nodeValue ?? "" }); tn = walker.nextNode(); }
+        const totalChars = parts.reduce((s, p) => s + p.text.length, 0);
+
+        // Reserve the final height so content below doesn't jump while typing.
+        summaryP.style.minHeight = summaryP.offsetHeight + "px";
+
+        const cursor = document.createElement("span");
+        cursor.className = "fp-type-cursor";
+
+        let typeTimer: number | undefined;
+        const applyShown = (shown: number) => {
+          let remaining = shown;
+          for (const p of parts) {
+            if (remaining <= 0) { p.node.nodeValue = ""; continue; }
+            if (remaining >= p.text.length) { p.node.nodeValue = p.text; remaining -= p.text.length; }
+            else { p.node.nodeValue = p.text.slice(0, remaining); remaining = 0; }
+          }
+        };
+
+        typeSummaryRef.current = () => {
+          if (typeTimer) window.clearInterval(typeTimer);
+          applyShown(0);
+          setScore(0);
+          if (!cursor.parentNode) summaryP.appendChild(cursor);
+          let shown = 0;
+          const CHARS_PER_TICK = 4; // ~250 chars/sec — fast but readable
+          const TICK_MS = 16;
+          typeTimer = window.setInterval(() => {
+            shown = Math.min(shown + CHARS_PER_TICK, totalChars);
+            applyShown(shown);
+            setScore(shown / totalChars); // count the score in lockstep with the text
+            summaryP.appendChild(cursor); // keep cursor after the revealed text
+            if (shown >= totalChars) {
+              window.clearInterval(typeTimer);
+              typeTimer = undefined;
+              setScore(1);
+              window.setTimeout(() => cursor.remove(), 500);
+            }
+          }, TICK_MS);
+        };
+
+        // Start hidden until the panel first opens.
+        applyShown(0);
+        setScore(0);
+      }
     }
 
     // "Behavior anomaly" → scroll to "Why this severity" section (2nd child of Frame72 = sections[0])
@@ -1491,7 +1566,7 @@ function LiveDemo() {
           boxShadow: open ? "-24px 0 70px rgba(15,23,42,0.28)" : "none",
         }}
       >
-        <IncidentDetailPane onViewFiles={() => setShowFiles(true)} />
+        <IncidentDetailPane onViewFiles={() => setShowFiles(true)} open={open} />
       </div>
 
       {/* Downloaded Files drill-down: dim backdrop + right-side panel (over the incident drawer) */}
