@@ -741,7 +741,7 @@ function Container6() {
         <span className="font-['Heebo:Regular',sans-serif] leading-[22px] text-[12px]">{` of `}</span>
         <span className="[text-underline-position:from-font] decoration-from-font decoration-solid font-['Heebo:Regular',sans-serif] leading-[22px] text-[#607aff] text-[12px] underline">{`sensitive customer financial data `}</span>
         <span className="font-['Heebo:Regular',sans-serif] leading-[22px] text-[12px]">{`— roughly `}</span>
-        <span className="font-['Heebo:Bold',sans-serif] font-bold leading-[22px] text-[#ec2a3f] text-[12px]">{`250× her typical daily volume `}</span>
+        <span className="font-['Heebo:Bold',sans-serif] font-bold leading-[22px] text-[#ec2a3f] text-[12px]">{`125× her typical daily volume `}</span>
         <span className="font-['Heebo:Regular',sans-serif] leading-[22px] text-[12px]">{`— from the corporate Cloud Drive. The transfer originated from an `}</span>
         <span className="font-['Heebo:SemiBold',sans-serif] font-semibold leading-[22px] text-[12px] text-black">unmanaged Windows 11 device</span>
         <span className="font-['Heebo:Regular',sans-serif] leading-[22px] text-[12px]">{` seen for the first time tonight, connecting from a `}</span>

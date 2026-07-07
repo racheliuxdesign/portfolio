@@ -1788,24 +1788,24 @@ function TopNav({ tab, onTab }: { tab: TopTab; onTab: (t: TopTab) => void }) {
 
 // Shared editorial building blocks ------------------------------------------------
 
-function CaseH2({ n, title }: { n: string; title: string }) {
+function CaseH2({ n, title, id }: { n: string; title: string; id?: string }) {
   return (
-    <div style={{ display: "flex", alignItems: "baseline", gap: 18, margin: "56px 0 22px" }}>
+    <div id={id ? `case-h-${id}` : undefined} style={{ display: "flex", alignItems: "baseline", gap: 18, margin: "56px 0 22px", scrollMarginTop: 24 }}>
       <span style={{ fontFamily: F.extrabold, fontSize: 15, color: "#607aff", letterSpacing: "0.08em", flexShrink: 0 }}>{n}</span>
       <h2 style={{ fontFamily: F.extrabold, fontSize: 27, color: "#0f172a", margin: 0 }}>{title}</h2>
     </div>
   );
 }
 
-function CaseH3({ children }: { children: React.ReactNode }) {
+function CaseH3({ children, id }: { children: React.ReactNode; id?: string }) {
   return (
-    <h3 style={{ fontFamily: F.bold, fontSize: 17.5, color: "#0f172a", margin: "30px 0 10px" }}>{children}</h3>
+    <h3 id={id ? `case-h-${id}` : undefined} style={{ fontFamily: F.bold, fontSize: 17.5, color: "#0f172a", margin: "30px 0 10px", scrollMarginTop: 24 }}>{children}</h3>
   );
 }
 
-function CaseH4({ children }: { children: React.ReactNode }) {
+function CaseH4({ children, id }: { children: React.ReactNode; id?: string }) {
   return (
-    <h4 style={{ fontFamily: F.bold, fontSize: 14.5, color: "#0f172a", margin: "20px 0 8px", letterSpacing: "0.01em" }}>{children}</h4>
+    <h4 id={id ? `case-h-${id}` : undefined} style={{ fontFamily: F.bold, fontSize: 14.5, color: "#0f172a", margin: "20px 0 8px", letterSpacing: "0.01em", scrollMarginTop: 24 }}>{children}</h4>
   );
 }
 
@@ -1950,9 +1950,155 @@ function CasePic({ label, ratio = "16/9", src, video }: { label: string; ratio?:
   );
 }
 
-function CaseStudyPresentation({ onViewDemo }: { onViewDemo: () => void }) {
+// ── Floating table of contents for the case study (auto-updates on scroll) ────
+type TocChild = { id: string; label: string };
+type TocSection = { id: string; n: string; title: string; children: TocChild[] };
+
+const CASE_TOC: TocSection[] = [
+  { id: "goal", n: "01", title: "The Goal of the Details Pane", children: [] },
+  {
+    id: "solution", n: "02", title: "The Solution & Work Process", children: [
+      { id: "essence", label: "Getting the essence" },
+      { id: "confidence", label: "Confidence through transparency" },
+      { id: "ask-anything", label: "The “Ask Anything” assistant" },
+      { id: "next-action", label: "Reducing decision friction" },
+    ],
+  },
+  {
+    id: "supportive", n: "03", title: "Supportive Data", children: [
+      { id: "sd-user", label: "User" },
+      { id: "sd-devices", label: "Devices" },
+      { id: "sd-files", label: "Files" },
+    ],
+  },
+  { id: "ai", n: "04", title: "Using AI", children: [] },
+];
+
+const CASE_FLAT: { id: string; level: number; n?: string; label: string }[] = CASE_TOC.flatMap((s) => [
+  { id: s.id, level: 0, n: s.n, label: s.title },
+  ...s.children.map((c) => ({ id: c.id, level: 1, label: c.label })),
+]);
+
+function PresentationTOC({ scrollRef }: { scrollRef: React.RefObject<HTMLDivElement | null> }) {
+  const [active, setActive] = useState(CASE_FLAT[0].id);
+  const [hovered, setHovered] = useState<string | null>(null);
+  const [collapsed, setCollapsed] = useState(false);
+
+  const ACCENT = "#7c3aed";
+  const RAIL = "#e9e9f1";
+
+  useEffect(() => {
+    const sc = scrollRef.current;
+    if (!sc) return;
+    const onScroll = () => {
+      const scTop = sc.getBoundingClientRect().top;
+      let current = CASE_FLAT[0].id;
+      for (const it of CASE_FLAT) {
+        const el = sc.querySelector(`#case-h-${it.id}`) as HTMLElement | null;
+        if (el && el.getBoundingClientRect().top - scTop <= 150) current = it.id;
+      }
+      if (sc.scrollTop + sc.clientHeight >= sc.scrollHeight - 4) {
+        current = CASE_FLAT[CASE_FLAT.length - 1].id;
+      }
+      setActive(current);
+    };
+    onScroll();
+    sc.addEventListener("scroll", onScroll, { passive: true });
+    return () => sc.removeEventListener("scroll", onScroll);
+  }, [scrollRef]);
+
+  const jump = (id: string) => {
+    const sc = scrollRef.current;
+    if (!sc) return;
+    const el = sc.querySelector(`#case-h-${id}`) as HTMLElement | null;
+    if (!el) return;
+    sc.scrollTo({
+      top: sc.scrollTop + el.getBoundingClientRect().top - sc.getBoundingClientRect().top - 20,
+      behavior: "smooth",
+    });
+  };
+
   return (
-    <div style={{ position: "absolute", inset: 0, overflowY: "auto", background: "#f7f8fc", fontFamily: "'Heebo', sans-serif" }}>
+    <nav
+      aria-label="Table of contents"
+      style={{
+        position: "fixed", right: 30, top: 128, zIndex: 40,
+        background: "rgba(255,255,255,0.94)", backdropFilter: "blur(8px)",
+        border: "1px solid #ecedf3", borderRadius: 16, padding: collapsed ? "10px" : "16px 16px 14px",
+        boxShadow: "0 12px 40px rgba(24,20,50,0.10)", width: collapsed ? "auto" : 248, maxWidth: "32vw",
+        maxHeight: "calc(100vh - 190px)", overflowY: "auto",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: collapsed ? 0 : 14 }}>
+        {!collapsed && (
+          <span style={{ fontFamily: F.extrabold, fontSize: 10, letterSpacing: "0.16em", color: "#a6a3c0" }}>ON THIS PAGE</span>
+        )}
+        <button
+          onClick={() => setCollapsed((c) => !c)}
+          aria-label={collapsed ? "Expand contents" : "Collapse contents"}
+          style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 24, height: 24, borderRadius: 8, border: "none", background: collapsed ? "#f2ecfd" : "transparent", color: ACCENT, cursor: "pointer", flexShrink: 0 }}
+        >
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+            {collapsed ? (
+              <path d="M2 3.5h11M2 7.5h11M2 11.5h7" stroke={ACCENT} strokeWidth="1.6" strokeLinecap="round" />
+            ) : (
+              <path d="M9 3L5 7.5 9 12" stroke={ACCENT} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+            )}
+          </svg>
+        </button>
+      </div>
+
+      {!collapsed && (
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          {CASE_FLAT.map((it) => {
+            const isActive = active === it.id;
+            const isHover = hovered === it.id;
+            const border = isActive ? ACCENT : isHover ? "#d3c7f2" : RAIL;
+            const textColor =
+              it.level === 0
+                ? isActive ? "#5b21b6" : isHover ? "#3d3a52" : "#585a70"
+                : isActive ? ACCENT : isHover ? "#585a70" : "#a2a4b8";
+            return (
+              <button
+                key={it.id}
+                onClick={() => jump(it.id)}
+                onMouseEnter={() => setHovered(it.id)}
+                onMouseLeave={() => setHovered(null)}
+                style={{
+                  display: "flex", alignItems: "baseline", gap: 9, width: "100%", textAlign: "left",
+                  background: "transparent", border: "none", cursor: "pointer",
+                  borderLeft: `2px solid ${border}`,
+                  padding: it.level === 0 ? "9px 8px 9px 15px" : "6px 8px 6px 30px",
+                  transition: "border-color 120ms ease, color 120ms ease",
+                }}
+              >
+                {it.level === 0 && (
+                  <span style={{ fontFamily: F.extrabold, fontSize: 10, letterSpacing: "0.04em", color: isActive ? ACCENT : "#c3c1d4", flexShrink: 0 }}>{it.n}</span>
+                )}
+                <span
+                  style={{
+                    fontFamily: it.level === 0 ? (isActive ? F.bold : F.semibold) : isActive ? F.semibold : F.medium,
+                    fontSize: it.level === 0 ? 13 : 12,
+                    lineHeight: 1.35, color: textColor,
+                  }}
+                >
+                  {it.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </nav>
+  );
+}
+
+
+function CaseStudyPresentation({ onViewDemo }: { onViewDemo: () => void }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  return (
+     <div ref={scrollRef} style={{ position: "absolute", inset: 0, overflowY: "auto", background: "#f7f8fc", fontFamily: "'Heebo', sans-serif" }}>
+      <PresentationTOC scrollRef={scrollRef} />
       {/* Hero */}
       <div
         style={{
@@ -1989,7 +2135,7 @@ function CaseStudyPresentation({ onViewDemo }: { onViewDemo: () => void }) {
       <div style={{ maxWidth: 860, margin: "0 auto", padding: "18px 40px 100px" }}>
 
         {/* 01 — The Goal ------------------------------------------------------ */}
-        <CaseH2 n="01" title="The Goal of the Details Pane" />
+        <CaseH2 n="01" title="The Goal of the Details Pane" id="goal" />
         <CaseP>
           The goal of the details pane is to allow the user to make a verdict in 5 seconds. I wanted to achieve that by:
         </CaseP>
@@ -2002,9 +2148,9 @@ function CaseStudyPresentation({ onViewDemo }: { onViewDemo: () => void }) {
         />
 
         {/* 02 — The Solution & Work Process ----------------------------------- */}
-        <CaseH2 n="02" title="The Solution & Work Process" />
+        <CaseH2 n="02" title="The Solution & Work Process" id="solution" />
 
-        <CaseH3>Getting the essence of the most significant information — very short and focused</CaseH3>
+        <CaseH3 id="essence">Getting the essence of the most significant information — very short and focused</CaseH3>
         <CaseP>
           This part of the details pane was the most challenging. I constantly changed the content and hierarchy
           (see the trade-off examples). I kept asking myself: what are the absolute minimum things the user needs
@@ -2048,7 +2194,7 @@ function CaseStudyPresentation({ onViewDemo }: { onViewDemo: () => void }) {
         <CaseH4>Some Designs I Experimented With (Trade-off)</CaseH4>
         <CasePic label="Trade-off examples explored for content & hierarchy" ratio="16/10" src={tradeoffsImg} />
 
-        <CaseH3>Giving users confidence in the system's conclusion through transparency</CaseH3>
+        <CaseH3 id="confidence">Giving users confidence in the system's conclusion through transparency</CaseH3>
         <CaseP>I wanted users to trust the system, not just accept its verdict.</CaseP>
         <CaseP>
           To achieve that, I broke the score into the different signals that contributed to it. By showing the
@@ -2107,7 +2253,7 @@ function CaseStudyPresentation({ onViewDemo }: { onViewDemo: () => void }) {
           </div>
         </div>
 
-        <CaseH3>Integrating the “Ask Anything” AI assistant (floating component)</CaseH3>
+        <CaseH3 id="ask-anything">Integrating the “Ask Anything” AI assistant (floating component)</CaseH3>
         <CaseP>
           When a user clicks an “Ask anything” button, a floating chat component appears. The chat automatically
           carries the context in which the button was clicked, so users never have to describe or re-type that
@@ -2131,7 +2277,7 @@ function CaseStudyPresentation({ onViewDemo }: { onViewDemo: () => void }) {
           Defining how and where the component is used, however, sits well within it.
         </CaseP>
 
-        <CaseH3>The user shouldn't have to think about the next action</CaseH3>
+        <CaseH3 id="next-action">The user shouldn't have to think about the next action</CaseH3>
         <CaseP>This section also went through many iterations.</CaseP>
         <CaseList
           items={[
@@ -2177,7 +2323,7 @@ function CaseStudyPresentation({ onViewDemo }: { onViewDemo: () => void }) {
         <CasePic label="Expandable recommendation card, revealing actions & consequences" ratio="16/9" src={expandableCardImg} />
 
         {/* 03 — Supportive Data ------------------------------------------------ */}
-        <CaseH2 n="03" title="Supportive Data" />
+        <CaseH2 n="03" title="Supportive Data" id="supportive" />
         <CaseP>This section also required several design decisions. I asked myself:</CaseP>
         <CaseQuote>What information helps users determine whether this incident is true or false, without overwhelming the main summary?</CaseQuote>
         <CaseP>
@@ -2192,7 +2338,7 @@ function CaseStudyPresentation({ onViewDemo }: { onViewDemo: () => void }) {
           ]}
         />
 
-        <CaseH4>User</CaseH4>
+        <CaseH4 id="sd-user">User</CaseH4>
         <CaseP>
           I chose to present Sarah's information as a card focused on her normal behavior rather than simply
           listing profile details. This makes it much easier to understand why the current activity is considered
@@ -2200,14 +2346,14 @@ function CaseStudyPresentation({ onViewDemo }: { onViewDemo: () => void }) {
         </CaseP>
         <CasePic label="Sarah Chen's normal-behavior profile card" ratio="16/9" src={userProfileCardImg} />
 
-        <CaseH4>Devices</CaseH4>
+        <CaseH4 id="sd-devices">Devices</CaseH4>
         <CaseP>
           I presented the devices in a table because tables are great for scanning, comparing information, and
           scaling to many items without becoming overwhelming.
         </CaseP>
         <CasePic label="Associated devices table" ratio="16/9" src={devicesTableImg} />
 
-        <CaseH4>Files</CaseH4>
+        <CaseH4 id="sd-files">Files</CaseH4>
         <CaseP>
           For the stolen files, I deliberately avoided placing them directly in the main details pane. A long file
           list can consume a lot of valuable screen space, especially for users who don't need it.
@@ -2228,7 +2374,7 @@ function CaseStudyPresentation({ onViewDemo }: { onViewDemo: () => void }) {
         <CasePic label="Downloaded files side panel" ratio="16/9" src={downloadedFilesPanelImg} />
 
         {/* 04 — Reflection ------------------------------------------------------ */}
-        <CaseH2 n="04" title="Using AI" />
+        <CaseH2 n="04" title="Using AI" id="ai" />
         <CaseP>
           This project was especially interesting because it combined UX challenges with technical challenges while
           I was also evolving the way I work with AI.
