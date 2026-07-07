@@ -1603,10 +1603,26 @@ function TopNav({ tab, onTab }: { tab: TopTab; onTab: (t: TopTab) => void }) {
     { id: "demo", label: "Live Demo" },
     { id: "presentation", label: "Case Study Presentation" },
   ];
+
+  const [justMounted, setJustMounted] = useState(true);
+  useEffect(() => {
+    const style = document.createElement("style");
+    style.textContent = `
+      @keyframes navTabFlash {
+        0% { box-shadow: 0 4px 14px rgba(229,36,42,0.4), 0 0 0 0 rgba(255,255,255,0.6); }
+        70% { box-shadow: 0 4px 14px rgba(229,36,42,0.4), 0 0 0 12px rgba(255,255,255,0); }
+        100% { box-shadow: 0 4px 14px rgba(229,36,42,0.4), 0 0 0 0 rgba(255,255,255,0); }
+      }
+    `;
+    document.head.appendChild(style);
+    const t = window.setTimeout(() => setJustMounted(false), 750);
+    return () => { style.remove(); window.clearTimeout(t); };
+  }, []);
+
   return (
     <div
       style={{
-        height: 60, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "space-between",
+        height: 60, flexShrink: 0, display: "flex", alignItems: "center", position: "relative",
         padding: "0 26px", background: "#0f172a", borderBottom: "1px solid rgba(255,255,255,0.06)",
         fontFamily: "'Heebo', sans-serif", zIndex: 10,
       }}
@@ -1622,8 +1638,8 @@ function TopNav({ tab, onTab }: { tab: TopTab; onTab: (t: TopTab) => void }) {
         <span style={{ fontFamily: F.bold, fontSize: 16, color: "#fff", letterSpacing: "-0.2px" }}>Racheli's Home Assignment</span>
       </div>
 
-      {/* Tabs */}
-      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+      {/* Tabs — centered in the header regardless of brand width */}
+      <div style={{ display: "flex", alignItems: "center", gap: 6, position: "absolute", left: "50%", top: "50%", transform: "translate(-50%, -50%)" }}>
         {tabs.map((t) => {
           const active = tab === t.id;
           return (
@@ -1633,13 +1649,12 @@ function TopNav({ tab, onTab }: { tab: TopTab; onTab: (t: TopTab) => void }) {
               style={{
                 border: "none", cursor: "pointer",
                 background: active ? "#e5242a" : "transparent",
-                color: active ? "#fff" : "#94a3b8",
+                color: "#fff",
                 fontFamily: active ? F.bold : F.semibold, fontSize: 14,
                 padding: "9px 18px", borderRadius: 9, transition: "background 0.15s, color 0.15s",
                 boxShadow: active ? "0 4px 14px rgba(229,36,42,0.4)" : "none",
+                animation: active && justMounted ? "navTabFlash 0.75s ease-out" : "none",
               }}
-              onMouseEnter={(e) => { if (!active) (e.currentTarget as HTMLButtonElement).style.color = "#cbd5e1"; }}
-              onMouseLeave={(e) => { if (!active) (e.currentTarget as HTMLButtonElement).style.color = "#94a3b8"; }}
             >
               {t.label}
             </button>
