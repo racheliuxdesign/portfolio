@@ -1,0 +1,78 @@
+BiltOn | Senior Product Designer
+Home Assignment: Permit to Work (PTW)
+
+Objective
+Design and present a prototype for the Permit to Work (PTW) workflow on a construction site — specifically the two roles at the heart of the process: the Foreman who requests a permit for hazardous work, and the Site Official who reviews and approves it.
+
+We are not looking for pixel-perfect UI or our exact visual language. We want to see how you think about UX: how you take a complex, high-stakes, real-world safety process and turn it into an experience that is simple enough for a foreman standing in the field on a phone, and trustworthy enough for a safety officer who is legally accountable for the decision.
+Assignment Overview
+Create a working prototype (using any web-based prototyping or AI / vibe-coding tool you like — Figma, Figma Make, MagicPatterns, Claude, etc.) that demonstrates the PTW Create → Approve loop, plus a short slide deck that explains your solution and your thinking.
+
+Your prototype should cover two connected flows:
+
+Foreman — Create & Submit a permit (mobile). Select permit type, fill the required form, set time and location, submit for approval.
+Site Official — Review & Decide (mobile). Open the pending request, review it, and either Approve, send back as Changes Required, or Reject — with the ability to leave a comment.
+
+You choose the fidelity, the number of screens, and which details to emphasize. Depth of thinking matters more than coverage.
+Time Allocation
+About 3 hours total
+
+
+
+Background: What Is a Permit to Work?
+A Permit to Work (PTW) is a formal authorization system for high-risk activities on construction and industrial sites. Before hazardous work begins — welding (hot work), confined-space entry, electrical isolation, work at height — a permit must be requested, reviewed, and approved by a designated authority. It documents that the right precautions are in place, who authorized the work, and what happens when it is done.
+
+A PTW is three things at once: a safety gate, a compliance record, and an accountability mechanism. When something goes wrong on a site, the permit trail is the first thing regulators and insurers examine.
+
+The problem today: most sites still run PTW on paper or spreadsheets. That means no real-time visibility into active hazardous work, approval bottlenecks when the safety officer isn't physically on-site, and no defensible audit trail when an incident occurs. BiltOn already has the workers, foremen, and safety roles in the system — so we can offer a permit experience that works from day one, on the phone, in the field.
+
+
+
+Feature Requirements (scoped to this assignment)
+The full PTW feature is large. For this assignment we have deliberately narrowed the scope to the Create + Approval loop. The requirements below are written as simple user stories; a short "out of scope" list follows.
+Roles in scope
+Foreman (Requester) — a subcontractor's crew lead. On mobile, in the field. Creates and submits permit requests, and revises them if changes are requested.
+Site Official (Approver) — safety officer or site manager. Reviews pending requests and decides. Legally accountable for the approval.
+The PTW feature builds on the platform's Custom-Forms system
+You do not need to design a form builder. BiltOn already has a custom-forms system: a set of reusable form components that can be composed together and applied to different features across the platform. Each form is defined by a JSON configuration.
+When a feature also needs a fixed set of data fields, those fields are built into the feature itself — separate from, and in addition to, its custom form.
+Your design focus is the experience of this existing form inside the permit flow.
+User stories — Foreman (Create & Submit)
+As a foreman, I want to create and submit a permit request from my phone so that I can get authorization for hazardous work without returning to the site office.
+As a foreman, I want to select the permit type so that the correct form and required information are loaded for that kind of work.
+As a foreman, I want to complete the permit's digital form so that all the details the approver needs are captured.
+As a foreman, I want to set the start and end date & time so that the work is clearly scoped in time.
+As a foreman, I want to set the location of the job so that the approver and the site team know where the hazardous work will happen.
+As a foreman, I want to save a permit as a draft before submitting so that I can finish it later if I am interrupted.
+As a foreman, I want each permit to receive a site-level serial number so that everyone can refer to it easily.
+As a foreman, I want to revise and resubmit a permit that was returned as "Changes Required" so that it can be approved.
+As a foreman, I want to be notified when my permit is approved, rejected, or returned for changes so that I know when I can start work or what to fix.
+User stories — Site Official (Review & Decide)
+As a site official, I want to be notified when a new permit is submitted so that I can review it promptly.
+As a site official, I want to see all permits waiting for my approval so that I know what needs my attention.
+As a site official, I want to open a pending permit and review its full content so that I can make an informed decision.
+As a site official, I want to approve a permit, optionally adding a comment and/or signature, so that authorized work can begin and my decision is documented.
+As a site official, I want to return a permit as "Changes Required" with a comment so that the foreman knows what to fix before resubmitting.
+As a site official, I want to reject an invalid permit, optionally with a reason, so that the request is formally denied.
+Out of scope (do not build — but feel free to mention)
+Building or configuring the form system itself, closure / work-completed flow, expiry handling, audit-log screens, reporting / export, back-office setup, offline sync mechanics, web dashboard, site maps / SIMOPS, AI risk assessment, uploading an existing PDF permit. Reference them in your slides if they influence your design decisions, but no need to prototype them.
+
+
+What to Deliver
+A working prototype covering the two flows above. Any tool is fine.
+A short slide deck (5–10 slides) that walks us through your thinking.
+
+What to Present (Live Session, ~30 minutes)
+Your understanding of PTW. What a Permit to Work is and why it matters for site safety and operations. Who the two users are and what each one actually needs.
+Research & insights. What you learned while getting up to speed on this domain.
+Product & UX decisions. Walk us through the prototype. Explain your key UX choices and the logic behind them. How does your solution improve on the current process?
+What you'd improve with more time — and what you'd want to validate with real users.
+
+As a reference, here is a prototype created by MagicPatterns using this document as the input: https://project-permit-to-work-workflow-967.magicpatterns.app
+We expect the submitted output to be meaningfully better :)
+
+Feel free to ask any clarifying questions if something is unclear.
+Good luck! 
+
+
+

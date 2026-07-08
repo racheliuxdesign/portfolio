@@ -1,0 +1,925 @@
+/* =========================================================================
+   BiltOn — Permit to Work (PTW) prototype logic
+   Vanilla JS. No dependencies. Persists to localStorage. Runs on file://.
+   ========================================================================= */
+(function () {
+  "use strict";
+
+  /* ----------------------------------------------------------------------
+     1. Domain: permit types + the platform's composable JSON form schemas
+     The "custom form" is defined by JSON config per permit type. Rendering
+     it generically demonstrates the reusable custom-forms system — separate
+     from the feature's fixed fields (type, location, time, serial…).
+  ---------------------------------------------------------------------- */
+  var TYPES = {
+    hot: { id:"hot", name:"Hot Work", icon:"🔥", tagline:"Welding · cutting · grinding", color:"var(--hot)", bg:"var(--hot-bg)" },
+    confined: { id:"confined", name:"Confined Space", icon:"🕳️", tagline:"Tanks · pits · sumps", color:"var(--conf)", bg:"var(--conf-bg)" },
+    electrical: { id:"electrical", name:"Electrical Isolation", icon:"⚡", tagline:"LOTO · live systems", color:"var(--elec)", bg:"var(--elec-bg)" },
+    height: { id:"height", name:"Work at Height", icon:"🪜", tagline:"Scaffold · MEWP · rope", color:"var(--height)", bg:"var(--height-bg)" }
+  };
+
+  // Each schema: groups -> fields. Field types: text, number, textarea,
+  // select, single (choice pills), yesno, checklist.
+  var SCHEMAS = {
+    hot: [
+      { title:"Fire safety", icon:"🔥", fields:[
+        { id:"method", label:"Hot work method", type:"single", required:true, options:["Welding","Cutting","Grinding","Brazing"] },
+        { id:"fireWatch", label:"Trained fire watch assigned?", type:"yesno", required:true },
+        { id:"watchDuration", label:"Fire watch after work stops", type:"select", options:["30 minutes","60 minutes"], hint:"Standard is 60 min for structural steel." },
+        { id:"extinguisher", label:"Extinguisher within 8 m of work?", type:"yesno", required:true }
+      ]},
+      { title:"Area preparation", icon:"🧯", fields:[
+        { id:"prep", label:"Confirm precautions in place", type:"checklist", required:true, options:[
+          "Combustibles removed or fire-blanketed","Floor & wall openings sealed","Sprinklers / detection operational","Atmosphere gas-tested"] },
+        { id:"gasReading", label:"Gas test reading", type:"text", placeholder:"e.g. 0% LEL", hint:"Leave blank if not applicable." },
+        { id:"hazards", label:"Adjacent hazards & extra precautions", type:"textarea", placeholder:"e.g. fuel line 4 m east — shielded with fire blanket." }
+      ]}
+    ],
+    confined: [
+      { title:"Atmosphere test", icon:"🧪", fields:[
+        { id:"o2", label:"Oxygen (O₂)  %", type:"number", required:true, placeholder:"19.5 – 23.5", hint:"Safe range 19.5–23.5%." },
+        { id:"lel", label:"Flammable gas  % LEL", type:"number", required:true, placeholder:"0" },
+        { id:"h2s", label:"Hydrogen sulphide  ppm", type:"number", placeholder:"0" }
+      ]},
+      { title:"Entry controls", icon:"🛟", fields:[
+        { id:"ventilation", label:"Continuous forced ventilation?", type:"yesno", required:true },
+        { id:"attendant", label:"Standby attendant (name)", type:"text", required:true, placeholder:"Full name of hole-watch" },
+        { id:"comms", label:"Attendant ↔ entrant comms", type:"single", options:["Two-way radio","Voice","Rope signal"] },
+        { id:"rescue", label:"Rescue plan briefed to all?", type:"yesno", required:true }
+      ]}
+    ],
+    electrical: [
+      { title:"Isolation", icon:"🔌", fields:[
+        { id:"voltage", label:"System voltage", type:"single", required:true, options:["LV  (<1 kV)","HV  (≥1 kV)"] },
+        { id:"point", label:"Isolation point / panel ID", type:"text", required:true, placeholder:"e.g. Panel DB-4, breaker 12" },
+        { id:"loto", label:"Lock-out / Tag-out applied?", type:"yesno", required:true },
+        { id:"padlock", label:"LOTO padlock / tag ID", type:"text", placeholder:"e.g. RED-217" }
+      ]},
+      { title:"Verification", icon:"✅", fields:[
+        { id:"provedDead", label:"Proved dead after isolation?", type:"yesno", required:true },
+        { id:"earthing", label:"Earthing / bonding applied?", type:"yesno" },
+        { id:"notes", label:"Isolation notes", type:"textarea", placeholder:"Circuits affected, downstream loads…" }
+      ]}
+    ],
+    height: [
+      { title:"Access & fall protection", icon:"🪜", fields:[
+        { id:"height", label:"Working height (m)", type:"number", required:true, placeholder:"e.g. 24" },
+        { id:"access", label:"Access method", type:"single", required:true, options:["Scaffold","MEWP","Ladder","Rope access"] },
+        { id:"fall", label:"Fall-protection measures", type:"checklist", required:true, options:[
+          "Full-body harness & lanyard","Guardrails / edge protection","Anchor points inspected","Exclusion zone below cordoned"] }
+      ]},
+      { title:"Conditions", icon:"🌦️", fields:[
+        { id:"weather", label:"Weather suitable (wind < 38 km/h)?", type:"yesno", required:true },
+        { id:"notes", label:"Site-specific notes", type:"textarea", placeholder:"Overhead lines, public below, drop zones…" }
+      ]}
+    ]
+  };
+
+  var SITE = { code:"NX7", name:"Nexus Tower · Block A" };
+
+  var STATUS = {
+    draft:            { label:"Draft",            icon:"✎" },
+    pending:          { label:"Pending approval", icon:"⏳" },
+    approved:         { label:"Approved",         icon:"✓" },
+    changes_required: { label:"Changes required", icon:"↩" },
+    rejected:         { label:"Rejected",         icon:"✕" }
+  };
+
+  var USERS = {
+    foreman: { name:"Marcus Reid", org:"Steelfix — Structural Crew", initials:"MR" },
+    official:{ name:"Dana Osei",   org:"HSE Officer · Site Authority", initials:"DO" }
+  };
+
+  /* ----------------------------------------------------------------------
+     2. State + persistence
+  ---------------------------------------------------------------------- */
+  var LS_KEY = "biltonPTW_v1";
+  var state;
+
+  function nowShift(mins) { var d = new Date(Date.now() + mins*60000); return isoLocal(d); }
+  function isoLocal(d) {
+    var p = function(n){ return (n<10?"0":"")+n; };
+    return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())+"T"+p(d.getHours())+":"+p(d.getMinutes());
+  }
+
+  function seed() {
+    var seq = 138;
+    var permits = [];
+
+    permits.push({
+      id:"p1", serial:serialFor(138), typeId:"hot", status:"approved",
+      title:"Handrail welding — Level 3 core", zone:"Level 3 · Core", detail:"North stair landing, grid B2",
+      start:nowShift(-180), end:nowShift(-30), workers:2,
+      description:"Weld safety handrail brackets to structural steel around stair void.",
+      form:{ method:"Welding", fireWatch:"yes", watchDuration:"60 minutes", extinguisher:"yes",
+             prep:["Combustibles removed or fire-blanketed","Floor & wall openings sealed","Sprinklers / detection operational","Atmosphere gas-tested"],
+             gasReading:"0% LEL", hazards:"Timber formwork 3 m below — covered with fire blanket." },
+      createdBy:"foreman", createdByName:USERS.foreman.name, createdAt:nowShift(-260),
+      history:[
+        { action:"created", actor:USERS.foreman.name, at:nowShift(-260) },
+        { action:"submitted", actor:USERS.foreman.name, at:nowShift(-255) },
+        { action:"approved", actor:USERS.official.name, at:nowShift(-250), comment:"Fire watch confirmed. Approved — keep extinguisher staged." }
+      ],
+      decision:{ action:"approved", by:USERS.official.name, at:nowShift(-250), comment:"Fire watch confirmed. Approved — keep extinguisher staged." }
+    });
+
+    permits.push({
+      id:"p2", serial:serialFor(139), typeId:"confined", status:"pending",
+      title:"Sump inspection — Basement B2", zone:"Basement B2", detail:"Drainage sump, grid C4",
+      start:nowShift(75), end:nowShift(225), workers:2,
+      description:"Enter drainage sump to inspect pump seals and clear silt.",
+      form:{ o2:"20.9", lel:"0", h2s:"3", ventilation:"yes", attendant:"R. Mokoena", comms:"Two-way radio", rescue:"yes" },
+      createdBy:"foreman", createdByName:"Luis Ferreira", createdByOrg:"Hydroline — Utilities", createdAt:nowShift(-12),
+      history:[
+        { action:"created", actor:"Luis Ferreira", at:nowShift(-15) },
+        { action:"submitted", actor:"Luis Ferreira", at:nowShift(-12) }
+      ],
+      decision:null
+    });
+
+    permits.push({
+      id:"p3", serial:serialFor(140), typeId:"height", status:"pending",
+      title:"Facade anchor install — East elevation", zone:"East facade · L8", detail:"Rope-access drops 8–12",
+      start:nowShift(38), end:nowShift(280), workers:3,
+      description:"Install permanent facade maintenance anchors on east elevation via rope access.",
+      form:{ height:"31", access:"Rope access",
+             fall:["Full-body harness & lanyard","Anchor points inspected","Exclusion zone below cordoned"],
+             weather:"yes", notes:"Public footpath below — spotter and hoarding in place from 09:00." },
+      createdBy:"foreman", createdByName:"Priya Nair", createdByOrg:"Apex Access", createdAt:nowShift(-4),
+      history:[
+        { action:"created", actor:"Priya Nair", at:nowShift(-6) },
+        { action:"submitted", actor:"Priya Nair", at:nowShift(-4) }
+      ],
+      decision:null
+    });
+
+    permits.push({
+      id:"p4", serial:serialFor(141), typeId:"electrical", status:"changes_required",
+      title:"Panel DB-4 shutdown — Level 2", zone:"Level 2 · Riser 3", detail:"Distribution board DB-4",
+      start:nowShift(120), end:nowShift(300), workers:1,
+      description:"Isolate DB-4 to re-terminate feeder cables for the L2 lighting circuit.",
+      form:{ voltage:"LV  (<1 kV)", point:"Panel DB-4", loto:"yes", padlock:"", provedDead:"", earthing:"no",
+             notes:"Feeder from main switchboard, circuit 7." },
+      createdBy:"foreman", createdByName:USERS.foreman.name, createdAt:nowShift(-90),
+      history:[
+        { action:"created", actor:USERS.foreman.name, at:nowShift(-95) },
+        { action:"submitted", actor:USERS.foreman.name, at:nowShift(-90) },
+        { action:"changes_required", actor:USERS.official.name, at:nowShift(-70),
+          comment:"Can't approve yet: add the LOTO padlock/tag ID and confirm the circuit was proved dead after isolation. Also apply earthing before re-termination." }
+      ],
+      decision:{ action:"changes_required", by:USERS.official.name, at:nowShift(-70),
+        comment:"Can't approve yet: add the LOTO padlock/tag ID and confirm the circuit was proved dead after isolation. Also apply earthing before re-termination." }
+    });
+
+    state = {
+      role:"foreman",
+      screen:{ name:"home" },
+      seq:142,
+      permits:permits,
+      draft:null,
+      createStep:0,
+      notif:{
+        foreman:[
+          { id:"n1", at:nowShift(-70), unread:true, permitId:"p4", kind:"changes_required", text:"Changes required on "+serialFor(141)+" — Dana Osei left a comment." },
+          { id:"n2", at:nowShift(-250), unread:false, permitId:"p1", kind:"approved", text:serialFor(138)+" approved by Dana Osei." }
+        ],
+        official:[
+          { id:"n3", at:nowShift(-4),  unread:true, permitId:"p3", kind:"submitted", text:"New permit "+serialFor(140)+" — Work at Height — needs review." },
+          { id:"n4", at:nowShift(-12), unread:true, permitId:"p2", kind:"submitted", text:"New permit "+serialFor(139)+" — Confined Space — needs review." }
+        ]
+      }
+    };
+    save();
+  }
+
+  function serialFor(n) {
+    var yy = String(new Date().getFullYear()).slice(2);
+    return "PTW-"+SITE.code+"-"+yy+"-"+String(n).padStart(4,"0");
+  }
+
+  function save() { try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch(e){} }
+  function load() {
+    try {
+      var raw = localStorage.getItem(LS_KEY);
+      if (raw) { state = JSON.parse(raw); return true; }
+    } catch(e){}
+    return false;
+  }
+  function resetDemo() { localStorage.removeItem(LS_KEY); seed(); go("home"); toast("Demo data reset","ok"); }
+
+  /* ----------------------------------------------------------------------
+     3. Small utilities
+  ---------------------------------------------------------------------- */
+  var $ = function(sel, root){ return (root||document).querySelector(sel); };
+  function el(id){ return document.getElementById(id); }
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+  function byId(id){ for (var i=0;i<state.permits.length;i++) if (state.permits[i].id===id) return state.permits[i]; return null; }
+
+  var DAYS=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"], MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  function pad(n){ return (n<10?"0":"")+n; }
+  function fmtDT(s){ if(!s) return "—"; var d=new Date(s); return DAYS[d.getDay()]+" "+d.getDate()+" "+MON[d.getMonth()]+" · "+pad(d.getHours())+":"+pad(d.getMinutes()); }
+  function fmtRange(a,b){
+    if(!a) return "—";
+    var da=new Date(a), db=new Date(b);
+    var sameDay = a&&b && da.toDateString()===db.toDateString();
+    if (sameDay) return DAYS[da.getDay()]+" "+da.getDate()+" "+MON[da.getMonth()]+" · "+pad(da.getHours())+":"+pad(da.getMinutes())+" – "+pad(db.getHours())+":"+pad(db.getMinutes());
+    return fmtDT(a)+" → "+fmtDT(b);
+  }
+  function rel(s){
+    var diff = Date.now()-new Date(s).getTime(), m=Math.round(diff/60000);
+    if (m<1) return "just now";
+    if (m<60) return m+" min ago";
+    var h=Math.round(m/60); if (h<24) return h+" h ago";
+    return Math.round(h/24)+" d ago";
+  }
+  function startsIn(s){
+    var diff = new Date(s).getTime()-Date.now(), m=Math.round(diff/60000);
+    if (m<0) { var am=Math.abs(m); return am<60? "started "+am+" min ago" : "started "+Math.round(am/60)+" h ago"; }
+    if (m<60) return "starts in "+m+" min";
+    var h=Math.round(m/60); if (h<24) return "starts in "+h+" h";
+    return "starts in "+Math.round(h/24)+" d";
+  }
+  function isSoon(s){ var diff=new Date(s).getTime()-Date.now(); return diff>0 && diff < 90*60000; }
+
+  /* ----------------------------------------------------------------------
+     4. Navigation + render
+  ---------------------------------------------------------------------- */
+  function go(name, params){ state.screen={ name:name, params:params||{} }; save(); render(); var b=$(".body"); if(b) b.scrollTop=0; }
+
+  var SCREENS = {}; // name -> function(params) => html
+
+  function render() {
+    var s = SCREENS[state.screen.name] || SCREENS.home;
+    el("app").innerHTML = s(state.screen.params || {});
+    afterRender();
+  }
+
+  /* ----- shared chrome ----- */
+  function roleStrip() {
+    var u = USERS[state.role];
+    return '<div class="rolestrip">'
+      + '<div class="avatar">'+u.initials+'</div>'
+      + '<div class="who"><b>'+esc(u.name)+'</b><span>'+esc(u.org)+'</span></div>'
+      + '<button class="rolechip" data-action="switch-role">⇄ '+(state.role==="foreman"?"Foreman":"Site Official")+'</button>'
+      + '</div>';
+  }
+  function bell() {
+    var list = state.notif[state.role], unread = list.filter(function(n){return n.unread;}).length;
+    return '<button class="iconbtn ghost" data-action="notif">🔔'+(unread?'<span class="dot">'+unread+'</span>':'')+'</button>';
+  }
+  function statusChip(st){ var m=STATUS[st]; return '<span class="chip '+st+'"><span class="cdot"></span>'+m.label+'</span>'; }
+  function hazBadge(typeId, size){ var t=TYPES[typeId]; return '<div class="hz" style="background:'+t.bg+';color:'+t.color+'">'+t.icon+'</div>'; }
+
+  /* ======================================================================
+     SCREEN: Home — adapts to role
+  ====================================================================== */
+  SCREENS.home = function(){ return state.role==="foreman" ? foremanHome() : officialHome(); };
+
+  function foremanHome() {
+    var mine = state.permits.filter(function(p){ return p.createdBy==="foreman" && p.createdByName===USERS.foreman.name; });
+    var filter = state.screen.params && state.screen.params.filter || "all";
+    var counts = { all:mine.length };
+    ["draft","pending","changes_required","approved","rejected"].forEach(function(k){ counts[k]=mine.filter(function(p){return p.status===k;}).length; });
+    var shown = filter==="all" ? mine : mine.filter(function(p){return p.status===filter;});
+    // order: action-needed first
+    var rank = { changes_required:0, draft:1, pending:2, approved:3, rejected:4 };
+    shown = shown.slice().sort(function(a,b){ return (rank[a.status]-rank[b.status]) || (new Date(b.createdAt)-new Date(a.createdAt)); });
+
+    var needAction = mine.filter(function(p){return p.status==="changes_required";}).length;
+
+    var chips='';
+    [["all","All"],["changes_required","Changes"],["pending","Pending"],["approved","Approved"],["draft","Drafts"]].forEach(function(f){
+      if (f[0]!=="all" && !counts[f[0]]) return;
+      chips += '<button class="seg '+(filter===f[0]?"active":"")+'" data-action="foreman-filter" data-f="'+f[0]+'">'+f[1]+(counts[f[0]]?'<span class="n">'+counts[f[0]]+'</span>':'')+'</button>';
+    });
+
+    var cards = shown.map(foremanCard).join("");
+    if (!shown.length) cards = '<div class="empty"><div class="ic">📋</div><b>No permits here yet</b><p>Tap <b>New permit</b> to request authorization for hazardous work.</p></div>';
+
+    var actionBanner = needAction ? '<div class="callout changes" data-action="open" data-id="'+changesId(mine)+'"><span class="ci">↩</span><div><b>'+needAction+' permit needs your changes</b>The site official sent it back — tap to fix and resubmit.</div></div>' : '';
+
+    return ''
+      + '<div class="appbar brandbar"><div style="flex:1"><div class="ab-title">My Permits</div><div class="ab-sub">'+esc(SITE.name)+'</div></div>'+bell()+'</div>'
+      + roleStrip()
+      + '<div class="body">'
+      +   actionBanner
+      +   '<div class="segmented">'+chips+'</div>'
+      +   cards
+      +   '<div class="fineprint">Site serial numbers are issued automatically on submit, unique per site.</div>'
+      + '</div>'
+      + '<button class="fab" data-action="new-permit"><span class="plus">＋</span> New permit</button>';
+  }
+  function changesId(list){ var p=list.filter(function(x){return x.status==="changes_required";})[0]; return p?p.id:""; }
+
+  function foremanCard(p){
+    var t=TYPES[p.typeId];
+    return '<div class="permit-card" data-action="open" data-id="'+p.id+'">'
+      + hazBadge(p.typeId)
+      + '<div class="pc-main">'
+      +   '<div class="pc-top"><span class="serial">'+ (p.status==="draft"?"Draft":esc(p.serial)) +'</span>'+statusChip(p.status)+'</div>'
+      +   '<div class="title">'+esc(p.title||t.name)+'</div>'
+      +   '<div class="meta">'
+      +     '<div class="row">📅 '+esc(fmtRange(p.start,p.end))+'</div>'
+      +     '<div class="row">📍 '+esc(p.zone||"Location not set")+'</div>'
+      +   '</div>'
+      + '</div><div class="chev">›</div></div>';
+  }
+
+  function officialHome() {
+    var pending = state.permits.filter(function(p){return p.status==="pending";});
+    pending.sort(function(a,b){ return new Date(a.start)-new Date(b.start); }); // most imminent first
+    var decided = state.permits.filter(function(p){return p.status!=="pending" && p.status!=="draft";});
+    decided.sort(function(a,b){ return new Date(b.decision?b.decision.at:b.createdAt)-new Date(a.decision?a.decision.at:a.createdAt); });
+
+    var tab = state.screen.params && state.screen.params.tab || "queue";
+
+    var body;
+    if (tab==="queue") {
+      var cards = pending.map(officialCard).join("");
+      if (!pending.length) cards = '<div class="empty"><div class="ic">✅</div><b>Queue is clear</b><p>No permits are waiting for your approval right now.</p></div>';
+      body = (pending.length? '<div class="callout info"><span class="ci">⏱️</span><div><b>'+pending.length+' permit'+(pending.length>1?"s":"")+' awaiting your decision</b>Sorted by soonest start time. You are accountable for each approval.</div></div>':'')
+           + cards;
+    } else {
+      var dc = decided.map(officialDecidedCard).join("");
+      if (!decided.length) dc = '<div class="empty"><div class="ic">🗂️</div><b>No decisions yet</b><p>Approved, returned and rejected permits will appear here.</p></div>';
+      body = dc;
+    }
+
+    return ''
+      + '<div class="appbar brandbar"><div style="flex:1"><div class="ab-title">Approvals</div><div class="ab-sub">'+esc(SITE.name)+'</div></div>'+bell()+'</div>'
+      + roleStrip()
+      + '<div class="body">'
+      +   '<div class="segmented">'
+      +     '<button class="seg '+(tab==="queue"?"active":"")+'" data-action="official-tab" data-t="queue">Needs review'+(pending.length?'<span class="n">'+pending.length+'</span>':'')+'</button>'
+      +     '<button class="seg '+(tab==="history"?"active":"")+'" data-action="official-tab" data-t="history">Decided</button>'
+      +   '</div>'
+      +   body
+      + '</div>';
+  }
+
+  function officialCard(p){
+    var t=TYPES[p.typeId], soon=isSoon(p.start);
+    return '<div class="permit-card '+(soon?"soon":"")+'" data-action="open" data-id="'+p.id+'">'
+      + hazBadge(p.typeId)
+      + '<div class="pc-main">'
+      +   '<div class="pc-top"><span class="serial">'+esc(p.serial)+'</span>'+(soon?'<span class="chip changes_required"><span class="cdot"></span>'+esc(startsIn(p.start))+'</span>':'<span class="muted" style="font-size:11.5px;font-weight:600">'+esc(startsIn(p.start))+'</span>')+'</div>'
+      +   '<div class="title">'+esc(p.title||t.name)+'</div>'
+      +   '<div class="meta">'
+      +     '<div class="row">'+t.icon+' '+esc(t.name)+' · 👷 '+esc(p.createdByName)+'</div>'
+      +     '<div class="row">📍 '+esc(p.zone)+'  ·  🕒 submitted '+esc(rel(p.createdAt))+'</div>'
+      +   '</div>'
+      + '</div><div class="chev">›</div></div>';
+  }
+  function officialDecidedCard(p){
+    var t=TYPES[p.typeId];
+    return '<div class="permit-card" data-action="open" data-id="'+p.id+'">'
+      + hazBadge(p.typeId)
+      + '<div class="pc-main">'
+      +   '<div class="pc-top"><span class="serial">'+esc(p.serial)+'</span>'+statusChip(p.status)+'</div>'
+      +   '<div class="title">'+esc(p.title||t.name)+'</div>'
+      +   '<div class="meta"><div class="row">👷 '+esc(p.createdByName)+' · '+(p.decision?esc(rel(p.decision.at)):"")+'</div></div>'
+      + '</div><div class="chev">›</div></div>';
+  }
+
+  /* ======================================================================
+     SCREEN: Type picker (foreman)
+  ====================================================================== */
+  SCREENS.pickType = function(){
+    var cards = Object.keys(TYPES).map(function(k){
+      var t=TYPES[k];
+      return '<button class="type-card" data-action="choose-type" data-type="'+k+'">'
+        + '<div class="ic" style="background:'+t.bg+';color:'+t.color+'">'+t.icon+'</div>'
+        + '<b>'+t.name+'</b><span>'+t.tagline+'</span></button>';
+    }).join("");
+    return ''
+      + '<div class="appbar"><button class="iconbtn" data-action="go" data-to="home">‹</button><div style="flex:1"><div class="ab-title">New Permit</div><div class="ab-sub">Step 1 · Choose work type</div></div></div>'
+      + '<div class="body">'
+      +   '<div class="callout info"><span class="ci">💡</span><div><b>What kind of hazardous work?</b>The type you pick loads the right safety form and required checks.</div></div>'
+      +   '<div class="type-grid">'+cards+'</div>'
+      + '</div>';
+  };
+
+  /* ======================================================================
+     SCREEN: Create form (3 steps) — fixed feature fields + custom JSON form
+  ====================================================================== */
+  SCREENS.create = function(){
+    var d = state.draft, t = TYPES[d.typeId], step = state.createStep;
+    var stepsBar = '<div class="progress-head"><div class="steps">'
+      + [0,1,2].map(function(i){ return '<div class="step '+(i<step?"done":i===step?"active":"")+'"></div>'; }).join("")
+      + '</div><div class="plabel"><span>'+["Permit details","Safety form","Review & submit"][step]+'</span><span>Step '+(step+1)+' of 3</span></div></div>';
+
+    var content = step===0 ? stepDetails(d,t) : step===1 ? stepForm(d,t) : stepReview(d,t);
+
+    var backTo = step===0 ? "pickType" : "create-prev";
+    var editing = d.status==="changes_required" || d.status==="draft";
+    var nextBtn = step<2
+      ? '<button class="btn btn-primary" data-action="create-next">Continue <span>›</span></button>'
+      : (d.revising
+          ? '<button class="btn btn-primary" data-action="resubmit">Resubmit for approval</button>'
+          : '<button class="btn btn-primary" data-action="submit-permit">Submit for approval</button>');
+
+    return ''
+      + '<div class="appbar"><button class="iconbtn" data-action="'+(step===0?"go":"create-prev")+'" data-to="pickType">‹</button>'
+      +   '<div style="flex:1"><div class="ab-title">'+ (d.revising?"Revise permit":"New Permit") +'</div><div class="ab-sub">'+t.icon+' '+esc(t.name)+(d.serial?" · "+esc(d.serial):"")+'</div></div>'
+      +   '<button class="btn btn-ghost sm" data-action="save-draft">Save draft</button></div>'
+      + stepsBar
+      + '<div class="body">'+content+'</div>'
+      + '<div class="actionbar '+(step>0?"two":"")+'">'
+      +   (step>0? '<button class="btn btn-ghost" data-action="create-prev">Back</button>':'')
+      +   nextBtn
+      + '</div>';
+  };
+
+  function stepDetails(d,t){
+    return ''
+      + '<div class="callout info" style="margin-bottom:16px"><span class="ci">'+t.icon+'</span><div><b>'+esc(t.name)+' permit</b>These core details are the same for every permit type.</div></div>'
+      + field("Permit title","text","title",d.title,{ required:true, placeholder:"Short description of the job" })
+      + '<div class="form-group"><div class="fg-head"><span class="fg-ic">📍</span><b>Location</b></div>'
+      +   locationMap(d)
+      +   field("Zone / level","text","zone",d.zone,{ required:true, placeholder:"e.g. Level 3 · Core" })
+      +   field("Specific spot","text","detail",d.detail,{ placeholder:"e.g. North stair landing, grid B2", hint:"Where exactly on site the work happens." })
+      + '</div>'
+      + '<div class="form-group"><div class="fg-head"><span class="fg-ic">🕒</span><b>When</b></div>'
+      +   field("Start","datetime-local","start",d.start,{ required:true })
+      +   field("End","datetime-local","end",d.end,{ required:true })
+      + '</div>'
+      + field("Number of workers","number","workers",d.workers,{ placeholder:"e.g. 2" })
+      + field("Scope of work","textarea","description",d.description,{ placeholder:"What will be done, briefly." });
+  }
+
+  function locationMap(d){
+    return '<div class="map-preview"><div class="pin">📍</div><div class="zone-tag">'+esc(d.zone||"Set the zone below")+'</div></div>'
+      + '<button class="btn btn-outline sm" data-action="use-location" style="margin-bottom:14px">📡 Use my current location</button>';
+  }
+
+  function stepForm(d,t){
+    var schema = SCHEMAS[d.typeId];
+    var groups = schema.map(function(g){
+      var fields = g.fields.map(function(f){ return customField(f, d.form[f.id]); }).join("");
+      return '<div class="form-group"><div class="fg-head"><span class="fg-ic">'+g.icon+'</span><b>'+esc(g.title)+'</b><span class="badge-json">CUSTOM FORM</span></div>'+fields+'</div>';
+    }).join("");
+    return '<div class="callout info" style="margin-bottom:14px"><span class="ci">🧩</span><div><b>'+esc(t.name)+' safety checks</b>This form is loaded from the permit type\'s JSON config — the platform\'s reusable custom-forms system.</div></div>'+groups;
+  }
+
+  /* generic fixed-field renderer */
+  function field(label, type, model, val, opts){
+    opts = opts||{};
+    var req = opts.required ? '<span class="req">*</span>' : '';
+    var hint = opts.hint ? '<div class="hint">'+esc(opts.hint)+'</div>' : '';
+    var control;
+    if (type==="textarea") control='<textarea class="textarea" data-model="'+model+'" placeholder="'+esc(opts.placeholder||"")+'">'+esc(val||"")+'</textarea>';
+    else control='<input class="input" type="'+type+'" data-model="'+model+'" value="'+esc(val==null?"":val)+'" placeholder="'+esc(opts.placeholder||"")+'"/>';
+    return '<div class="field" data-fieldwrap="'+model+'"><label>'+esc(label)+req+'</label>'+hint+control+'<div class="err">Required</div></div>';
+  }
+
+  /* custom (JSON-defined) field renderer */
+  function customField(f, val){
+    var req = f.required ? '<span class="req">*</span>' : '';
+    var hint = f.hint ? '<div class="hint">'+esc(f.hint)+'</div>' : '';
+    var control='';
+    if (f.type==="text"||f.type==="number")
+      control='<input class="input" type="'+(f.type==="number"?"number":"text")+'" data-form="'+f.id+'" value="'+esc(val==null?"":val)+'" placeholder="'+esc(f.placeholder||"")+'"/>';
+    else if (f.type==="textarea")
+      control='<textarea class="textarea" data-form="'+f.id+'" placeholder="'+esc(f.placeholder||"")+'">'+esc(val||"")+'</textarea>';
+    else if (f.type==="select")
+      control='<select class="select" data-form="'+f.id+'"><option value="">Select…</option>'+f.options.map(function(o){return '<option '+(val===o?"selected":"")+'>'+esc(o)+'</option>';}).join("")+'</select>';
+    else if (f.type==="single")
+      control='<div class="choices" data-form-choice="'+f.id+'">'+f.options.map(function(o){return '<button type="button" class="choice '+(val===o?"sel":"")+'" data-val="'+esc(o)+'">'+esc(o)+'</button>';}).join("")+'</div>';
+    else if (f.type==="yesno")
+      control='<div class="choices" data-form-yesno="'+f.id+'">'
+        +'<button type="button" class="choice '+(val==="yes"?"sel yes":"")+'" data-val="yes">✓ Yes</button>'
+        +'<button type="button" class="choice '+(val==="no"?"sel no":"")+'" data-val="no">✕ No</button></div>';
+    else if (f.type==="checklist") {
+      var arr = Array.isArray(val)?val:[];
+      control='<div class="check-list" data-form-check="'+f.id+'">'+f.options.map(function(o){
+        var on=arr.indexOf(o)>=0;
+        return '<div class="check-item '+(on?"on":"")+'" data-val="'+esc(o)+'"><div class="box">'+(on?"✓":"")+'</div><div class="lbl">'+esc(o)+'</div></div>';
+      }).join("")+'</div>';
+    }
+    return '<div class="field" data-fieldwrap="form:'+f.id+'"><label>'+esc(f.label)+req+'</label>'+hint+control+'<div class="err">Required</div></div>';
+  }
+
+  /* ---- Review step ---- */
+  function stepReview(d,t){
+    return '<div class="callout info" style="margin-bottom:14px"><span class="ci">👀</span><div><b>Check before you submit</b>The official reviews exactly what you see here. A site serial number is issued on submit.</div></div>'
+      + permitSummary(d, true);
+  }
+
+  // Full permit summary card used in review + detail
+  function permitSummary(p, isDraft){
+    var t=TYPES[p.typeId];
+    var head = '<div class="sc-head">'+hazBadge(p.typeId)+'<div class="t"><b>'+esc(p.title||t.name)+'</b><span>'+t.icon+' '+esc(t.name)+(isDraft?'':' · '+esc(p.serial))+'</span></div></div>';
+    var core = ''
+      + kv("Location", esc((p.zone||"—")+(p.detail?" · "+p.detail:"")))
+      + kv("When", esc(fmtRange(p.start,p.end)))
+      + kv("Workers", esc(p.workers||"—"))
+      + (p.description? kv("Scope", esc(p.description)) : "")
+      + (isDraft? "" : kv("Requested by", esc(p.createdByName)+(p.createdByOrg?" · "+p.createdByOrg:"")));
+
+    var schema = SCHEMAS[p.typeId], rows="";
+    schema.forEach(function(g){
+      g.fields.forEach(function(f){
+        var v = p.form[f.id];
+        rows += kv(f.label.replace(/\s*\(.*?\)/,""), formatVal(f,v), f.type==="yesno"&&v==="yes"?"ok":"");
+      });
+    });
+
+    return '<div class="card summary-card">'+head
+      + '<div class="section-label">Permit details</div>'+core
+      + '<div class="section-label">'+esc(t.name)+' safety form</div>'+rows
+      + '</div>';
+  }
+  function kv(k,v,cls){ return '<div class="kv"><div class="k">'+k+'</div><div class="v '+(cls||"")+'">'+(v||"—")+'</div></div>'; }
+  function formatVal(f,v){
+    if (v==null || v==="" || (Array.isArray(v)&&!v.length)) return '<span class="muted">Not provided</span>';
+    if (f.type==="yesno") return v==="yes"?"✓ Yes":"✕ No";
+    if (f.type==="checklist") return '<div class="tag-list">'+v.map(function(o){return '<span class="mini-tag">'+esc(o)+'</span>';}).join("")+'</div>';
+    return esc(v);
+  }
+
+  /* ======================================================================
+     SCREEN: Permit detail (both roles adapt)
+  ====================================================================== */
+  SCREENS.detail = function(params){
+    var p = byId(params.id); if(!p) return SCREENS.home();
+    return state.role==="official" ? officialDetail(p) : foremanDetail(p);
+  };
+
+  function timeline(p){
+    var items = (p.history||[]).slice().reverse().map(function(h){
+      var map = {
+        created:{ic:"✎",bg:"var(--draft)",txt:"Draft created"},
+        submitted:{ic:"↑",bg:"var(--brand-500)",txt:"Submitted for approval"},
+        resubmitted:{ic:"↑",bg:"var(--brand-500)",txt:"Revised & resubmitted"},
+        approved:{ic:"✓",bg:"var(--approved)",txt:"Approved"},
+        changes_required:{ic:"↩",bg:"var(--changes)",txt:"Returned — changes required"},
+        rejected:{ic:"✕",bg:"var(--rejected)",txt:"Rejected"}
+      }[h.action] || {ic:"•",bg:"var(--ink-3)",txt:h.action};
+      return '<div class="tl-item"><div class="tl-dot" style="background:'+map.bg+'">'+map.ic+'</div>'
+        + '<div class="tl-body"><b>'+map.txt+'</b><div class="tl-time">'+esc(h.actor)+' · '+esc(fmtDT(h.at))+'</div>'
+        + (h.comment? '<div class="tl-comment">“'+esc(h.comment)+'”</div>':'')
+        + (h.signature? '<div class="tl-comment"><img src="'+h.signature+'" alt="signature" style="max-height:52px"/></div>':'')
+        + '</div></div>';
+    }).join("");
+    return '<div class="card" style="padding:14px"><div class="h-sec" style="margin:0 0 10px">Activity</div><div class="timeline">'+items+'</div></div>';
+  }
+
+  function foremanDetail(p){
+    var banner="";
+    if (p.status==="changes_required") banner='<div class="callout changes"><span class="ci">↩</span><div><b>Changes required by '+esc(p.decision.by)+'</b>'+esc(p.decision.comment)+'</div></div>';
+    if (p.status==="approved") banner='<div class="callout approved"><span class="ci">✓</span><div><b>Approved by '+esc(p.decision.by)+'</b>'+(p.decision.comment?esc(p.decision.comment):"You are cleared to begin. Keep the permit accessible on site.")+'</div></div>';
+    if (p.status==="rejected") banner='<div class="callout rejected"><span class="ci">✕</span><div><b>Rejected by '+esc(p.decision.by)+'</b>'+(p.decision.comment?esc(p.decision.comment):"This request was denied.")+'</div></div>';
+    if (p.status==="pending") banner='<div class="callout info"><span class="ci">⏳</span><div><b>Awaiting approval</b>Submitted '+esc(rel(p.createdAt))+'. You\'ll be notified the moment '+esc(USERS.official.name)+' decides.</div></div>';
+
+    var actions="";
+    if (p.status==="changes_required") actions='<div class="actionbar"><button class="btn btn-primary" data-action="revise" data-id="'+p.id+'">Revise & resubmit</button></div>';
+    else if (p.status==="draft") actions='<div class="actionbar two"><button class="btn btn-ghost" data-action="delete-draft" data-id="'+p.id+'">Delete</button><button class="btn btn-primary" data-action="revise" data-id="'+p.id+'">Continue editing</button></div>';
+    else if (p.status==="approved") actions='<div class="actionbar"><button class="btn btn-outline" data-action="toast-soon">🟢 Start work &amp; open on-site (out of scope)</button></div>';
+
+    return ''
+      + '<div class="appbar"><button class="iconbtn" data-action="go" data-to="home">‹</button><div style="flex:1"><div class="ab-title">'+(p.status==="draft"?"Draft":esc(p.serial))+'</div><div class="ab-sub">'+STATUS[p.status].label+'</div></div>'+statusChip(p.status)+'</div>'
+      + '<div class="body">'+banner+permitSummary(p,false)+timeline(p)+'</div>'
+      + actions;
+  }
+
+  function officialDetail(p){
+    var decided = p.status!=="pending";
+    var banner="";
+    if (p.status==="approved") banner='<div class="callout approved"><span class="ci">✓</span><div><b>You approved this permit</b>'+esc(fmtDT(p.decision.at))+(p.decision.comment?' · “'+esc(p.decision.comment)+'”':"")+'</div></div>';
+    if (p.status==="changes_required") banner='<div class="callout changes"><span class="ci">↩</span><div><b>You returned this for changes</b>“'+esc(p.decision.comment)+'”</div></div>';
+    if (p.status==="rejected") banner='<div class="callout rejected"><span class="ci">✕</span><div><b>You rejected this permit</b>'+(p.decision.comment?'“'+esc(p.decision.comment)+'”':"")+'</div></div>';
+    if (!decided && isSoon(p.start)) banner='<div class="callout changes"><span class="ci">⏱️</span><div><b>Time-critical — '+esc(startsIn(p.start))+'</b>The crew is waiting on your decision to begin.</div></div>';
+
+    var reqBar = '<div class="callout info"><span class="ci">👷</span><div><b>'+esc(p.createdByName)+(p.createdByOrg?' · '+esc(p.createdByOrg):"")+'</b>Submitted '+esc(rel(p.createdAt))+' · '+esc(startsIn(p.start))+'</div></div>';
+
+    var actions = decided
+      ? ''
+      : '<div class="actionbar"><button class="btn btn-primary" data-action="decide-open" data-id="'+p.id+'">Review complete — decide ›</button></div>';
+
+    return ''
+      + '<div class="appbar"><button class="iconbtn" data-action="go" data-to="home">‹</button><div style="flex:1"><div class="ab-title">'+esc(p.serial)+'</div><div class="ab-sub">'+STATUS[p.status].label+'</div></div>'+(decided?statusChip(p.status):'<span class="chip pending"><span class="cdot"></span>Review</span>')+'</div>'
+      + '<div class="body">'+banner+reqBar+permitSummary(p,false)+timeline(p)+'</div>'
+      + actions;
+  }
+
+  /* ======================================================================
+     SCREEN: Confirmation
+  ====================================================================== */
+  SCREENS.confirm = function(params){
+    var p = byId(params.id), warn = params.mode==="draft";
+    if (warn) {
+      return '<div class="body" style="display:flex;flex-direction:column;justify-content:center"><div class="confirm warn"><div class="seal">✎</div>'
+        + '<h2>Draft saved</h2><p>Your permit is saved. Pick it back up any time from <b>My Permits</b>.</p>'
+        + '<button class="btn btn-primary" data-action="go" data-to="home" style="max-width:240px;margin:0 auto">Back to my permits</button></div></div>';
+    }
+    var resub = params.mode==="resubmit";
+    return '<div class="body" style="display:flex;flex-direction:column;justify-content:center"><div class="confirm"><div class="seal">✓</div>'
+      + '<h2>'+(resub?"Resubmitted":"Submitted for approval")+'</h2>'
+      + '<p>'+esc(USERS.official.name)+' has been notified and will review your '+esc(TYPES[p.typeId].name)+' permit.</p>'
+      + '<div class="serial-badge"><span class="sl">Site permit number</span><span class="sv">'+esc(p.serial)+'</span></div>'
+      + '<div style="max-width:250px;margin:0 auto;display:flex;flex-direction:column;gap:9px">'
+      +   '<button class="btn btn-outline" data-action="preview-official" data-id="'+p.id+'">👁️ Preview the approver\'s view</button>'
+      +   '<button class="btn btn-primary" data-action="go" data-to="home">Back to my permits</button>'
+      + '</div>'
+      + '<div class="fineprint">You\'ll get a push notification the moment a decision is made.</div>'
+      + '</div></div>';
+  };
+
+  SCREENS.decided = function(params){
+    var p=byId(params.id), m=params.mode;
+    var cfg = {
+      approved:{ic:"✓",cls:"",h:"Permit approved",t:"Work is authorized. "+esc(p.createdByName)+" has been notified and can begin at the scheduled time."},
+      changes_required:{ic:"↩",cls:"warn",h:"Sent back for changes",t:esc(p.createdByName)+" has been notified with your comment and can revise and resubmit."},
+      rejected:{ic:"✕",cls:"warn",h:"Permit rejected",t:"The request has been formally denied and "+esc(p.createdByName)+" notified."}
+    }[m];
+    return '<div class="body" style="display:flex;flex-direction:column;justify-content:center"><div class="confirm '+cfg.cls+'"><div class="seal">'+cfg.ic+'</div>'
+      + '<h2>'+cfg.h+'</h2><p>'+cfg.t+'</p>'
+      + '<div class="serial-badge"><span class="sl">Permit</span><span class="sv">'+esc(p.serial)+'</span></div>'
+      + '<button class="btn btn-primary" data-action="go" data-to="home" style="max-width:240px;margin:0 auto">Back to approvals</button>'
+      + '</div></div>';
+  };
+
+  /* ======================================================================
+     5. Sheets (notifications, decision)
+  ====================================================================== */
+  function openSheet(html){ el("sheet").innerHTML='<div class="grip"></div>'+html; el("scrim").classList.add("show"); el("sheet").classList.add("show"); }
+  function closeSheet(){ el("scrim").classList.remove("show"); el("sheet").classList.remove("show"); }
+
+  function notifSheet(){
+    var list = state.notif[state.role];
+    var items = list.length ? list.map(function(n){
+      var icon={submitted:"📥",approved:"✓",changes_required:"↩",rejected:"✕"}[n.kind]||"🔔";
+      var col={submitted:"var(--brand-500)",approved:"var(--approved)",changes_required:"var(--changes)",rejected:"var(--rejected)"}[n.kind];
+      return '<div class="check-item" data-action="open-notif" data-id="'+n.permitId+'" data-nid="'+n.id+'" style="cursor:pointer;padding:12px 0">'
+        + '<div class="box" style="background:'+col+';border-color:'+col+'">'+icon+'</div>'
+        + '<div class="lbl" style="flex:1"><div style="font-weight:'+(n.unread?"700":"500")+'">'+esc(n.text)+'</div><div style="font-size:11.5px;color:var(--ink-3);margin-top:2px">'+esc(rel(n.at))+(n.unread?' · <b style="color:var(--brand-600)">New</b>':"")+'</div></div></div>';
+    }).join("") : '<div class="empty" style="padding:26px"><div class="ic">🔔</div><p>No notifications.</p></div>';
+    return '<h3>Notifications</h3><p class="sub">'+(state.role==="foreman"?"Approval decisions on your permits.":"New permits needing your review.")+'</p>'
+      + '<div class="check-list">'+items+'</div>'
+      + '<div style="margin-top:14px;text-align:center"><button class="btn btn-ghost sm" data-action="reset-demo">↺ Reset demo data</button></div>';
+  }
+
+  var sigState = { drawing:false, dirty:false, canvas:null, ctx:null };
+  function decisionSheet(p, action){
+    var cfg = {
+      approved:{title:"Approve permit",sub:"Authorize the work. Your signature is legally attached to this decision.",btn:"Approve & sign",cls:"btn-approve",commentReq:false,sign:true},
+      changes_required:{title:"Request changes",sub:"Tell the foreman exactly what to fix so they can resubmit.",btn:"Send back to foreman",cls:"btn-changes",commentReq:true,sign:false},
+      rejected:{title:"Reject permit",sub:"Formally deny this request. A reason is recommended.",btn:"Reject permit",cls:"btn-danger",commentReq:false,sign:false}
+    }[action];
+    var sig = cfg.sign ? '<div class="field"><label>Signature <span class="req">*</span></label>'
+      + '<div class="sigpad-wrap" id="sigWrap"><canvas class="sigpad" id="sigPad"></canvas><div class="sig-ph">✍️ Sign here</div></div>'
+      + '<div class="sig-actions"><span class="muted" style="font-size:12px">'+esc(USERS.official.name)+' · '+esc(fmtDT(isoLocal(new Date())))+'</span><button class="link" data-action="sig-clear">Clear</button></div></div>' : '';
+    return '<h3>'+cfg.title+'</h3><p class="sub">'+cfg.sub+'</p>'
+      + '<div class="field"><label>Comment'+(cfg.commentReq?' <span class="req">*</span>':' <span class="muted" style="font-weight:500">(optional)</span>')+'</label>'
+      + '<textarea class="textarea" id="decisionComment" placeholder="'+(action==="changes_required"?"e.g. Add the LOTO padlock ID and confirm proved-dead reading.":action==="rejected"?"e.g. Work conflicts with crane lift in the same zone.":"e.g. Approved — keep the fire watch on for 60 min after.")+'"></textarea>'
+      + '<div class="err" id="commentErr" style="color:var(--danger);font-size:12px;margin-top:6px;display:none;font-weight:600">Please add a comment so the foreman knows what to change.</div></div>'
+      + sig
+      + '<button class="btn '+cfg.cls+' btn-block" data-action="confirm-decision" data-id="'+p.id+'" data-decision="'+action+'">'+cfg.btn+'</button>';
+  }
+
+  function initSignature(){
+    var c = el("sigPad"); if(!c) return;
+    var wrap = el("sigWrap");
+    var ratio = window.devicePixelRatio||1;
+    var rect = c.getBoundingClientRect();
+    c.width = rect.width*ratio; c.height = rect.height*ratio;
+    var ctx = c.getContext("2d"); ctx.scale(ratio,ratio);
+    ctx.lineWidth=2.2; ctx.lineCap="round"; ctx.lineJoin="round"; ctx.strokeStyle="#123a63";
+    sigState.canvas=c; sigState.ctx=ctx; sigState.dirty=false;
+    var pos=function(e){ var r=c.getBoundingClientRect(); var t=e.touches?e.touches[0]:e; return {x:t.clientX-r.left,y:t.clientY-r.top}; };
+    var start=function(e){ e.preventDefault(); sigState.drawing=true; var p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); };
+    var move=function(e){ if(!sigState.drawing)return; e.preventDefault(); var p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); if(!sigState.dirty){sigState.dirty=true;wrap.classList.add("signed");} };
+    var end=function(){ sigState.drawing=false; };
+    c.addEventListener("mousedown",start); c.addEventListener("mousemove",move); window.addEventListener("mouseup",end);
+    c.addEventListener("touchstart",start,{passive:false}); c.addEventListener("touchmove",move,{passive:false}); c.addEventListener("touchend",end);
+  }
+  function clearSig(){ if(sigState.ctx){ sigState.ctx.clearRect(0,0,sigState.canvas.width,sigState.canvas.height); sigState.dirty=false; el("sigWrap").classList.remove("signed"); } }
+
+  /* ======================================================================
+     6. Toast
+  ====================================================================== */
+  function toast(msg, kind){
+    var host=el("toastHost"); var t=document.createElement("div");
+    t.className="toast "+(kind||"");
+    var ic={ok:"✓",warn:"↩",err:"✕"}[kind]||"🔔";
+    t.innerHTML='<div class="ti">'+ic+'</div><div>'+esc(msg)+'</div>';
+    host.appendChild(t);
+    requestAnimationFrame(function(){ t.classList.add("show"); });
+    setTimeout(function(){ t.classList.remove("show"); setTimeout(function(){ host.removeChild(t); },300); }, 3200);
+  }
+
+  /* ======================================================================
+     7. Actions / event wiring
+  ====================================================================== */
+  function newDraft(typeId){
+    return { id:"p"+Date.now(), serial:null, typeId:typeId, status:"draft",
+      title:"", zone:"", detail:"", start:"", end:"", workers:"", description:"",
+      form:{}, createdBy:"foreman", createdByName:USERS.foreman.name,
+      createdAt:isoLocal(new Date()), history:[], decision:null, revising:false };
+  }
+
+  function validateStep(step){
+    var d=state.draft, bad=[];
+    if (step===0) {
+      [["title",d.title],["zone",d.zone],["start",d.start],["end",d.end]].forEach(function(x){ if(!x[1]) bad.push(x[0]); });
+      if (d.start && d.end && new Date(d.end)<=new Date(d.start)) { bad.push("end"); toast("End time must be after start time","warn"); }
+    } else if (step===1) {
+      SCHEMAS[d.typeId].forEach(function(g){ g.fields.forEach(function(f){
+        if(!f.required) return;
+        var v=d.form[f.id];
+        if (v==null || v==="" || (Array.isArray(v)&&!v.length)) bad.push("form:"+f.id);
+      });});
+    }
+    // paint
+    document.querySelectorAll(".field.invalid").forEach(function(n){ n.classList.remove("invalid"); });
+    bad.forEach(function(m){ var w=document.querySelector('[data-fieldwrap="'+m.replace(/"/g,'')+'"]'); if(w) w.classList.add("invalid"); });
+    if (bad.length) { toast("Please complete the required fields","warn"); var first=document.querySelector(".field.invalid"); if(first) first.scrollIntoView({behavior:"smooth",block:"center"}); }
+    return bad.length===0;
+  }
+
+  function submitPermit(resubmit){
+    var d=state.draft;
+    if (!d.serial) { d.serial=serialFor(state.seq); state.seq++; }
+    d.status="pending";
+    d.revising=false;
+    var at=isoLocal(new Date());
+    if (resubmit) d.history.push({ action:"resubmitted", actor:USERS.foreman.name, at:at });
+    else { d.history.push({ action:"created", actor:USERS.foreman.name, at:d.createdAt||at }); d.history.push({ action:"submitted", actor:USERS.foreman.name, at:at }); }
+    // upsert into permits
+    upsert(d);
+    // notify official
+    state.notif.official.unshift({ id:"n"+Date.now(), at:at, unread:true, permitId:d.id, kind:"submitted",
+      text:"New permit "+d.serial+" — "+TYPES[d.typeId].name+" — needs review." });
+    var id=d.id; state.draft=null; save();
+    go("confirm",{ id:id, mode:resubmit?"resubmit":"new" });
+  }
+
+  function saveDraft(){
+    var d=state.draft; d.status="draft"; upsert(d);
+    var id=d.id; state.draft=null; save(); go("confirm",{ id:id, mode:"draft" });
+  }
+
+  function upsert(p){
+    var i=-1; for(var k=0;k<state.permits.length;k++) if(state.permits[k].id===p.id){ i=k; break; }
+    if(i>=0) state.permits[i]=p; else state.permits.unshift(p);
+  }
+
+  function confirmDecision(id, action){
+    var p=byId(id);
+    var comment = (el("decisionComment").value||"").trim();
+    if (action==="changes_required" && !comment) { el("commentErr").style.display="block"; return; }
+    var signature=null;
+    if (action==="approved") {
+      if (!sigState.dirty) { toast("Please add your signature to approve","warn"); return; }
+      signature = sigState.canvas.toDataURL("image/png");
+    }
+    var at=isoLocal(new Date());
+    p.status=action;
+    p.decision={ action:action, by:USERS.official.name, at:at, comment:comment, signature:signature };
+    p.history.push({ action:action, actor:USERS.official.name, at:at, comment:comment, signature:signature });
+    // notify foreman
+    var txt = action==="approved" ? p.serial+" approved by "+USERS.official.name+"."
+            : action==="changes_required" ? "Changes required on "+p.serial+" — "+USERS.official.name+" left a comment."
+            : p.serial+" was rejected by "+USERS.official.name+".";
+    state.notif.foreman.unshift({ id:"n"+Date.now(), at:at, unread:true, permitId:p.id, kind:action, text:txt });
+    // mark related official notif read
+    state.notif.official.forEach(function(n){ if(n.permitId===p.id) n.unread=false; });
+    save(); closeSheet();
+    go("decided",{ id:id, mode:action });
+  }
+
+  function markNotifRead(nid){ state.notif[state.role].forEach(function(n){ if(n.id===nid) n.unread=false; }); save(); }
+
+  /* ---- delegation ---- */
+  document.addEventListener("click", function(e){
+    var t = e.target.closest("[data-action]");
+    // choice / checklist toggles handled separately below regardless of data-action
+    var choice = e.target.closest("[data-form-choice] .choice, [data-form-yesno] .choice");
+    if (choice) { handleChoice(choice); return; }
+    var chk = e.target.closest("[data-form-check] .check-item");
+    if (chk) { handleCheck(chk); return; }
+
+    if (!t) return;
+    var a = t.getAttribute("data-action");
+
+    switch(a){
+      case "switch-role":
+        state.role = state.role==="foreman" ? "official" : "foreman";
+        toast("Viewing as "+(state.role==="foreman"?USERS.foreman.name+" (Foreman)":USERS.official.name+" (Site Official)"), "ok");
+        go("home"); break;
+      case "notif": openSheet(notifSheet()); break;
+      case "reset-demo": closeSheet(); resetDemo(); break;
+      case "open-notif": {
+        var nid=t.getAttribute("data-nid"); markNotifRead(nid); closeSheet(); go("detail",{ id:t.getAttribute("data-id") }); break;
+      }
+      case "open": go("detail",{ id:t.getAttribute("data-id") }); break;
+      case "go": go(t.getAttribute("data-to")); break;
+      case "foreman-filter": go("home",{ filter:t.getAttribute("data-f") }); break;
+      case "official-tab": go("home",{ tab:t.getAttribute("data-t") }); break;
+      case "new-permit": go("pickType"); break;
+      case "choose-type": state.draft=newDraft(t.getAttribute("data-type")); state.createStep=0; save(); go("create"); break;
+      case "create-next": if (validateStep(state.createStep)) { state.createStep=Math.min(2,state.createStep+1); save(); render(); scrollTop(); } break;
+      case "create-prev": if (state.createStep===0){ go("pickType"); } else { state.createStep--; save(); render(); scrollTop(); } break;
+      case "save-draft": saveDraft(); break;
+      case "submit-permit": if (validateStep(0)&&validateStep(1)) submitPermit(false); else { state.createStep=validateStep(0)?1:0; render(); } break;
+      case "resubmit": if (validateStep(0)&&validateStep(1)) submitPermit(true); else { state.createStep=validateStep(0)?1:0; render(); } break;
+      case "use-location": {
+        state.draft.zone = state.draft.zone||"Level 8 · East";
+        state.draft.detail = state.draft.detail||"GPS grid E4 (±3 m)";
+        save(); render(); toast("Location captured from device GPS","ok"); break;
+      }
+      case "revise": {
+        var pr=byId(t.getAttribute("data-id")); state.draft=Object.assign({},pr); state.draft.form=Object.assign({},pr.form); state.draft.revising=(pr.status==="changes_required"); state.createStep=0; save(); go("create"); break;
+      }
+      case "delete-draft": {
+        var did=t.getAttribute("data-id"); state.permits=state.permits.filter(function(p){return p.id!==did;}); save(); go("home"); toast("Draft deleted","ok"); break;
+      }
+      case "preview-official": state.role="official"; save(); go("detail",{ id:t.getAttribute("data-id") }); toast("Now viewing as "+USERS.official.name+" (Site Official)","ok"); break;
+      case "decide-open": {
+        openDecision(t.getAttribute("data-id")); break;
+      }
+      case "sig-clear": clearSig(); break;
+      case "confirm-decision": confirmDecision(t.getAttribute("data-id"), t.getAttribute("data-decision")); break;
+      case "toast-soon": toast("Out of scope for this prototype — flagged in the deck.","warn"); break;
+    }
+  });
+
+  // Decision entry: show triad first inside a sheet, then the form
+  function openDecision(id){
+    var p=byId(id);
+    var html = '<h3>Your decision</h3><p class="sub">You are legally accountable for approving '+esc(p.serial)+'. Choose an outcome.</p>'
+      + '<div class="decision-triad">'
+      + '<button class="btn btn-approve" data-action="decision-pick" data-id="'+id+'" data-d="approved"><span class="d-ic">✓</span><span class="d-txt">Approve<small>Authorize the work to begin</small></span></button>'
+      + '<button class="btn btn-changes" data-action="decision-pick" data-id="'+id+'" data-d="changes_required"><span class="d-ic">↩</span><span class="d-txt">Request changes<small>Send back with a comment</small></span></button>'
+      + '<button class="btn btn-reject" data-action="decision-pick" data-id="'+id+'" data-d="rejected"><span class="d-ic">✕</span><span class="d-txt">Reject<small>Formally deny this request</small></span></button>'
+      + '</div>';
+    openSheet(html);
+  }
+  // second-level pick handled here (needs its own listener because sheet re-renders)
+  document.addEventListener("click", function(e){
+    var t=e.target.closest('[data-action="decision-pick"]'); if(!t) return;
+    var id=t.getAttribute("data-id"), d=t.getAttribute("data-d"), p=byId(id);
+    openSheet(decisionSheet(p,d));
+    if (d==="approved") setTimeout(initSignature,60);
+  });
+
+  el("scrim").addEventListener("click", closeSheet);
+
+  /* text/number/textarea/select binding (no re-render, preserve focus) */
+  document.addEventListener("input", function(e){
+    var m=e.target.getAttribute && e.target.getAttribute("data-model");
+    var f=e.target.getAttribute && e.target.getAttribute("data-form");
+    if (m && state.draft){ state.draft[m]=e.target.value; syncMap(m); }
+    else if (f && state.draft){ state.draft.form[f]=e.target.value; }
+    // don't save on every keystroke for perf; save on nav. But cheap enough:
+  });
+  document.addEventListener("change", function(e){
+    var f=e.target.getAttribute && e.target.getAttribute("data-form");
+    if (f && state.draft){ state.draft.form[f]=e.target.value; save(); }
+    var m=e.target.getAttribute && e.target.getAttribute("data-model");
+    if (m && state.draft){ state.draft[m]=e.target.value; save(); }
+  });
+  function syncMap(m){ if(m==="zone"){ var tag=document.querySelector(".map-preview .zone-tag"); if(tag) tag.textContent=state.draft.zone||"Set the zone below"; } }
+
+  function handleChoice(node){
+    var wrap = node.closest("[data-form-choice],[data-form-yesno]");
+    var id = wrap.getAttribute("data-form-choice") || wrap.getAttribute("data-form-yesno");
+    var val = node.getAttribute("data-val");
+    state.draft.form[id]=val;
+    wrap.querySelectorAll(".choice").forEach(function(c){ c.classList.remove("sel","yes","no"); });
+    if (wrap.hasAttribute("data-form-yesno")) node.classList.add("sel", val==="yes"?"yes":"no");
+    else node.classList.add("sel");
+    var fw=wrap.closest(".field"); if(fw) fw.classList.remove("invalid");
+    save();
+  }
+  function handleCheck(item){
+    var wrap=item.closest("[data-form-check]"); var id=wrap.getAttribute("data-form-check"); var val=item.getAttribute("data-val");
+    var arr=Array.isArray(state.draft.form[id])?state.draft.form[id]:[];
+    var i=arr.indexOf(val);
+    if(i>=0){ arr.splice(i,1); item.classList.remove("on"); item.querySelector(".box").textContent=""; }
+    else { arr.push(val); item.classList.add("on"); item.querySelector(".box").textContent="✓"; }
+    state.draft.form[id]=arr;
+    var fw=wrap.closest(".field"); if(fw && arr.length) fw.classList.remove("invalid");
+    save();
+  }
+
+  function scrollTop(){ var b=$(".body"); if(b) b.scrollTop=0; }
+
+  /* re-init signature on resize to keep canvas crisp (rare) */
+  function afterRender(){
+    // clock
+    var d=new Date(); el("sbClock").textContent=pad(d.getHours())+":"+pad(d.getMinutes());
+  }
+
+  /* ======================================================================
+     8. Boot
+  ====================================================================== */
+  if (!load()) seed();
+  // safety: ensure notif structure exists
+  if (!state.notif) { seed(); }
+  render();
+  setInterval(function(){ var d=new Date(); var c=el("sbClock"); if(c) c.textContent=pad(d.getHours())+":"+pad(d.getMinutes()); }, 30000);
+
+  // expose for console/debug
+  window.PTW = { reset:resetDemo, state:function(){return state;} };
+})();
