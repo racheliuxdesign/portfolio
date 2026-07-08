@@ -86,45 +86,76 @@ body {
 }
 .stage-aside .aside-card b { color: #fff; font-size: 15px; }
 .stage-aside .aside-card span { display:block; color:#93a4bd; font-size: 14px; margin-top: 4px; line-height: 1.5; }
+.stage-aside .viewas-label {
+  font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
+  color: #7c8ca6; margin: 4px 0 10px;
+}
+.stage-aside .role-card {
+  display: block; width: 100%; text-align: left; cursor: pointer;
+  font-family: inherit; position: relative; transition: .15s;
+}
+.stage-aside .role-card:hover {
+  background: rgba(255,255,255,.09); border-color: rgba(255,255,255,.18);
+}
+.stage-aside .role-card.selected {
+  background: rgba(45,140,255,.16);
+  border-color: #4b9bff;
+  box-shadow: 0 0 0 1px #4b9bff, 0 8px 22px rgba(30,110,220,.22);
+}
+.stage-aside .role-card.selected::before {
+  content:""; position:absolute; left:0; top:12px; bottom:12px; width:4px;
+  border-radius: 0 4px 4px 0; background:#4b9bff;
+}
+.stage-aside .rc-head { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.stage-aside .aside-card .rc-badge {
+  display: none; flex: 0 0 auto; font-size: 11px; font-weight: 800; color: #fff;
+  background: #2d8cff; padding: 2px 9px; border-radius: 999px; letter-spacing: .01em;
+  margin-top: 0;
+}
+.stage-aside .role-card.selected .rc-badge { display: inline-block; }
 .stage-aside .tip { font-size: 13px; color: #7c8ca6; margin-top: 14px; }
 .stage-aside kbd {
   background: rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.12);
   border-radius: 6px; padding: 1px 6px; font-size: 12px; color:#dce6f4;
 }
 
-/* ---------- Phone frame ---------- */
+/* ---------- Phone frame (iPhone 17) ---------- */
 .phone {
   position: relative;
-  width: 390px; height: 800px;
+  width: 414px; height: 886px;
   background: #0b0f16;
-  border-radius: 46px;
-  padding: 12px;
+  border-radius: 58px;
+  padding: 6px;
   box-shadow: var(--shadow-2), 0 30px 60px rgba(0,0,0,.5);
   flex: 0 0 auto;
 }
-.phone::after { /* side buttons */
-  content:""; position:absolute; right:-2px; top:150px; width:3px; height:66px;
+.phone::after { /* side button (power) */
+  content:""; position:absolute; right:-2px; top:200px; width:3px; height:82px;
+  background:#1a212c; border-radius: 3px;
+}
+.phone::before { /* volume buttons */
+  content:""; position:absolute; left:-2px; top:170px; width:3px; height:120px;
   background:#1a212c; border-radius: 3px;
 }
 .screen-wrap {
   position: relative;
-  width: 100%; height: 100%;
+  width: 402px; height: 874px;
   background: var(--canvas);
-  border-radius: 36px;
+  border-radius: 52px;
   overflow: hidden;
   display: flex; flex-direction: column;
 }
-.notch {
-  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
-  width: 150px; height: 26px; background: #0b0f16;
-  border-bottom-left-radius: 16px; border-bottom-right-radius: 16px; z-index: 60;
+.notch, .island {
+  position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+  width: 122px; height: 34px; background: #05070b;
+  border-radius: 999px; z-index: 60;
 }
 
 /* ---------- App chrome ---------- */
 .statusbar {
-  height: 44px; flex: 0 0 auto;
+  height: 54px; flex: 0 0 auto;
   display: flex; align-items: flex-end; justify-content: space-between;
-  padding: 0 22px 4px; font-size: 14px; font-weight: 600; color: var(--ink);
+  padding: 0 30px 6px; font-size: 14px; font-weight: 600; color: var(--ink);
   z-index: 40;
 }
 .statusbar .sb-right { display:flex; gap:5px; align-items:center; font-size: 13px; }
@@ -168,9 +199,9 @@ body {
 .rolestrip .who { flex: 1; line-height: 1.25; }
 .rolestrip .who b { font-size: 15px; }
 .rolestrip .who span { display: block; font-size: 12.5px; color: var(--ink-3); }
-.rolestrip .rolechip {
-  font-size: 12px; font-weight: 700; padding: 4px 9px; border-radius: 999px;
-  background: var(--surface); border: 1px solid var(--line); color: var(--brand-600);
+.rolestrip .role-tag {
+  font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px;
+  background: var(--surface); border: 1px solid var(--line); color: var(--ink-2);
 }
 
 /* ---------- Scroll body ---------- */

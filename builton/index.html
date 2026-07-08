@@ -14,31 +14,30 @@
     <h1>Permit&nbsp;to&nbsp;Work</h1>
     <p>An interactive prototype of the PTW <b>Create&nbsp;→&nbsp;Approve</b> loop, built for the two people at the heart of site safety.</p>
 
-    <div class="aside-card">
-      <b>👷 Foreman — create &amp; submit</b>
-      <span>In the field, on a phone. Picks a permit type, fills the form, sets time &amp; place, submits for approval.</span>
-    </div>
-    <div class="aside-card">
-      <b>🦺 Site Official — review &amp; decide</b>
-      <span>Approves, requests changes, or rejects — with a comment and signature. Legally accountable.</span>
-    </div>
+    <div class="viewas-label">View app as</div>
+    <button type="button" class="aside-card role-card" data-action="view-as" data-role="foreman">
+      <div class="rc-head"><b>👷 Foreman</b><span class="rc-badge">● Viewing</span></div>
+      <span>Create &amp; submit — in the field, on a phone. Picks a permit type, fills the form, sets time &amp; place, submits for approval.</span>
+    </button>
+    <button type="button" class="aside-card role-card" data-action="view-as" data-role="official">
+      <div class="rc-head"><b>🦺 Site Official</b><span class="rc-badge">● Viewing</span></div>
+      <span>Review &amp; decide — approves, requests changes, or rejects, with a comment and signature. Legally accountable.</span>
+    </button>
 
-    <p class="tip">The two roles share one live dataset. Submit as the Foreman, then switch role to review the same permit as the Official. Use the <kbd>⇄</kbd> button in the top bar to switch roles anytime.</p>
+    <p class="tip">Both roles share one live dataset. Submit as the Foreman, then switch above to review the same permit as the Site Official. (This selector is a prototype aid — in the real app each person has a single fixed role.)</p>
   </aside>
 
   <!-- Phone -->
   <div class="phone">
     <div class="screen-wrap" id="screenWrap">
-      <div class="notch"></div>
+      <div class="island"></div>
 
       <!-- Status bar -->
       <div class="statusbar">
         <span id="sbClock">9:41</span>
         <span class="sb-right">
-          <span>BiltOn</span>
-          <span>·</span>
           <span>5G</span>
-          <span>􀛨</span>
+          <span>􀙇</span>
           <span>100%</span>
         </span>
       </div>

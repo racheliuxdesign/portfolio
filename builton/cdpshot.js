@@ -10,7 +10,7 @@ class WS{constructor(u){this.url=u;this.id=0;this.pending=new Map();this.buf=Buf
 const getJSON=u=>new Promise((res,rej)=>{http.get(u,r=>{let d="";r.on("data",c=>d+=c);r.on("end",()=>res(JSON.parse(d)));}).on("error",rej);});
 (async()=>{
  const steps=JSON.parse(process.argv[2]||"[]"),outfile=process.argv[3]||"shot.png";
- const proc=spawn(EDGE,["--headless=new","--disable-gpu","--no-first-run","--no-default-browser-check",`--remote-debugging-port=${PORT}`,`--user-data-dir=${userDir}`,"--window-size=430,860","--hide-scrollbars","--force-device-scale-factor=2",FILE_URL]);
+ const proc=spawn(EDGE,["--headless=new","--disable-gpu","--no-first-run","--no-default-browser-check",`--remote-debugging-port=${PORT}`,`--user-data-dir=${userDir}`,"--window-size=470,946","--hide-scrollbars","--force-device-scale-factor=2",FILE_URL]);
  let target;for(let i=0;i<40;i++){try{const l=await getJSON(`http://127.0.0.1:${PORT}/json`);target=l.find(t=>t.type==="page"&&t.webSocketDebuggerUrl);if(target)break;}catch{}await sleep(300);}
  const ws=new WS(target.webSocketDebuggerUrl);await ws.connect();await ws.send("Runtime.enable");await ws.send("Page.enable");
  await ws.send("Page.navigate",{url:FILE_URL});await sleep(700);await ws.send("Runtime.evaluate",{expression:"localStorage.clear()"});await ws.send("Page.reload");await sleep(800);

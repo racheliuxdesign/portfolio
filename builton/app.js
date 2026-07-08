@@ -337,7 +337,13 @@
   function render() {
     var s = SCREENS[state.screen.name] || SCREENS.home;
     el("app").innerHTML = s(state.screen.params || {});
+    updateAsideSelection();
     afterRender();
+  }
+  function updateAsideSelection() {
+    document.querySelectorAll(".role-card").forEach(function(c){
+      c.classList.toggle("selected", c.getAttribute("data-role")===state.role);
+    });
   }
 
   /* ----- shared chrome ----- */
@@ -346,7 +352,7 @@
     return '<div class="rolestrip">'
       + '<div class="avatar">'+u.initials+'</div>'
       + '<div class="who"><b>'+esc(u.name)+'</b><span>'+esc(u.org)+'</span></div>'
-      + '<button class="rolechip" data-action="switch-role">⇄ '+(state.role==="foreman"?"Foreman":"Site Official")+'</button>'
+      + '<span class="role-tag">'+(state.role==="foreman"?"Foreman":"Site Official")+'</span>'
       + '</div>';
   }
   function bell() {
@@ -981,10 +987,15 @@
     var a = t.getAttribute("data-action");
 
     switch(a){
-      case "switch-role":
-        state.role = state.role==="foreman" ? "official" : "foreman";
-        toast("Viewing as "+(state.role==="foreman"?USERS.foreman.name+" (Foreman)":USERS.official.name+" (Site Official)"), "ok");
-        go("home"); break;
+      case "view-as": {
+        var r = t.getAttribute("data-role");
+        if (r && r!==state.role) {
+          state.role = r;
+          toast("Viewing as "+(r==="foreman"?USERS.foreman.name+" (Foreman)":USERS.official.name+" (Site Official)"), "ok");
+          go("home");
+        }
+        break;
+      }
       case "notif": openSheet(notifSheet()); break;
       case "reset-demo": closeSheet(); resetDemo(); break;
       case "open-notif": {
