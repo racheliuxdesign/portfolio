@@ -113,6 +113,14 @@ body {
   margin-top: 0;
 }
 .stage-aside .role-card.selected .rc-badge { display: inline-block; }
+.stage-aside .reset-demo-btn {
+  margin-top: 16px; display: inline-flex; align-items: center; gap: 7px;
+  font-family: inherit; font-size: 13px; font-weight: 800; color: #ffd9b0; cursor: pointer;
+  background: rgba(249,115,22,.14); border: 1px solid rgba(249,115,22,.5);
+  padding: 9px 16px; border-radius: 999px; transition: background .12s, transform .1s, color .12s;
+}
+.stage-aside .reset-demo-btn:hover { background: rgba(249,115,22,.24); color: #ffe6cc; }
+.stage-aside .reset-demo-btn:active { transform: scale(.97); }
 .stage-aside .tip { font-size: 13px; color: #7c8ca6; margin-top: 14px; }
 .stage-aside kbd {
   background: rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.12);
@@ -259,15 +267,11 @@ body {
 
 /* Urgency accent for approver queue */
 .permit-card.soon { border-color: #f4c9a0; }
-.permit-card.soon::before {
-  content:""; position:absolute; left:0; top:14px; bottom:14px; width:4px;
-  border-radius: 4px; background: var(--changes);
-}
 
 /* ---------- Status chips ---------- */
 .chip {
   display: inline-flex; align-items: center; gap: 5px;
-  font-size: 12px; font-weight: 800; letter-spacing: .01em;
+  font-size: 12px; font-weight: 600; letter-spacing: .01em;
   padding: 3px 9px; border-radius: 999px; white-space: nowrap;
 }
 .chip .cdot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }

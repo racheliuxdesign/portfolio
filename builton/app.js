@@ -272,11 +272,76 @@
       decision:null
     });
 
+    permits.push({
+      id:"p6", serial:serialFor(143), typeId:"height", status:"approved",
+      title:"Scaffold erection — North elevation L4", zone:"North elevation · L4", detail:"Bays 3–7",
+      start:nowShift(-300), end:nowShift(-30), workers:4,
+      description:"Erect system scaffold to north elevation for cladding works.",
+      form:{ height:"14", access:"Scaffold",
+             fall:["Full-body harness & lanyard","Guardrails / edge protection","Anchor points inspected"],
+             weather:"yes", notes:"Scaffold tag inspected and signed by competent person." },
+      createdBy:"foreman", createdByName:"Priya Nair", createdByOrg:"Apex Access", createdAt:nowShift(-360),
+      history:[
+        { action:"created", actor:"Priya Nair", at:nowShift(-360) },
+        { action:"submitted", actor:"Priya Nair", at:nowShift(-355) },
+        { action:"approved", actor:USERS.official.name, at:nowShift(-350), comment:"Scaffold tag verified. Approved." }
+      ],
+      decision:{ action:"approved", by:USERS.official.name, at:nowShift(-350), comment:"Scaffold tag verified. Approved." }
+    });
+
+    permits.push({
+      id:"p7", serial:serialFor(144), typeId:"electrical", status:"approved",
+      title:"Lighting circuit isolation — Level 5", zone:"Level 5 · Riser 2", detail:"Panel DB-2, breaker 9",
+      start:nowShift(-260), end:nowShift(-20), workers:1,
+      description:"Isolate lighting circuit to replace faulty contactor.",
+      form:{ voltage:"LV  (<1 kV)", point:"Panel DB-2, breaker 9", loto:"yes", padlock:"RED-118",
+             provedDead:"yes", earthing:"yes", notes:"Downstream L5 corridor lighting only." },
+      createdBy:"foreman", createdByName:"Luis Ferreira", createdByOrg:"Hydroline — Utilities", createdAt:nowShift(-300),
+      history:[
+        { action:"created", actor:"Luis Ferreira", at:nowShift(-300) },
+        { action:"submitted", actor:"Luis Ferreira", at:nowShift(-295) },
+        { action:"approved", actor:USERS.official.name, at:nowShift(-290), comment:"LOTO and proved-dead confirmed. Approved." }
+      ],
+      decision:{ action:"approved", by:USERS.official.name, at:nowShift(-290), comment:"LOTO and proved-dead confirmed. Approved." }
+    });
+
+    permits.push({
+      id:"p8", serial:serialFor(145), typeId:"confined", status:"approved",
+      title:"Tank cleaning — Water storage T-3", zone:"Roof plant · Tank T-3", detail:"Potable water tank",
+      start:nowShift(-200), end:nowShift(-10), workers:2,
+      description:"Enter potable water storage tank to clean and inspect internal coating.",
+      form:{ o2:"20.9", lel:"0", h2s:"0", ventilation:"yes", attendant:"K. Mensah", comms:"Two-way radio", rescue:"yes" },
+      createdBy:"foreman", createdByName:"Priya Nair", createdByOrg:"Apex Access", createdAt:nowShift(-240),
+      history:[
+        { action:"created", actor:"Priya Nair", at:nowShift(-240) },
+        { action:"submitted", actor:"Priya Nair", at:nowShift(-235) },
+        { action:"approved", actor:USERS.official.name, at:nowShift(-230), comment:"Atmosphere clear, attendant assigned. Approved." }
+      ],
+      decision:{ action:"approved", by:USERS.official.name, at:nowShift(-230), comment:"Atmosphere clear, attendant assigned. Approved." }
+    });
+
+    permits.push({
+      id:"p9", serial:serialFor(146), typeId:"hot", status:"approved",
+      title:"Pipe brazing — Level 2 riser", zone:"Level 2 · Riser 1", detail:"Chilled-water pipework",
+      start:nowShift(-160), end:nowShift(-5), workers:2,
+      description:"Braze chilled-water pipe joints in the Level 2 riser cupboard.",
+      form:{ method:"Brazing", fireWatch:"yes", watchDuration:"60 minutes", extinguisher:"yes",
+             prep:["Combustibles removed or fire-blanketed","Sprinklers / detection operational","Atmosphere gas-tested"],
+             gasReading:"0% LEL", hazards:"Insulation cleared 1 m around joints; fire blanket staged." },
+      createdBy:"foreman", createdByName:"Luis Ferreira", createdByOrg:"Hydroline — Utilities", createdAt:nowShift(-200),
+      history:[
+        { action:"created", actor:"Luis Ferreira", at:nowShift(-200) },
+        { action:"submitted", actor:"Luis Ferreira", at:nowShift(-195) },
+        { action:"approved", actor:USERS.official.name, at:nowShift(-190), comment:"Fire watch and gas test confirmed. Approved." }
+      ],
+      decision:{ action:"approved", by:USERS.official.name, at:nowShift(-190), comment:"Fire watch and gas test confirmed. Approved." }
+    });
+
     state = {
       role:"foreman",
       authed:false,
       screen:{ name:"home" },
-      seq:143,
+      seq:147,
       officialSort:"start",
       templates:DEFAULT_TEMPLATES.slice(),
       settings:defaultSettings(),
@@ -322,7 +387,7 @@
     } catch(e){}
     return false;
   }
-  function resetDemo() { localStorage.removeItem(LS_KEY); seed(); go("home"); toast("Demo data reset","ok"); }
+  function resetDemo() { var r = state.role; localStorage.removeItem(LS_KEY); seed(); state.authed = true; state.role = r; save(); go("home"); toast("Demo data reset","ok"); }
 
   /* ----------------------------------------------------------------------
      3. Small utilities
@@ -605,9 +670,10 @@
     var open = state.permits.filter(function(p){ return p.status==="pending" || p.status==="changes_required"; });
     var rejected = state.permits.filter(function(p){ return p.status==="rejected"; });
     var approved = state.permits.filter(function(p){ return p.status==="approved"; });
+    var all = state.permits.filter(function(p){ return p.status!=="draft"; });
 
     var tab = state.screen.params && state.screen.params.tab || "pending";
-    var list = tab==="rejected" ? rejected : tab==="approved" ? approved : open;
+    var list = tab==="all" ? all : tab==="rejected" ? rejected : tab==="approved" ? approved : open;
 
     var sortKey = state.officialSort || "start";
     list.sort(sortKey==="oldest"
@@ -628,11 +694,14 @@
       var em = {
         pending:  { ic:"✅", b:"Nothing to approve", p:"No permits are in the approval loop right now." },
         rejected: { ic:"🚫", b:"Nothing rejected",   p:"Permits you reject will appear here." },
-        approved: { ic:"✅", b:"Nothing approved yet",p:"Permits you approve will appear here." }
+        approved: { ic:"✅", b:"Nothing approved yet",p:"Permits you approve will appear here." },
+        all:      { ic:"📋", b:"No permits yet",      p:"Every permit for this site will appear here." }
       }[tab];
       cards = '<div class="empty"><div class="ic">'+em.ic+'</div><b>'+em.b+'</b><p>'+em.p+'</p></div>';
     } else {
-      cards = list.map(tab==="pending" ? officialCard : officialDecidedCard).join("");
+      cards = list.map(function(p){
+        return (p.status==="pending" || p.status==="changes_required") ? officialCard(p) : officialDecidedCard(p);
+      }).join("");
     }
 
     var SORTS = [
@@ -666,6 +735,7 @@
       + '<div class="body">'
       +   todayBoard()
       +   '<div class="segmented">'
+      +     seg("all","All",all.length)
       +     seg("pending","Pending",open.length)
       +     seg("rejected","Rejected",rejected.length)
       +     seg("approved","Approved",approved.length)
@@ -677,7 +747,7 @@
   // Compact "today at a glance" board shown above the tabs on the official side.
   // Numbers are illustrative for the prototype (approved + returned + not-yet = expected).
   function todayBoard(){
-    var d = { expected:20, approved:10, changes:4, pending:6 };
+    var d = { expected:20, approved:5, changes:4, pending:11 };
     var done = d.approved + d.changes;                 // permits acted on so far
     var pct = Math.round(done / d.expected * 100);
     var bar = function(cls,n){ return n ? '<span class="tb-fill '+cls+'" style="flex:'+n+'"></span>' : ''; };
@@ -692,7 +762,7 @@
       + '<div class="tb-bar">'+bar("approved",d.approved)+bar("changes",d.changes)+bar("pending",d.pending)+'</div>'
       + '<div class="tb-legend">'
       +   stat("approved",d.approved,"Approved")
-      +   stat("changes",d.changes,"Sent back")
+      +   stat("changes",d.changes,"Changes requested")
       +   stat("pending",d.pending,"Not in yet")
       + '</div>'
       + '</div>';
@@ -707,7 +777,7 @@
     return '<div class="permit-card '+(soon?"soon":"")+'" data-action="open" data-id="'+p.id+'">'
       + hazBadge(p.typeId)
       + '<div class="pc-main">'
-      +   '<div class="pc-top"><span class="serial">'+esc(p.serial)+'</span></div>'
+      +   '<div class="pc-top"><span class="serial">'+esc(p.serial)+'</span>'+statusChip(p.status)+'</div>'
       +   '<div class="title">'+esc(p.title||t.name)+'</div>'
       +   '<div class="meta">'
       +     '<div class="row">'+t.icon+' '+esc(t.name)+' · 👷 '+esc(p.createdByName)+'</div>'
@@ -720,7 +790,7 @@
     return '<div class="permit-card" data-action="open" data-id="'+p.id+'">'
       + hazBadge(p.typeId)
       + '<div class="pc-main">'
-      +   '<div class="pc-top"><span class="serial">'+esc(p.serial)+'</span></div>'
+      +   '<div class="pc-top"><span class="serial">'+esc(p.serial)+'</span>'+statusChip(p.status)+'</div>'
       +   '<div class="title">'+esc(p.title||t.name)+'</div>'
       +   '<div class="meta"><div class="row">👷 '+esc(p.createdByName)+' · '+(p.decision?esc(rel(p.decision.at)):"")+'</div></div>'
       + '</div><div class="chev">›</div></div>';
@@ -820,10 +890,6 @@
   }
   function resetDemoRow(){
     return '<div class="set-section"><div class="card set-card">'
-      + '<div class="set-row">'
-      +   '<div class="st-txt"><b>Reset demo data</b><span>Restore the prototype to its starting permits and settings.</span></div>'
-      +   '<button class="btn btn-ghost sm" data-action="reset-demo">↺ Reset</button>'
-      + '</div>'
       + '<div class="set-row">'
       +   '<div class="st-txt"><b>Sign out</b><span>Return to the login screen.</span></div>'
       +   '<button class="btn btn-ghost sm" data-action="sign-out">↪ Sign out</button>'
