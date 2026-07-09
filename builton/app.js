@@ -505,108 +505,20 @@
 
   /* ======================================================================
      SCREEN: Login — SSO gate shown before the app (mockup only)
+     Matches the Figma design: assets/bilton-logo.png + assets/login-crane-
+     illustration.png, centered copy, single yellow "Log in" button.
   ====================================================================== */
-  // The BiltOn hard-hat mark used as the "O" of the wordmark (and on the SSO chip).
-  function hardHat(cls, fill){
-    return '<svg class="'+cls+'" viewBox="0 0 100 70" aria-hidden="true" fill="'+fill+'">'
-      + '<path d="M14 52 a36 36 0 0 1 72 0 z"/>'          // dome
-      + '<rect x="37" y="2" width="26" height="16" rx="8"/>'  // top ridge
-      + '<rect x="2" y="52" width="96" height="16" rx="8"/>'  // brim
-      + '</svg>';
-  }
-
   function loginScreen(){
-    // Hand-drawn crawler-crane scene on cream paper — ink line-art with a warm
-    // orange skyline and yellow accents, recreating the brand illustration.
-    var INK = '#1f2023', ACC = '#d9924f', YEL = '#FFC400';
-    var crane = '<svg class="login-crane" viewBox="0 0 720 420" fill="none" stroke="'+INK+'" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
-      // --- warm orange skyline, left cluster ---
-      + '<g stroke="'+ACC+'">'
-      +   '<path d="M56 390 v-64 a17 17 0 0 1 34 0 v64"/>'
-      +   '<path d="M104 390 v-104 h54 v104"/>'
-      +   '<path d="M170 390 v-76 h38 v76"/><path d="M189 314 v-16"/>'
-      + '</g>'
-      + '<g fill="'+ACC+'" stroke="none">'
-      +   '<rect x="114" y="300" width="10" height="14"/><rect x="134" y="300" width="10" height="14"/>'
-      +   '<rect x="114" y="326" width="10" height="14"/><rect x="134" y="326" width="10" height="14"/>'
-      +   '<rect x="114" y="352" width="10" height="14"/><rect x="134" y="352" width="10" height="14"/>'
-      +   '<rect x="178" y="326" width="8" height="11"/><rect x="192" y="326" width="8" height="11"/>'
-      +   '<rect x="178" y="348" width="8" height="11"/><rect x="192" y="348" width="8" height="11"/>'
-      +   '<rect x="69" y="344" width="9" height="12"/>'
-      + '</g>'
-      // --- skyline behind the crane ---
-      + '<g stroke="'+ACC+'">'
-      +   '<path d="M362 390 v-66 h34 v66"/><path d="M404 390 v-92 h48 v92"/>'
-      +   '<path d="M458 390 v-38 a11 11 0 0 1 22 0 v38"/>'
-      + '</g>'
-      + '<g fill="'+ACC+'" stroke="none">'
-      +   '<rect x="412" y="312" width="9" height="12"/><rect x="430" y="312" width="9" height="12"/>'
-      +   '<rect x="412" y="336" width="9" height="12"/><rect x="430" y="336" width="9" height="12"/>'
-      +   '<rect x="370" y="336" width="8" height="11"/><rect x="384" y="336" width="8" height="11"/>'
-      + '</g>'
-      // --- cloud + bird ---
-      + '<path stroke="'+ACC+'" d="M560 104 a13 13 0 0 1 22 -9 a15 15 0 0 1 29 -3 a11 11 0 0 1 17 12 z"/>'
-      + '<path d="M586 80 q5 -6 10 0 q5 -6 10 0"/>'
-      // --- dirt mound + debris ---
-      + '<path d="M66 390 C 96 344 138 310 196 302 C 250 306 296 342 330 390"/>'
-      + '<g fill="'+INK+'" stroke="none">'
-      +   '<circle cx="150" cy="352" r="1.4"/><circle cx="170" cy="338" r="1.4"/><circle cx="196" cy="330" r="1.4"/>'
-      +   '<circle cx="220" cy="336" r="1.4"/><circle cx="240" cy="350" r="1.4"/><circle cx="184" cy="356" r="1.4"/>'
-      +   '<circle cx="210" cy="362" r="1.4"/><circle cx="160" cy="368" r="1.4"/><circle cx="232" cy="368" r="1.4"/>'
-      +   '<circle cx="196" cy="346" r="1.4"/><circle cx="130" cy="370" r="1.4"/><circle cx="256" cy="366" r="1.4"/>'
-      + '</g>'
-      + '<path d="M118 378 l26 -5 l1.5 5 l-26 5 z"/><circle cx="160" cy="384" r="3"/><circle cx="288" cy="378" r="3"/><path d="M262 384 l14 -3"/>'
-      // --- crane: tracks, deck, cab, housing ---
-      + '<rect x="478" y="346" width="196" height="44" rx="22"/>'
-      + '<circle cx="512" cy="368" r="13"/><circle cx="640" cy="368" r="13"/>'
-      + '<circle cx="556" cy="381" r="4"/><circle cx="580" cy="381" r="4"/><circle cx="604" cy="381" r="4"/>'
-      + '<rect x="468" y="318" width="212" height="28" rx="4"/>'
-      + '<rect x="482" y="262" width="74" height="56" rx="6"/>'
-      + '<rect x="490" y="270" width="42" height="28" rx="3"/><path d="M496 292 l28 -18"/>'
-      + '<rect x="560" y="270" width="118" height="48" rx="6"/>'
-      + '<rect x="570" y="280" width="20" height="28" rx="3" fill="'+YEL+'"/>'
-      + '<path d="M640 278 v32 M648 278 v32 M656 278 v32 M664 278 v32"/>'
-      + '<rect x="598" y="254" width="8" height="16"/>'
-      // --- rear gantry + backstay cable ---
-      + '<path d="M598 270 L622 224 L648 270 M606 250 h32"/>'
-      + '<path d="M348 64 L622 224" stroke-width="2"/>'
-      // --- lattice boom ---
-      + '<path d="M530 302 L352 72 M512 284 L338 56 M506 300 h32"/>'
-      + '<path stroke-width="2" d="M521 291 L491 257 L494 256 L463 220 L466 219 L435 184 L437 182 L408 147 L409 146 L380 111 L381 109 L352 74"/>'
-      + '<path d="M338 56 L352 72 M322 42 h36 M330 42 L338 56"/>'
-      + '<rect x="320" y="32" width="16" height="10" rx="2"/><circle cx="342" cy="64" r="4"/>'
-      // --- hoist line + yellow hook block ---
-      + '<path d="M340 68 V238"/>'
-      + '<rect x="332" y="238" width="16" height="15" rx="3" fill="'+YEL+'"/>'
-      + '<path d="M340 253 c1 8 -3 13 -9 13 c-6 0 -10 -5 -8 -11"/>'
-      // --- sapling + grass, right ---
-      + '<path d="M690 390 c0 -16 -2 -30 -6 -44 M684 352 c-8 -8 -14 -10 -20 -10 M685 348 c8 -10 14 -13 20 -13"/>'
-      + '<g fill="'+INK+'" stroke="none">'
-      +   '<ellipse cx="662" cy="338" rx="9" ry="5"/><ellipse cx="707" cy="331" rx="9" ry="5"/><ellipse cx="682" cy="322" rx="10" ry="6"/>'
-      + '</g>'
-      + '<path d="M652 390 q3 -9 6 0 M660 392 q3 -10 6 0 M710 391 q3 -9 6 0"/>'
-      // --- ground texture ---
-      + '<path stroke-width="2" d="M58 397 h7 M84 401 h5 M128 396 h6 M300 398 h7 M338 401 h5 M366 397 h5 M452 400 h6 M560 399 h6 M700 398 h6 M676 402 h4"/>'
-      + '</svg>';
     return ''
       + '<div class="login">'
-      +   '<div class="login-bg"></div>'
-      +   crane
       +   '<div class="login-inner">'
-      +     '<div class="login-top">'
-      +       '<div class="login-logo"><span class="lw">Bilt</span>'+hardHat("ll-hat", YEL)+'<span class="lw">n</span></div>'
-      +       '<div class="login-tag">Permit to Work</div>'
-      +     '</div>'
+      +     '<img class="login-logo-img" src="assets/bilton-logo.png" alt="BiltOn"/>'
+      +     '<img class="login-crane-img" src="assets/login-crane-illustration.png" alt=""/>'
       +     '<div class="login-card">'
-      +       '<div class="lc-hi">Welcome back 👷</div>'
       +       '<h2>Sign in to your site</h2>'
-      +       '<p>Request, review and approve permits — from the field, on your phone.</p>'
-      +       '<button class="sso-btn" data-action="sso-login">'
-      +         '<span class="sso-ic">'+hardHat("", "#17181a")+'</span><span>Continue with Company SSO</span><span class="sso-arrow">›</span>'
-      +       '</button>'
-      +       '<div class="sso-note">Single sign-on via your BiltOn work account</div>'
+      +       '<p>Request, review, Approve permits</p>'
+      +       '<button class="login-btn" data-action="sso-login">Log in</button>'
       +     '</div>'
-      +     '<div class="login-foot">🔒 Secured by BiltOn · your role and site are set by your company</div>'
       +   '</div>'
       + '</div>';
   }

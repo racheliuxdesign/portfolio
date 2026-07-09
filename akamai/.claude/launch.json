@@ -6,6 +6,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev", "--", "--port", "5180", "--strictPort"],
       "port": 5180
+    },
+    {
+      "name": "builton",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "cd /Users/racheli/workshop/builton && npm run dev -- -p 3101"],
+      "port": 3101
     }
   ]
 }
