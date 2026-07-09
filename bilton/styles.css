@@ -538,6 +538,8 @@ body {
 .btn:active { transform: scale(.98); }
 .btn-primary { background: var(--brand-600); color: #fff; box-shadow: 0 6px 16px rgba(22,87,160,.28); }
 .btn-primary:active { filter: brightness(.96); }
+.btn-review  { background: var(--brand-500); color: #fff; box-shadow: 0 6px 16px rgba(31,116,208,.26); }
+.btn-review:active { filter: brightness(.96); }
 .btn-ghost { background: var(--canvas); color: var(--ink); }
 .btn-outline { background: var(--surface); color: var(--brand-600); border: 1.5px solid var(--brand-100); }
 .btn-approve { background: var(--approved); color: #fff; box-shadow: 0 6px 16px rgba(26,127,75,.28); }

@@ -1150,7 +1150,7 @@
 
     var actions = decided
       ? ''
-      : '<div class="actionbar"><button class="btn btn-primary" data-action="decide-open" data-id="'+p.id+'">Approve permit</button></div>';
+      : '<div class="actionbar"><button class="btn btn-review" data-action="decide-open" data-id="'+p.id+'">Review &amp; decide</button></div>';
 
     return ''
       + '<div class="appbar"><button class="iconbtn" data-action="go" data-to="home">‹</button><div style="flex:1"><div class="ab-title">'+esc(p.serial)+'</div><div class="ab-sub">'+statusLabel(p.status)+'</div></div>'+statusChip(p.status)+'</div>'
