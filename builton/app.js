@@ -157,6 +157,24 @@
     official:{ name:"Dana Osei",   org:"HSE Officer · Site Authority", initials:"DO" }
   };
 
+  // Per-role notification & workflow preferences (Settings screen).
+  function defaultSettings(){
+    return {
+      foreman: {
+        voiceRing:true, ringtone:"Chime", vibrate:true, pushDecisions:true,
+        autoPingUnapproved:true, quietHours:false
+      },
+      official: {
+        dueSoonAlerts:true, dueSoonLead:"1 hour before", newPermitPush:true,
+        escalate:true, escalateAfter:"15 minutes",
+        highRiskFirst:true, requireSignature:true,
+        voiceRing:true, ringtone:"Spoken voice",
+        outOfOffice:false, delegate:"— None —",
+        dailyDigest:true, digestTime:"07:30", quietHours:false
+      }
+    };
+  }
+
   /* ----------------------------------------------------------------------
      2. State + persistence
   ---------------------------------------------------------------------- */
@@ -256,10 +274,12 @@
 
     state = {
       role:"foreman",
+      authed:false,
       screen:{ name:"home" },
       seq:143,
       officialSort:"start",
       templates:DEFAULT_TEMPLATES.slice(),
+      settings:defaultSettings(),
       hideAiNotice:false,
       permits:permits,
       draft:null,
@@ -287,7 +307,18 @@
   function load() {
     try {
       var raw = localStorage.getItem(LS_KEY);
-      if (raw) { state = JSON.parse(raw); if(!state.officialSort) state.officialSort="start"; if(!state.templates||!state.templates.length) state.templates=DEFAULT_TEMPLATES.slice(); if(state.hideAiNotice==null) state.hideAiNotice=false; return true; }
+      if (raw) {
+        state = JSON.parse(raw);
+        if(!state.officialSort) state.officialSort="start";
+        if(!state.templates||!state.templates.length) state.templates=DEFAULT_TEMPLATES.slice();
+        if(state.hideAiNotice==null) state.hideAiNotice=false;
+        // merge in any settings keys added since this device last saved
+        var def=defaultSettings();
+        if(!state.settings) state.settings=def;
+        else { state.settings.foreman=Object.assign({}, def.foreman, state.settings.foreman);
+               state.settings.official=Object.assign({}, def.official, state.settings.official); }
+        return true;
+      }
     } catch(e){}
     return false;
   }
@@ -330,15 +361,118 @@
   /* ----------------------------------------------------------------------
      4. Navigation + render
   ---------------------------------------------------------------------- */
-  function go(name, params){ state.screen={ name:name, params:params||{} }; save(); render(); var b=$(".body"); if(b) b.scrollTop=0; }
+  function go(name, params){ pendingDecision=null; state.screen={ name:name, params:params||{} }; save(); render(); var b=$(".body"); if(b) b.scrollTop=0; }
 
   var SCREENS = {}; // name -> function(params) => html
 
   function render() {
+    // Auth gate: before sign-in, the login page owns the whole screen and the
+    // desktop role-switcher aside is hidden.
+    document.body.classList.toggle("pre-auth", !state.authed);
+    if (!state.authed) { el("app").innerHTML = loginScreen(); afterRender(); renderNotes(); return; }
     var s = SCREENS[state.screen.name] || SCREENS.home;
     el("app").innerHTML = s(state.screen.params || {});
     updateAsideSelection();
     afterRender();
+    renderNotes();
+  }
+
+  /* ----------------------------------------------------------------------
+     Desktop presenter notes: short "why we designed it this way" copy that
+     changes with whatever screen is currently on the phone. Purely a
+     presentation aid — no effect on app state.
+  ---------------------------------------------------------------------- */
+  var NOTES = {
+    login: { eyebrow:"Sign-in", items:[
+      { h:"SSO, not a new password", p:"The permit app rides on BiltOn's existing company login — one fewer credential for a foreman to remember on site, provisioned centrally by IT." },
+      { h:"One door, two roles", p:"Foreman and Site Official sign in through the identical screen; the account itself determines which home screen and permissions they land on next." }
+    ]},
+    home: {
+      foreman: { eyebrow:"My Permits · Foreman", items:[
+        { h:"Action-needed rises to the top", p:"Permits returned as “Changes required” are ranked above everything else — a correction sitting unseen is the biggest risk to a job starting late." },
+        { h:"View sorted by permit's status", p:"Instead of searching and scrolling to the wanted permit alongside irrelevant permits, the permits are sorted by their status, making it much easier to be found." },
+        { h:"A nudge before it's late", p:"If a submitted permit's start time is approaching and it's still pending, a banner lets the foreman proactively ping the official instead of just waiting." },
+        { h:"Reachable with a thumb", p:"The floating “+ New permit” button stays in thumb range, because this flow is meant to be filled out standing on site, not at a desk." }
+      ]},
+      official: { eyebrow:"Approvals · Site Official", items:[
+        { h:"Pending means “still my job”", p:"A freshly submitted permit and one the foreman is revising after a return both show as Pending — the official has no outstanding action on either." },
+        { h:"Today, at a glance", p:"The mini progress board answers “how am I doing today” in one glance — reviewed vs. still outstanding — before scrolling into the list." },
+        { h:"Soonest start sorts first", p:"Default sort is by scheduled start time, so the permit that would block a crew soonest is always the one on top." }
+      ]}
+    },
+    pickType: { eyebrow:"New permit · Step 1", items:[
+      { h:"Type decides the form", p:"Choosing the hazard type loads the correct JSON-defined safety checklist — hot work, confined space, electrical, or height — so nobody fills out irrelevant fields." },
+      { h:"Four types, not a blank form", p:"Constraining the choice to the site's actual permitted hazard categories keeps every request scoped and quick to review." },
+      { h:"Content scalability", p:"This page can hold a handful of types or a lot of them and still look good, thanks to the card-based structure. If the list grows large, a search box is a natural addition." }
+    ]},
+    create: [
+      { eyebrow:"New permit · Step 2 of 3 · Details", items:[
+        { h:"Auto-filled fields using AI & GPS", p:"Filling out a form can be tedious, so saving the user time by pre-filling fields is a big help. We can suggest permit titles generated by our AI engine, and auto-fill the job location by matching the user's GPS position to sites already in the system, or by cross-referencing a schedule of where they're assigned to work that day." },
+        { h:"Voice-to-text & templates", p:"On a construction site, people work from their phones — typing a long comment or description is hard, especially in bright sun or with dirty, gloved hands. It's much easier to record a comment and let the system transcribe it to text. And when someone repeats the same comment for a specific situation, they can save it as a template and reuse it in a single tap." },
+        { h:"Dividing a large form into smaller chunks (wizard)", p:[
+          "The goal was to avoid overwhelming users with one long, never-ending form. Instead, the process is broken into smaller, easy-to-digest steps using a wizard — reducing cognitive load and helping users focus on one task at a time.",
+          "This matters even more on mobile, where long forms quickly become frustrating and hard to navigate. Presenting only the information relevant to the current step keeps the experience light and manageable.",
+          "A progress indicator shows how many steps the wizard contains. Setting clear expectations helps users understand where they are in the process, how much is left, and gives them confidence to continue."
+        ] }
+      ]},
+      { eyebrow:"New permit · Step 2 of 3 · Safety form", items:[
+        { h:"The reusable custom-forms system", p:"This step renders BiltOn's existing composable form components from a JSON schema — the same engine other features use — not a one-off form." },
+        { h:"Dictation for gloved hands", p:"Hold-to-record turns spoken notes into text for free-text fields, because typing a paragraph one-handed on a ladder isn't realistic." }
+      ]},
+      { eyebrow:"New permit · Step 3 of 3 · Review", items:[
+        { h:"What you see is what they see", p:"The review screen reuses the exact summary component the Site Official will see when deciding — no surprises, no separate “preview” formatting." },
+        { h:"Serial number on submit", p:"A site-unique serial is issued only once submitted, so drafts don't consume numbers and the record starts at the moment of accountability." }
+      ]}
+    ],
+    detail: {
+      foreman: { eyebrow:"Permit detail · Foreman", items:[
+        { h:"The banner explains the “why”", p:"Rather than a bare status chip, the banner always states who decided and, for changes or rejections, exactly what comment they left." },
+        { h:"One tap to revise", p:"A returned permit shows a single primary action, Revise & resubmit, which reopens the same 3-step flow pre-filled with the previous answers." }
+      ]},
+      official: { eyebrow:"Permit detail · Site Official", items:[
+        { h:"Time-critical is called out", p:"If a permit's start is close and it's still undecided, a banner flags it above the request details — surfaced by urgency, not just list order." },
+        { h:"A full audit trail", p:"Every submission, return and decision is logged with actor, timestamp, comment and signature — the permit trail is the first thing regulators and insurers review." }
+      ]}
+    },
+    settings: {
+      foreman: { eyebrow:"Settings · Foreman", items:[
+        { h:"Ring loud enough to hear on site", p:"Voice ring lets a decision cut through site noise — spoken aloud, not just a silent push a foreman might not see for an hour." },
+        { h:"Auto-chase, not manual nagging", p:"Auto-chasing an unapproved permit near its start time turns a stressful last-minute call into a background nudge the app sends for you." }
+      ]},
+      official: { eyebrow:"Settings · Site Official", items:[
+        { h:"Alerts tuned to the stakes", p:"A configurable lead time before a pending permit's start warns the official early enough to act, not just after a crew is already idle." },
+        { h:"Coverage when you're off-site", p:"Delegating to a backup approver directly addresses the paper process's biggest failure mode: approvals stalling when the one signer isn't around." }
+      ]}
+    },
+    confirm: { eyebrow:"Submitted", items:[
+      { h:"Preview the other side", p:"“Preview the approver's view” lets a foreman see exactly what the official will see next — useful here, and a good habit for checking your own submission." },
+      { h:"A confirmation screen, not just a toast", p:"The serial number gives the foreman something concrete to reference on site, rather than a toast that disappears in three seconds." }
+    ]},
+    decided: { eyebrow:"Decision recorded", items:[
+      { h:"Closing the loop", p:"The official sees the same weight of confirmation the foreman gets on submit — reinforcing that a decision is a real, recorded action, not a quick swipe." }
+    ]}
+  };
+
+  function currentNotes(){
+    if (!state.authed) return NOTES.login;
+    var name = state.screen.name;
+    if (name==="home") return NOTES.home[state.role];
+    if (name==="create") return NOTES.create[state.createStep] || NOTES.create[0];
+    if (name==="detail") return NOTES.detail[state.role];
+    if (name==="settings") return NOTES.settings[state.role];
+    return NOTES[name] || null;
+  }
+  function renderNotes(){
+    var host = el("stageNotes"); if (!host) return;
+    var d = currentNotes();
+    if (!d) { host.innerHTML=""; return; }
+    host.innerHTML = '<div class="sn-eyebrow">'+esc(d.eyebrow)+'</div>'
+      + d.items.map(function(it){
+          var paras = Array.isArray(it.p) ? it.p : [it.p];
+          return '<div class="sn-item"><h4>'+esc(it.h)+'</h4>'
+            + paras.map(function(t){ return '<p>'+esc(t)+'</p>'; }).join("")
+            + '</div>';
+        }).join("");
   }
   function updateAsideSelection() {
     document.querySelectorAll(".role-card").forEach(function(c){
@@ -357,7 +491,124 @@
   }
   function bell() {
     var list = state.notif[state.role], unread = list.filter(function(n){return n.unread;}).length;
-    return '<button class="iconbtn ghost" data-action="notif">🔔'+(unread?'<span class="dot">'+unread+'</span>':'')+'</button>';
+    return '<button class="iconbtn ghost" data-action="notif" aria-label="Notifications">🔔'+(unread?'<span class="dot">'+unread+'</span>':'')+'</button>';
+  }
+  function gear() {
+    return '<button class="iconbtn ghost" data-action="settings" aria-label="Settings">'
+      + '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">'
+      +   '<line x1="4" y1="8" x2="20" y2="8"/><circle cx="9" cy="8" r="2.6" fill="var(--surface)"/>'
+      +   '<line x1="4" y1="16" x2="20" y2="16"/><circle cx="15" cy="16" r="2.6" fill="var(--surface)"/>'
+      + '</svg></button>';
+  }
+  // Settings + bell, side by side (bell on the right), for the home appbars.
+  function homeActions(){ return '<div class="ab-actions">'+gear()+bell()+'</div>'; }
+
+  /* ======================================================================
+     SCREEN: Login — SSO gate shown before the app (mockup only)
+  ====================================================================== */
+  // The BiltOn hard-hat mark used as the "O" of the wordmark (and on the SSO chip).
+  function hardHat(cls, fill){
+    return '<svg class="'+cls+'" viewBox="0 0 100 70" aria-hidden="true" fill="'+fill+'">'
+      + '<path d="M14 52 a36 36 0 0 1 72 0 z"/>'          // dome
+      + '<rect x="37" y="2" width="26" height="16" rx="8"/>'  // top ridge
+      + '<rect x="2" y="52" width="96" height="16" rx="8"/>'  // brim
+      + '</svg>';
+  }
+
+  function loginScreen(){
+    // Hand-drawn crawler-crane scene on cream paper — ink line-art with a warm
+    // orange skyline and yellow accents, recreating the brand illustration.
+    var INK = '#1f2023', ACC = '#d9924f', YEL = '#FFC400';
+    var crane = '<svg class="login-crane" viewBox="0 0 720 420" fill="none" stroke="'+INK+'" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+      // --- warm orange skyline, left cluster ---
+      + '<g stroke="'+ACC+'">'
+      +   '<path d="M56 390 v-64 a17 17 0 0 1 34 0 v64"/>'
+      +   '<path d="M104 390 v-104 h54 v104"/>'
+      +   '<path d="M170 390 v-76 h38 v76"/><path d="M189 314 v-16"/>'
+      + '</g>'
+      + '<g fill="'+ACC+'" stroke="none">'
+      +   '<rect x="114" y="300" width="10" height="14"/><rect x="134" y="300" width="10" height="14"/>'
+      +   '<rect x="114" y="326" width="10" height="14"/><rect x="134" y="326" width="10" height="14"/>'
+      +   '<rect x="114" y="352" width="10" height="14"/><rect x="134" y="352" width="10" height="14"/>'
+      +   '<rect x="178" y="326" width="8" height="11"/><rect x="192" y="326" width="8" height="11"/>'
+      +   '<rect x="178" y="348" width="8" height="11"/><rect x="192" y="348" width="8" height="11"/>'
+      +   '<rect x="69" y="344" width="9" height="12"/>'
+      + '</g>'
+      // --- skyline behind the crane ---
+      + '<g stroke="'+ACC+'">'
+      +   '<path d="M362 390 v-66 h34 v66"/><path d="M404 390 v-92 h48 v92"/>'
+      +   '<path d="M458 390 v-38 a11 11 0 0 1 22 0 v38"/>'
+      + '</g>'
+      + '<g fill="'+ACC+'" stroke="none">'
+      +   '<rect x="412" y="312" width="9" height="12"/><rect x="430" y="312" width="9" height="12"/>'
+      +   '<rect x="412" y="336" width="9" height="12"/><rect x="430" y="336" width="9" height="12"/>'
+      +   '<rect x="370" y="336" width="8" height="11"/><rect x="384" y="336" width="8" height="11"/>'
+      + '</g>'
+      // --- cloud + bird ---
+      + '<path stroke="'+ACC+'" d="M560 104 a13 13 0 0 1 22 -9 a15 15 0 0 1 29 -3 a11 11 0 0 1 17 12 z"/>'
+      + '<path d="M586 80 q5 -6 10 0 q5 -6 10 0"/>'
+      // --- dirt mound + debris ---
+      + '<path d="M66 390 C 96 344 138 310 196 302 C 250 306 296 342 330 390"/>'
+      + '<g fill="'+INK+'" stroke="none">'
+      +   '<circle cx="150" cy="352" r="1.4"/><circle cx="170" cy="338" r="1.4"/><circle cx="196" cy="330" r="1.4"/>'
+      +   '<circle cx="220" cy="336" r="1.4"/><circle cx="240" cy="350" r="1.4"/><circle cx="184" cy="356" r="1.4"/>'
+      +   '<circle cx="210" cy="362" r="1.4"/><circle cx="160" cy="368" r="1.4"/><circle cx="232" cy="368" r="1.4"/>'
+      +   '<circle cx="196" cy="346" r="1.4"/><circle cx="130" cy="370" r="1.4"/><circle cx="256" cy="366" r="1.4"/>'
+      + '</g>'
+      + '<path d="M118 378 l26 -5 l1.5 5 l-26 5 z"/><circle cx="160" cy="384" r="3"/><circle cx="288" cy="378" r="3"/><path d="M262 384 l14 -3"/>'
+      // --- crane: tracks, deck, cab, housing ---
+      + '<rect x="478" y="346" width="196" height="44" rx="22"/>'
+      + '<circle cx="512" cy="368" r="13"/><circle cx="640" cy="368" r="13"/>'
+      + '<circle cx="556" cy="381" r="4"/><circle cx="580" cy="381" r="4"/><circle cx="604" cy="381" r="4"/>'
+      + '<rect x="468" y="318" width="212" height="28" rx="4"/>'
+      + '<rect x="482" y="262" width="74" height="56" rx="6"/>'
+      + '<rect x="490" y="270" width="42" height="28" rx="3"/><path d="M496 292 l28 -18"/>'
+      + '<rect x="560" y="270" width="118" height="48" rx="6"/>'
+      + '<rect x="570" y="280" width="20" height="28" rx="3" fill="'+YEL+'"/>'
+      + '<path d="M640 278 v32 M648 278 v32 M656 278 v32 M664 278 v32"/>'
+      + '<rect x="598" y="254" width="8" height="16"/>'
+      // --- rear gantry + backstay cable ---
+      + '<path d="M598 270 L622 224 L648 270 M606 250 h32"/>'
+      + '<path d="M348 64 L622 224" stroke-width="2"/>'
+      // --- lattice boom ---
+      + '<path d="M530 302 L352 72 M512 284 L338 56 M506 300 h32"/>'
+      + '<path stroke-width="2" d="M521 291 L491 257 L494 256 L463 220 L466 219 L435 184 L437 182 L408 147 L409 146 L380 111 L381 109 L352 74"/>'
+      + '<path d="M338 56 L352 72 M322 42 h36 M330 42 L338 56"/>'
+      + '<rect x="320" y="32" width="16" height="10" rx="2"/><circle cx="342" cy="64" r="4"/>'
+      // --- hoist line + yellow hook block ---
+      + '<path d="M340 68 V238"/>'
+      + '<rect x="332" y="238" width="16" height="15" rx="3" fill="'+YEL+'"/>'
+      + '<path d="M340 253 c1 8 -3 13 -9 13 c-6 0 -10 -5 -8 -11"/>'
+      // --- sapling + grass, right ---
+      + '<path d="M690 390 c0 -16 -2 -30 -6 -44 M684 352 c-8 -8 -14 -10 -20 -10 M685 348 c8 -10 14 -13 20 -13"/>'
+      + '<g fill="'+INK+'" stroke="none">'
+      +   '<ellipse cx="662" cy="338" rx="9" ry="5"/><ellipse cx="707" cy="331" rx="9" ry="5"/><ellipse cx="682" cy="322" rx="10" ry="6"/>'
+      + '</g>'
+      + '<path d="M652 390 q3 -9 6 0 M660 392 q3 -10 6 0 M710 391 q3 -9 6 0"/>'
+      // --- ground texture ---
+      + '<path stroke-width="2" d="M58 397 h7 M84 401 h5 M128 396 h6 M300 398 h7 M338 401 h5 M366 397 h5 M452 400 h6 M560 399 h6 M700 398 h6 M676 402 h4"/>'
+      + '</svg>';
+    return ''
+      + '<div class="login">'
+      +   '<div class="login-bg"></div>'
+      +   crane
+      +   '<div class="login-inner">'
+      +     '<div class="login-top">'
+      +       '<div class="login-logo"><span class="lw">Bilt</span>'+hardHat("ll-hat", YEL)+'<span class="lw">n</span></div>'
+      +       '<div class="login-tag">Permit to Work</div>'
+      +     '</div>'
+      +     '<div class="login-card">'
+      +       '<div class="lc-hi">Welcome back 👷</div>'
+      +       '<h2>Sign in to your site</h2>'
+      +       '<p>Request, review and approve permits — from the field, on your phone.</p>'
+      +       '<button class="sso-btn" data-action="sso-login">'
+      +         '<span class="sso-ic">'+hardHat("", "#17181a")+'</span><span>Continue with Company SSO</span><span class="sso-arrow">›</span>'
+      +       '</button>'
+      +       '<div class="sso-note">Single sign-on via your BiltOn work account</div>'
+      +     '</div>'
+      +     '<div class="login-foot">🔒 Secured by BiltOn · your role and site are set by your company</div>'
+      +   '</div>'
+      + '</div>';
   }
   function statusLabel(st){ return (state.role==="official" && OFFICIAL_LABELS[st]) ? OFFICIAL_LABELS[st] : STATUS[st].label; }
   function statusChip(st){
@@ -386,7 +637,7 @@
     var needAction = mine.filter(function(p){return p.status==="changes_required";}).length;
 
     var chips='';
-    [["pending","Waiting for approval"],["changes_required","Change requested"],["rejected","Rejected"],["approved","Approved"]].forEach(function(f){
+    [["draft","Draft"],["pending","Waiting for approval"],["changes_required","Change requested"],["rejected","Rejected"],["approved","Approved"]].forEach(function(f){
       if (!counts[f[0]]) return;
       chips += '<button class="seg '+(filter===f[0]?"active":"")+'" data-action="foreman-filter" data-f="'+f[0]+'">'+f[1]+(counts[f[0]]?'<span class="n">'+counts[f[0]]+'</span>':'')+'</button>';
     });
@@ -394,14 +645,14 @@
     var cards = shown.map(foremanCard).join("");
     if (!shown.length) cards = '<div class="empty"><div class="ic">📋</div><b>No permits here yet</b><p>Tap <b>New permit</b> to request authorization for hazardous work.</p></div>';
 
-    var actionBanner = needAction ? '<div class="callout changes" data-action="open" data-id="'+changesId(mine)+'"><span class="ci">↩</span><div><b>'+needAction+' permit needs your changes</b>The site official sent it back — tap to fix and resubmit.</div></div>' : '';
+    var actionBanner = needAction ? '<div class="callout rejected" data-action="open" data-id="'+changesId(mine)+'"><span class="ci">↩</span><div><b>'+needAction+' permit needs your changes</b>The site official sent it back — tap to fix and resubmit.</div></div>' : '';
 
     var soonPending = mine.filter(function(p){
       var diff = new Date(p.start).getTime()-Date.now();
       return p.status==="pending" && diff>0 && diff < 8*3600000;
     }).sort(function(a,b){ return new Date(a.start)-new Date(b.start); })[0];
     if (soonPending && state.pingDismissed===soonPending.id) soonPending = null;
-    var pingBanner = soonPending ? '<div class="callout changes ping-banner">'
+    var pingBanner = soonPending ? '<div class="callout rejected ping-banner">'
       + '<button class="cl-close" data-action="ping-dismiss" data-id="'+soonPending.id+'" aria-label="Dismiss">✕</button>'
       + '<span class="ci">⏱️</span>'
       + '<div><b>'+esc(soonPending.serial)+' '+esc(startsIn(soonPending.start))+' — still not approved</b>'
@@ -409,7 +660,7 @@
       + '<button class="ping-btn" data-action="ping-official" data-id="'+soonPending.id+'">🔔 Ping the site official</button></div></div>' : '';
 
     return ''
-      + '<div class="appbar brandbar"><div style="flex:1"><div class="ab-title">My Permits</div><div class="ab-sub">'+esc(SITE.name)+'</div></div>'+bell()+'</div>'
+      + '<div class="appbar brandbar"><div style="flex:1"><div class="ab-title">My Permits</div><div class="ab-sub">'+esc(SITE.name)+'</div></div>'+homeActions()+'</div>'
       + roleStrip()
       + '<div class="body">'
       +   pingBanner
@@ -451,6 +702,15 @@
       ? function(a,b){ return new Date(a.createdAt)-new Date(b.createdAt); }   // oldest request first
       : function(a,b){ return new Date(a.start)-new Date(b.start); });          // soonest start time
 
+    // Under "Soonest start time", time-critical permits (starting within 90 min) always
+    // float to the very top — ahead of overdue ones too — since they're the most urgent
+    // to act on. Order within each group is preserved from the sort above.
+    if (sortKey==="start") {
+      var soonFirst = list.filter(function(p){ return p.status==="pending" && isSoon(p.start); });
+      var rest = list.filter(function(p){ return !(p.status==="pending" && isSoon(p.start)); });
+      list = soonFirst.concat(rest);
+    }
+
     var cards;
     if (!list.length) {
       var em = {
@@ -489,7 +749,7 @@
     };
 
     return ''
-      + '<div class="appbar brandbar"><div style="flex:1"><div class="ab-title">Approvals</div><div class="ab-sub">'+esc(SITE.name)+'</div></div>'+bell()+'</div>'
+      + '<div class="appbar brandbar"><div style="flex:1"><div class="ab-title">Approvals</div><div class="ab-sub">'+esc(SITE.name)+'</div></div>'+homeActions()+'</div>'
       + roleStrip()
       + '<div class="body">'
       +   todayBoard()
@@ -552,6 +812,143 @@
       +   '<div class="title">'+esc(p.title||t.name)+'</div>'
       +   '<div class="meta"><div class="row">👷 '+esc(p.createdByName)+' · '+(p.decision?esc(rel(p.decision.at)):"")+'</div></div>'
       + '</div><div class="chev">›</div></div>';
+  }
+
+  /* ======================================================================
+     SCREEN: Settings — role-aware notification & workflow preferences
+  ====================================================================== */
+  SCREENS.settings = function(){
+    return state.role==="foreman" ? foremanSettings() : officialSettings();
+  };
+
+  // ---- little builders for a consistent settings list ----
+  function setToggle(key, label, desc){
+    var on = !!state.settings[state.role][key];
+    return '<div class="set-row"><div class="st-txt"><b>'+esc(label)+'</b>'+(desc?'<span>'+esc(desc)+'</span>':'')+'</div>'
+      + '<button class="switch '+(on?"on":"")+'" data-action="setting-toggle" data-key="'+key+'" role="switch" aria-checked="'+on+'" aria-label="'+esc(label)+'"><span class="knob"></span></button></div>';
+  }
+  function setSelect(key, label, opts){
+    var v=state.settings[state.role][key];
+    return '<div class="set-sub"><label>'+esc(label)+'</label>'
+      + '<select class="select" data-setting="'+key+'">'+opts.map(function(o){return '<option '+(v===o?"selected":"")+'>'+esc(o)+'</option>';}).join("")+'</select></div>';
+  }
+  function ringPreview(){
+    return '<div class="set-sub"><button class="btn btn-outline sm ring-btn" data-action="ring-preview">🔊 Preview ring</button></div>';
+  }
+  function setSection(title, rowsHTML, note){
+    return '<div class="set-section"><div class="set-title">'+esc(title)+'</div>'
+      + '<div class="card set-card">'+rowsHTML+'</div>'
+      + (note?'<div class="set-note">'+esc(note)+'</div>':'')+'</div>';
+  }
+  function settingsAppbar(){
+    return '<div class="appbar"><button class="iconbtn" data-action="go" data-to="home" aria-label="Back">‹</button>'
+      + '<div style="flex:1"><div class="ab-title">Settings</div><div class="ab-sub">'+(state.role==="foreman"?"Foreman":"Site Official")+' · '+esc(SITE.name)+'</div></div></div>';
+  }
+
+  function foremanSettings(){
+    var s=state.settings.foreman;
+    return ''
+      + settingsAppbar()
+      + roleStrip()
+      + '<div class="body">'
+      + setSection("Alerts",
+          setToggle("voiceRing","Voice ring when a permit is ready","Ring or speak the decision aloud the moment approval lands — so you hear it over site noise, gloves on.")
+          + (s.voiceRing ? setSelect("ringtone","Ring sound",["Chime","Bell","Siren","Spoken voice"]) + ringPreview() : "")
+          + setToggle("vibrate","Vibrate on alerts")
+          + setToggle("pushDecisions","Push notifications for decisions","Approved, changes requested, or rejected."),
+          "Time-critical safety alerts always come through — even on silent or in quiet hours.")
+      + setSection("Reminders",
+          setToggle("autoPingUnapproved","Auto-chase approval near start time","If a submitted permit still isn’t approved as its start time nears, nudge the site official for you."))
+      + setSection("Quiet hours",
+          setToggle("quietHours","Enable quiet hours (22:00 – 06:00)","Mute routine notifications overnight."),
+          "Safety-critical alerts still ring during quiet hours.")
+      + resetDemoRow()
+      + '</div>';
+  }
+
+  function officialSettings(){
+    var s=state.settings.official;
+    return ''
+      + settingsAppbar()
+      + roleStrip()
+      + '<div class="body">'
+      + setSection("Approval alerts",
+          setToggle("dueSoonAlerts","Alert me when a start time is approaching","Notify me about permits still awaiting my approval as their scheduled start nears — so no crew waits on a sign-off.")
+          + (s.dueSoonAlerts ? setSelect("dueSoonLead","Alert me this early",["30 minutes before","1 hour before","90 minutes before","2 hours before"]) : "")
+          + setToggle("newPermitPush","Notify me on every new submission")
+          + setToggle("escalate","Escalate un-reviewed permits","Re-alert me if a pending permit sits without a decision.")
+          + (s.escalate ? setSelect("escalateAfter","Escalate after",["10 minutes","15 minutes","30 minutes"]) : ""),
+          "So a job never starts late, and nothing hazardous slips through un-reviewed.")
+      + setSection("Prioritisation",
+          setToggle("highRiskFirst","Surface high-risk permits first","Hot work, confined space, electrical and height jump to the top of your list.")
+          + sortDefaultRow())
+      + setSection("Decision defaults",
+          setToggle("requireSignature","Require my signature to approve","Legally binds your approval to the record. Recommended on.")
+          + setToggle("voiceRing","Voice ring for time-critical approvals","Sound an alert for permits starting very soon.")
+          + (s.voiceRing ? setSelect("ringtone","Ring sound",["Chime","Bell","Siren","Spoken voice"]) + ringPreview() : ""))
+      + setSection("Coverage",
+          setToggle("outOfOffice","I’m off-site — delegate approvals")
+          + (s.outOfOffice ? setSelect("delegate","Backup approver",["— None —","Sam Whitfield · Deputy HSE","Ops control room"]) : "")
+          + setToggle("dailyDigest","Daily digest of site permit activity")
+          + (s.dailyDigest ? setSelect("digestTime","Send digest at",["06:30","07:30","08:00"]) : ""),
+          "Approvals stall when the safety officer isn’t on-site — a backup keeps work moving safely.")
+      + setSection("Quiet hours",
+          setToggle("quietHours","Enable quiet hours (22:00 – 06:00)","Mute routine notifications overnight."),
+          "Time-critical approval alerts always break through quiet hours.")
+      + resetDemoRow()
+      + '</div>';
+  }
+
+  // Default sort is shared with the Approvals list's sort control (state.officialSort).
+  function sortDefaultRow(){
+    var v=state.officialSort||"start";
+    return '<div class="set-sub"><label>Default sort order</label><select class="select" data-setting-sort>'
+      + '<option value="start" '+(v==="start"?"selected":"")+'>Soonest start time</option>'
+      + '<option value="oldest" '+(v==="oldest"?"selected":"")+'>Oldest request first</option></select></div>';
+  }
+  function resetDemoRow(){
+    return '<div class="set-section"><div class="card set-card">'
+      + '<div class="set-row">'
+      +   '<div class="st-txt"><b>Reset demo data</b><span>Restore the prototype to its starting permits and settings.</span></div>'
+      +   '<button class="btn btn-ghost sm" data-action="reset-demo">↺ Reset</button>'
+      + '</div>'
+      + '<div class="set-row">'
+      +   '<div class="st-txt"><b>Sign out</b><span>Return to the login screen.</span></div>'
+      +   '<button class="btn btn-ghost sm" data-action="sign-out">↪ Sign out</button>'
+      + '</div>'
+      + '</div></div>';
+  }
+
+  /* ---- "voice ring" preview: synthesised tone or spoken announcement ---- */
+  function playRing(kind){
+    try {
+      if (navigator.vibrate && state.settings[state.role].vibrate!==false) navigator.vibrate(kind==="Siren"?[120,60,120]:60);
+      if (kind==="Spoken voice" && window.speechSynthesis){
+        var msg = state.role==="official"
+          ? "Approval needed. A permit starts in one hour and is still awaiting your sign-off."
+          : "Your permit is approved. You are cleared to begin work.";
+        var u=new SpeechSynthesisUtterance(msg); u.rate=1; u.pitch=1;
+        window.speechSynthesis.cancel(); window.speechSynthesis.speak(u);
+        toast("Playing spoken alert","ok"); return;
+      }
+      var AC=window.AudioContext||window.webkitAudioContext;
+      if(!AC){ toast("Audio not supported here","warn"); return; }
+      var ctx=new AC();
+      var seq = kind==="Siren" ? [[660,0],[880,.2],[660,.4],[880,.6]]
+              : kind==="Bell"  ? [[988,0],[740,.16]]
+              :                  [[988,0],[1319,.12],[1568,.24]]; // Chime
+      var type = kind==="Siren" ? "sawtooth" : "sine";
+      seq.forEach(function(n){
+        var o=ctx.createOscillator(), g=ctx.createGain();
+        o.type=type; o.frequency.value=n[0]; o.connect(g); g.connect(ctx.destination);
+        var t0=ctx.currentTime+n[1];
+        g.gain.setValueAtTime(0,t0);
+        g.gain.linearRampToValueAtTime(.25,t0+.02);
+        g.gain.exponentialRampToValueAtTime(.001,t0+.26);
+        o.start(t0); o.stop(t0+.28);
+      });
+      toast("Playing "+kind.toLowerCase(),"ok");
+    } catch(e){ toast("Couldn’t play the preview","warn"); }
   }
 
   /* ======================================================================
@@ -841,18 +1238,23 @@
   }
 
   var sigState = { drawing:false, dirty:false, canvas:null, ctx:null };
-  function decisionSheet(p, action){
+  // Tracks an in-progress official decision (Approve/Changes/Reject) so that opening
+  // the Templates sub-sheet and picking one can return the user to that same decision
+  // sheet — with the comment merged in — instead of just closing the whole modal.
+  var pendingDecision = null; // { id, action } | null
+  function decisionSheet(p, action, prefillComment){
+    var sigReq = state.settings.official.requireSignature;
     var cfg = {
       approved:{title:"Approve permit",sub:"Authorize the work. Your signature is legally attached to this decision.",btn:"Approve & sign",cls:"btn-approve",commentReq:false,sign:true},
       changes_required:{title:"Request changes",sub:"Tell the foreman exactly what to fix so they can resubmit.",btn:"Send back to foreman",cls:"btn-changes",commentReq:true,sign:false},
       rejected:{title:"Reject permit",sub:"Formally deny this request. A reason is recommended.",btn:"Reject permit",cls:"btn-danger",commentReq:false,sign:false}
     }[action];
-    var sig = cfg.sign ? '<div class="field"><label>Signature <span class="req">*</span></label>'
+    var sig = cfg.sign ? '<div class="field"><label>Signature '+(sigReq?'<span class="req">*</span>':'<span class="muted" style="font-weight:500">(optional)</span>')+'</label>'
       + '<div class="sigpad-wrap" id="sigWrap"><canvas class="sigpad" id="sigPad"></canvas><div class="sig-ph">✍️ Sign here</div></div>'
       + '<div class="sig-actions"><span class="muted" style="font-size: 13px">'+esc(USERS.official.name)+' · '+esc(fmtDT(isoLocal(new Date())))+'</span><button class="link" data-action="sig-clear">Clear</button></div></div>' : '';
     return '<h3>'+cfg.title+'</h3><p class="sub">'+cfg.sub+'</p>'
       + '<div class="field"><label>Comment'+(cfg.commentReq?' <span class="req">*</span>':' <span class="muted" style="font-weight:500">(optional)</span>')+'</label>'
-      + taWrap('<textarea class="textarea has-tools" id="decisionComment" placeholder="'+(action==="changes_required"?"e.g. Add the LOTO padlock ID and confirm proved-dead reading.":action==="rejected"?"e.g. Work conflicts with crane lift in the same zone.":"e.g. Approved — keep the fire watch on for 60 min after.")+'"></textarea>')
+      + taWrap('<textarea class="textarea has-tools" id="decisionComment" placeholder="'+(action==="changes_required"?"e.g. Add the LOTO padlock ID and confirm proved-dead reading.":action==="rejected"?"e.g. Work conflicts with crane lift in the same zone.":"e.g. Approved — keep the fire watch on for 60 min after.")+'">'+esc(prefillComment||"")+'</textarea>')
       + '<div class="err" id="commentErr" style="color:var(--danger);font-size: 13px;margin-top:6px;display:none;font-weight:600">Please add a comment so the foreman knows what to change.</div></div>'
       + sig
       + '<button class="btn '+cfg.cls+' btn-block" data-action="confirm-decision" data-id="'+p.id+'" data-decision="'+action+'">'+cfg.btn+'</button>';
@@ -951,8 +1353,8 @@
     if (action==="changes_required" && !comment) { el("commentErr").style.display="block"; return; }
     var signature=null;
     if (action==="approved") {
-      if (!sigState.dirty) { toast("Please add your signature to approve","warn"); return; }
-      signature = sigState.canvas.toDataURL("image/png");
+      if (state.settings.official.requireSignature && !sigState.dirty) { toast("Please add your signature to approve","warn"); return; }
+      if (sigState.dirty) signature = sigState.canvas.toDataURL("image/png");
     }
     var at=isoLocal(new Date());
     p.status=action;
@@ -965,6 +1367,7 @@
     state.notif.foreman.unshift({ id:"n"+Date.now(), at:at, unread:true, permitId:p.id, kind:action, text:txt });
     // mark related official notif read
     state.notif.official.forEach(function(n){ if(n.permitId===p.id) n.unread=false; });
+    pendingDecision = null;
     save(); closeSheet();
     go("decided",{ id:id, mode:action });
   }
@@ -996,7 +1399,21 @@
         }
         break;
       }
+      case "sso-login": {
+        state.authed = true; state.screen = { name:"home" }; save(); render();
+        toast("Signed in — welcome to BiltOn","ok"); break;
+      }
+      case "sign-out": {
+        state.authed = false; save(); render();
+        toast("Signed out","ok"); break;
+      }
       case "notif": openSheet(notifSheet()); break;
+      case "settings": go("settings"); break;
+      case "setting-toggle": {
+        var sk=t.getAttribute("data-key"); var bag=state.settings[state.role];
+        bag[sk]=!bag[sk]; save(); render(); break;
+      }
+      case "ring-preview": playRing(state.settings[state.role].ringtone); break;
       case "reset-demo": closeSheet(); resetDemo(); break;
       case "open-notif": {
         var nid=t.getAttribute("data-nid"); markNotifRead(nid); closeSheet(); go("detail",{ id:t.getAttribute("data-id") }); break;
@@ -1061,11 +1478,12 @@
   document.addEventListener("click", function(e){
     var t=e.target.closest('[data-action="decision-pick"]'); if(!t) return;
     var id=t.getAttribute("data-id"), d=t.getAttribute("data-d"), p=byId(id);
+    pendingDecision = { id:id, action:d };
     openSheet(decisionSheet(p,d));
     if (d==="approved") setTimeout(initSignature,60);
   });
 
-  el("scrim").addEventListener("click", closeSheet);
+  el("scrim").addEventListener("click", function(){ pendingDecision=null; closeSheet(); });
 
   /* ======================================================================
      In-field text tools: Templates + hold-to-dictate microphone
@@ -1110,13 +1528,15 @@
     openSheet(html);
   }
   function insertTemplate(txt){
+    var merged = null;
     if (activeTA){
       var cur = activeTA.value.trim();
-      activeTA.value = cur ? (cur + "\n" + txt) : txt;
+      merged = cur ? (cur + "\n" + txt) : txt;
+      activeTA.value = merged;
       activeTA.dispatchEvent(new Event("input", { bubbles:true }));
       save();
     }
-    closeSheet();
+    returnToDecisionOrClose(merged);
     toast("Template added to your comment","ok");
   }
   function saveTemplate(){
@@ -1124,8 +1544,20 @@
     if (!txt){ toast("Type a comment first, then save it","warn"); return; }
     if (state.templates.indexOf(txt) === -1) state.templates.unshift(txt);
     save();
-    closeSheet();
+    returnToDecisionOrClose(txt);
     toast("Saved to your templates","ok");
+  }
+  // After the Templates sub-sheet is used, either return to the decision sheet it was
+  // opened from (comment merged in, so the official can still review before confirming)
+  // or, when Templates was opened from a normal form field, just close as before.
+  function returnToDecisionOrClose(commentText){
+    if (pendingDecision){
+      var p = byId(pendingDecision.id);
+      openSheet(decisionSheet(p, pendingDecision.action, commentText));
+      if (pendingDecision.action==="approved") setTimeout(initSignature,60);
+    } else {
+      closeSheet();
+    }
   }
 
   /* ---- hold-to-dictate microphone (simulated speech-to-text) ---- */
@@ -1212,6 +1644,8 @@
     var f=e.target.getAttribute && e.target.getAttribute("data-form");
     if (m && state.draft){ state.draft[m]=e.target.value; syncMap(m); }
     else if (f && state.draft){ state.draft.form[f]=e.target.value; }
+    var stx=e.target.getAttribute && e.target.getAttribute("data-setting-text");
+    if (stx){ state.settings[state.role][stx]=e.target.value; save(); }
     // don't save on every keystroke for perf; save on nav. But cheap enough:
   });
   document.addEventListener("change", function(e){
@@ -1219,6 +1653,10 @@
     if (f && state.draft){ state.draft.form[f]=e.target.value; save(); }
     var m=e.target.getAttribute && e.target.getAttribute("data-model");
     if (m && state.draft){ state.draft[m]=e.target.value; save(); }
+    // settings selects
+    var st=e.target.getAttribute && e.target.getAttribute("data-setting");
+    if (st){ state.settings[state.role][st]=e.target.value; save(); }
+    if (e.target.hasAttribute && e.target.hasAttribute("data-setting-sort")){ state.officialSort=e.target.value; save(); }
   });
   function syncMap(m){ if(m==="zone"){ var tag=document.querySelector(".map-preview .zone-tag"); if(tag) tag.textContent=state.draft.zone||"Set the zone below"; } }
 
