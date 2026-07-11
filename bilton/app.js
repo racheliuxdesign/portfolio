@@ -773,7 +773,7 @@
     var t=TYPES[p.typeId], soon=p.status==="pending" && isSoon(p.start);
     var line2 = p.status==="changes_required"
       ? '🕒 Awaiting foreman revision'
-      : (soon?'⏱️ <b style="color:var(--changes)">'+esc(startsIn(p.start))+'</b>':'🕒 '+esc(startsIn(p.start)))+'  ·  📍 '+esc(p.zone);
+      : (soon?'⏱️ <span style="color:var(--changes);font-weight:600">'+esc(startsIn(p.start))+'</span>':'🕒 '+esc(startsIn(p.start)))+'  ·  📍 '+esc(p.zone);
     return '<div class="permit-card '+(soon?"soon":"")+'" data-action="open" data-id="'+p.id+'">'
       + hazBadge(p.typeId)
       + '<div class="pc-main">'
