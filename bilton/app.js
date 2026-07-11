@@ -85,14 +85,15 @@
     rejected:         { label:"Rejected",         icon:"✕" }
   };
 
-  // Site Official sees the same states through a review lens. A submitted permit —
-  // and one the foreman is still revising after a return — both read as "Pending"
-  // on this side, because the official has no outstanding change to make on either.
+  // Site Official sees the same states through a review lens. "pending" means the permit
+  // is awaiting the official's review (their turn); "changes_required" means it was returned
+  // and is now awaiting the foreman's revision (not the official's turn) — so the two are
+  // kept distinct here rather than collapsed into one "Pending" bucket.
   var OFFICIAL_LABELS = {
     draft:            "Draft",
-    pending:          "Pending",
+    pending:          "Awaiting review",
     approved:         "Approved",
-    changes_required: "Pending",
+    changes_required: "Changes requested",
     rejected:         "Rejected"
   };
 
@@ -589,10 +590,7 @@
   }
   function statusLabel(st){ return (state.role==="official" && OFFICIAL_LABELS[st]) ? OFFICIAL_LABELS[st] : STATUS[st].label; }
   function statusChip(st){
-    // On the official side a returned permit is shown as plain "Pending", so it carries
-    // pending styling too — the "changes required" flag belongs to the foreman's view.
-    var cls = (state.role==="official" && st==="changes_required") ? "pending" : st;
-    return '<span class="chip '+cls+'"><span class="cdot"></span>'+statusLabel(st)+'</span>';
+    return '<span class="chip '+st+'"><span class="cdot"></span>'+statusLabel(st)+'</span>';
   }
   function hazBadge(typeId, size){ var t=TYPES[typeId]; return '<div class="hz" style="background:'+t.bg+';color:'+t.color+'">'+t.icon+'</div>'; }
 
@@ -665,15 +663,21 @@
   }
 
   function officialHome() {
-    // "Pending" holds everything still in the approval loop: freshly submitted (pending)
-    // + permits the foreman is revising after a return (changes_required).
-    var open = state.permits.filter(function(p){ return p.status==="pending" || p.status==="changes_required"; });
+    // "Awaiting review" = freshly submitted permits that need the official's decision (their turn).
+    // "Changes requested" = permits the official returned; now awaiting the foreman's revision.
+    // These are kept separate so the queue never mixes "my turn" with "their turn".
+    var awaiting = state.permits.filter(function(p){ return p.status==="pending"; });
+    var changes = state.permits.filter(function(p){ return p.status==="changes_required"; });
     var rejected = state.permits.filter(function(p){ return p.status==="rejected"; });
     var approved = state.permits.filter(function(p){ return p.status==="approved"; });
     var all = state.permits.filter(function(p){ return p.status!=="draft"; });
 
     var tab = state.screen.params && state.screen.params.tab || "pending";
-    var list = tab==="all" ? all : tab==="rejected" ? rejected : tab==="approved" ? approved : open;
+    var list = tab==="all" ? all
+             : tab==="changes" ? changes
+             : tab==="rejected" ? rejected
+             : tab==="approved" ? approved
+             : awaiting;
 
     var sortKey = state.officialSort || "start";
     list.sort(sortKey==="oldest"
@@ -692,7 +696,8 @@
     var cards;
     if (!list.length) {
       var em = {
-        pending:  { ic:"✅", b:"Nothing to approve", p:"No permits are in the approval loop right now." },
+        pending:  { ic:"✅", b:"Nothing to review",  p:"No permits are waiting for your decision right now." },
+        changes:  { ic:"↩", b:"Nothing returned",   p:"Permits you send back for changes will appear here." },
         rejected: { ic:"🚫", b:"Nothing rejected",   p:"Permits you reject will appear here." },
         approved: { ic:"✅", b:"Nothing approved yet",p:"Permits you approve will appear here." },
         all:      { ic:"📋", b:"No permits yet",      p:"Every permit for this site will appear here." }
@@ -700,7 +705,7 @@
       cards = '<div class="empty"><div class="ic">'+em.ic+'</div><b>'+em.b+'</b><p>'+em.p+'</p></div>';
     } else {
       cards = list.map(function(p){
-        return (p.status==="pending" || p.status==="changes_required") ? officialCard(p) : officialDecidedCard(p);
+        return p.status==="pending" ? officialCard(p) : officialDecidedCard(p);
       }).join("");
     }
 
@@ -736,7 +741,8 @@
       +   todayBoard()
       +   '<div class="segmented">'
       +     seg("all","All",all.length)
-      +     seg("pending","Pending",open.length)
+      +     seg("pending","Awaiting review",awaiting.length)
+      +     seg("changes","Changes",changes.length)
       +     seg("rejected","Rejected",rejected.length)
       +     seg("approved","Approved",approved.length)
       +   '</div>'
@@ -745,35 +751,40 @@
   }
 
   // Compact "today at a glance" board shown above the tabs on the official side.
-  // Numbers are illustrative for the prototype (approved + returned + not-yet = expected).
+  // Counts are derived from real permit state — no fabricated "expected" figure.
   function todayBoard(){
-    var d = { expected:20, approved:5, changes:4, pending:11 };
-    var done = d.approved + d.changes;                 // permits acted on so far
-    var pct = Math.round(done / d.expected * 100);
+    var subs = state.permits.filter(function(p){ return p.status!=="draft"; });
+    var approved = subs.filter(function(p){ return p.status==="approved"; }).length;
+    var changes  = subs.filter(function(p){ return p.status==="changes_required"; }).length;
+    var rejected = subs.filter(function(p){ return p.status==="rejected"; }).length;
+    var pending  = subs.filter(function(p){ return p.status==="pending"; }).length;
+    var total = subs.length;
+    var reviewed = approved + changes + rejected;      // permits the official has acted on
+    var pct = total ? Math.round(reviewed / total * 100) : 0;
     var bar = function(cls,n){ return n ? '<span class="tb-fill '+cls+'" style="flex:'+n+'"></span>' : ''; };
     var stat = function(cls,n,label){
-      return '<div class="tb-stat"><span class="tb-dot '+cls+'"></span><b>'+n+'</b><span>'+label+'</span></div>';
+      return n ? '<div class="tb-stat"><span class="tb-dot '+cls+'"></span><b>'+n+'</b><span>'+label+'</span></div>' : '';
     };
     return '<div class="todaycard">'
       + '<div class="tb-head">'
-      +   '<div class="tb-title">Today’s permits<span>'+d.expected+' expected · '+pct+'% reviewed</span></div>'
-      +   '<div class="tb-count">'+done+'<em>/'+d.expected+'</em></div>'
+      +   '<div class="tb-title">Today’s permits<span>'+total+' submitted · '+pct+'% reviewed</span></div>'
+      +   '<div class="tb-count">'+reviewed+'<em>/'+total+'</em></div>'
       + '</div>'
-      + '<div class="tb-bar">'+bar("approved",d.approved)+bar("changes",d.changes)+bar("pending",d.pending)+'</div>'
+      + '<div class="tb-bar">'+bar("approved",approved)+bar("changes",changes)+bar("rejected",rejected)+bar("pending",pending)+'</div>'
       + '<div class="tb-legend">'
-      +   stat("approved",d.approved,"Approved")
-      +   stat("changes",d.changes,"Changes requested")
-      +   stat("pending",d.pending,"Not in yet")
+      +   stat("approved",approved,"Approved")
+      +   stat("changes",changes,"Changes requested")
+      +   stat("rejected",rejected,"Rejected")
+      +   stat("pending",pending,"Awaiting review")
       + '</div>'
       + '</div>';
   }
 
 
+
   function officialCard(p){
-    var t=TYPES[p.typeId], soon=p.status==="pending" && isSoon(p.start);
-    var line2 = p.status==="changes_required"
-      ? '🕒 Awaiting foreman revision'
-      : (soon?'⏱️ <span style="color:var(--changes);font-weight:600">'+esc(startsIn(p.start))+'</span>':'🕒 '+esc(startsIn(p.start)))+'  ·  📍 '+esc(p.zone);
+    var t=TYPES[p.typeId], soon=isSoon(p.start);
+    var line2 = (soon?'⏱️ <span style="color:var(--changes);font-weight:600">'+esc(startsIn(p.start))+'</span>':'🕒 '+esc(startsIn(p.start)))+'  ·  📍 '+esc(p.zone);
     return '<div class="permit-card '+(soon?"soon":"")+'" data-action="open" data-id="'+p.id+'">'
       + hazBadge(p.typeId)
       + '<div class="pc-main">'
@@ -1139,7 +1150,9 @@
   }
 
   function officialDetail(p){
-    var decided = p.status==="approved" || p.status==="rejected";
+    // changes_required counts as "decided" from the official's side — they've already acted
+    // (returned it) and it's now awaiting the foreman's revision, so no decision button shows.
+    var decided = p.status==="approved" || p.status==="rejected" || p.status==="changes_required";
     var banner="";
     if (p.status==="approved") banner='<div class="callout approved"><span class="ci">✓</span><div><b>You approved this permit</b>'+esc(fmtDT(p.decision.at))+(p.decision.comment?' · “'+esc(p.decision.comment)+'”':"")+'</div></div>';
     if (p.status==="changes_required") banner='<div class="callout changes"><span class="ci">↩</span><div><b>You returned this for changes</b>“'+esc(p.decision.comment)+'”</div></div>';

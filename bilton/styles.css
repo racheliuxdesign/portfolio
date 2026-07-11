@@ -14,9 +14,9 @@
 
   /* Status */
   --draft:    #6b7688;
-  --pending:  #b7791f;   --pending-bg:  #fdf3e2;
-  --approved: #1a7f4b;   --approved-bg: #e6f5ec;
-  --changes:  #b45309;   --changes-bg:  #fdf0e1;
+  --pending:  #c98a16;   --pending-bg:  #fdf5e3;
+  --approved: #059669;   --approved-bg: #e7f6ef;
+  --changes:  #d9531e;   --changes-bg:  #fcece2;
   --rejected: #c02b2b;   --rejected-bg: #fbe9e9;
 
   /* Hazard hues */
@@ -266,7 +266,7 @@ body {
 .permit-card .chev { align-self: center; color: var(--ink-3); font-size: 20px; }
 
 /* Urgency accent for approver queue */
-.permit-card.soon { border-color: #f4c9a0; }
+.permit-card.soon { border-color: #f7cf97; }
 
 /* ---------- Status chips ---------- */
 .chip {
@@ -278,7 +278,7 @@ body {
 .chip.draft    { color: var(--draft);    background: #eef0f4; }
 .chip.pending  { color: var(--pending);  background: var(--pending-bg); }
 .chip.approved { color: var(--approved); background: var(--approved-bg); }
-.chip.changes_required { color: var(--rejected); background: var(--rejected-bg); }
+.chip.changes_required { color: var(--changes); background: var(--changes-bg); }
 .chip.rejected { color: var(--rejected); background: var(--rejected-bg); }
 
 /* ---------- Segmented / filters ---------- */
@@ -309,14 +309,16 @@ body {
 .tb-fill { border-radius: 3px; }
 .tb-fill.approved { background: var(--approved); }
 .tb-fill.changes  { background: var(--changes); }
-.tb-fill.pending  { background: #d4d9e2; }
+.tb-fill.rejected { background: var(--rejected); }
+.tb-fill.pending  { background: var(--pending); }
 .tb-legend { display: flex; gap: 14px; flex-wrap: wrap; }
 .tb-stat { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; color: var(--ink-3); }
 .tb-stat b { font-size: 13.5px; font-weight: 700; color: var(--ink-1); }
 .tb-dot { width: 8px; height: 8px; border-radius: 3px; flex: 0 0 auto; }
 .tb-dot.approved { background: var(--approved); }
 .tb-dot.changes  { background: var(--changes); }
-.tb-dot.pending  { background: #b7bdc9; }
+.tb-dot.rejected { background: var(--rejected); }
+.tb-dot.pending  { background: var(--pending); }
 
 .sortbar {
   display: flex; align-items: center; justify-content: flex-end;
@@ -501,9 +503,9 @@ body {
 }
 .callout .ci { font-size: 17.5px; flex: 0 0 auto; margin-top: 1px; }
 .callout b { display: block; margin-bottom: 2px; }
-.callout.changes  { background: var(--changes-bg); color: #7c3d0a; }
+.callout.changes  { background: var(--changes-bg); color: #a53c12; }
 .callout.rejected { background: var(--rejected-bg); color: #8f1f1f; }
-.callout.approved { background: var(--approved-bg); color: #145c37; }
+.callout.approved { background: var(--approved-bg); color: #065f46; }
 .callout.info     { background: var(--brand-050); color: var(--brand-700); }
 .ping-btn {
   margin-top: 10px; display: inline-flex; align-items: center; gap: 6px;
@@ -542,7 +544,7 @@ body {
 .btn-review:active { filter: brightness(.96); }
 .btn-ghost { background: var(--canvas); color: var(--ink); }
 .btn-outline { background: var(--surface); color: var(--brand-600); border: 1.5px solid var(--brand-100); }
-.btn-approve { background: var(--approved); color: #fff; box-shadow: 0 6px 16px rgba(26,127,75,.28); }
+.btn-approve { background: var(--approved); color: #fff; box-shadow: 0 6px 16px rgba(5,150,105,.28); }
 .btn-changes { background: var(--changes); color: #fff; }
 .btn-reject  { background: var(--surface); color: var(--rejected); border: 1.5px solid var(--rejected-bg); }
 .btn-danger  { background: var(--rejected); color: #fff; }
@@ -624,10 +626,10 @@ canvas.sigpad { display: block; width: 100%; height: 130px; touch-action: none; 
 .confirm .seal {
   width: 92px; height: 92px; border-radius: 50%; margin: 0 auto 22px;
   display: grid; place-items: center; font-size: 48.5px; color: #fff;
-  background: linear-gradient(135deg, var(--approved), #34c1a5);
-  box-shadow: 0 12px 30px rgba(26,127,75,.35); animation: pop .4s cubic-bezier(.22,1.4,.5,1);
+  background: linear-gradient(135deg, var(--approved), #34d399);
+  box-shadow: 0 12px 30px rgba(5,150,105,.35); animation: pop .4s cubic-bezier(.22,1.4,.5,1);
 }
-.confirm.warn .seal { background: linear-gradient(135deg, var(--changes), #e0842f); box-shadow: 0 12px 30px rgba(180,83,9,.3); }
+.confirm.warn .seal { background: linear-gradient(135deg, var(--changes), #f0733a); box-shadow: 0 12px 30px rgba(217,83,30,.3); }
 @keyframes pop { 0%{ transform: scale(.4); opacity: 0; } 100%{ transform: scale(1); opacity: 1; } }
 .confirm h2 { font-size: 24px; margin: 0 0 6px; letter-spacing: -.02em; }
 .confirm p { font-size: 15.5px; color: var(--ink-2); margin: 0 auto 22px; max-width: 280px; line-height: 1.5; }
