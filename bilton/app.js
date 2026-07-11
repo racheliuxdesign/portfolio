@@ -696,7 +696,7 @@
     var approved = state.permits.filter(function(p){ return p.status==="approved"; });
     var all = state.permits.filter(function(p){ return p.status!=="draft"; });
 
-    var tab = state.screen.params && state.screen.params.tab || "pending";
+    var tab = state.screen.params && state.screen.params.tab || "all";
     var list = tab==="all" ? all
              : tab==="changes" ? changes
              : tab==="rejected" ? rejected
