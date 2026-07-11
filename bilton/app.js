@@ -338,9 +338,26 @@
       decision:{ action:"approved", by:USERS.official.name, at:nowShift(-190), comment:"Fire watch and gas test confirmed. Approved." }
     });
 
+    permits.push({
+      id:"p10", serial:serialFor(147), typeId:"height", status:"pending",
+      title:"Roof edge-protection install — Level 12", zone:"Level 12 · Roof perimeter", detail:"North & east parapet runs",
+      start:nowShift(240), end:nowShift(480), workers:3,
+      description:"Install temporary guardrail edge protection to the L12 roof perimeter ahead of waterproofing works.",
+      form:{ height:"41", access:"MEWP / roof access",
+             fall:["Full-body harness & lanyard","Guardrails / edge protection","Anchor points inspected"],
+             weather:"yes", notes:"Later shift — not time-critical. Exclusion zone below to be cordoned before start." },
+      createdBy:"foreman", createdByName:"Priya Nair", createdByOrg:"Apex Access", createdAt:nowShift(-20),
+      history:[
+        { action:"created", actor:"Priya Nair", at:nowShift(-24) },
+        { action:"submitted", actor:"Priya Nair", at:nowShift(-20) }
+      ],
+      decision:null
+    });
+
     state = {
       role:"foreman",
       authed:false,
+      theme:"light",
       screen:{ name:"home" },
       seq:147,
       officialSort:"start",
@@ -388,7 +405,7 @@
     } catch(e){}
     return false;
   }
-  function resetDemo() { var r = state.role; localStorage.removeItem(LS_KEY); seed(); state.authed = true; state.role = r; save(); go("home"); toast("Demo data reset","ok"); }
+  function resetDemo() { var r = state.role, th = state.theme; localStorage.removeItem(LS_KEY); seed(); state.authed = true; state.role = r; state.theme = th; save(); go("home"); toast("Demo data reset","ok"); }
 
   /* ----------------------------------------------------------------------
      3. Small utilities
@@ -423,6 +440,7 @@
     return "starts in "+Math.round(h/24)+" d";
   }
   function isSoon(s){ var diff=new Date(s).getTime()-Date.now(); return diff>0 && diff < 90*60000; }
+  function isOverdue(s){ return new Date(s).getTime()-Date.now() <= 0; }
 
   /* ----------------------------------------------------------------------
      4. Navigation + render
@@ -431,7 +449,13 @@
 
   var SCREENS = {}; // name -> function(params) => html
 
+  function applyTheme(){
+    var sw = el("screenWrap");
+    if (sw) sw.setAttribute("data-theme", state.theme==="dark" ? "dark" : "light");
+  }
+
   function render() {
+    applyTheme();
     // Auth gate: before sign-in, the login page owns the whole screen and the
     // desktop role-switcher aside is hidden.
     document.body.classList.toggle("pre-auth", !state.authed);
@@ -684,13 +708,15 @@
       ? function(a,b){ return new Date(a.createdAt)-new Date(b.createdAt); }   // oldest request first
       : function(a,b){ return new Date(a.start)-new Date(b.start); });          // soonest start time
 
-    // Under "Soonest start time", time-critical permits (starting within 90 min) always
-    // float to the very top — ahead of overdue ones too — since they're the most urgent
-    // to act on. Order within each group is preserved from the sort above.
+    // Under "Soonest start time", the most urgent pending permits float to the top:
+    // overdue (start already passed) first, then time-critical (starting within 90 min),
+    // then everything else. Within each group the ascending start-time order is preserved,
+    // so the permit that has been overdue longest sits at the very top.
     if (sortKey==="start") {
-      var soonFirst = list.filter(function(p){ return p.status==="pending" && isSoon(p.start); });
-      var rest = list.filter(function(p){ return !(p.status==="pending" && isSoon(p.start)); });
-      list = soonFirst.concat(rest);
+      var overdueFirst = list.filter(function(p){ return p.status==="pending" && isOverdue(p.start); });
+      var soonFirst = list.filter(function(p){ return p.status==="pending" && !isOverdue(p.start) && isSoon(p.start); });
+      var rest = list.filter(function(p){ return !(p.status==="pending" && (isOverdue(p.start) || isSoon(p.start))); });
+      list = overdueFirst.concat(soonFirst, rest);
     }
 
     var cards;
@@ -783,9 +809,11 @@
 
 
   function officialCard(p){
-    var t=TYPES[p.typeId], soon=isSoon(p.start);
-    var line2 = (soon?'⏱️ <span style="color:var(--changes);font-weight:600">'+esc(startsIn(p.start))+'</span>':'🕒 '+esc(startsIn(p.start)))+'  ·  📍 '+esc(p.zone);
-    return '<div class="permit-card '+(soon?"soon":"")+'" data-action="open" data-id="'+p.id+'">'
+    var t=TYPES[p.typeId], overdue=isOverdue(p.start), soon=!overdue && isSoon(p.start), urgent=overdue||soon;
+    var uColor = overdue ? "var(--rejected)" : "var(--changes)";
+    var line2 = (urgent?'⏱️ <span style="color:'+uColor+';font-weight:600">'+esc(startsIn(p.start))+'</span>':'🕒 '+esc(startsIn(p.start)))+'  ·  📍 '+esc(p.zone);
+    var cls = overdue ? "overdue" : (soon ? "soon" : "");
+    return '<div class="permit-card '+cls+'" data-action="open" data-id="'+p.id+'">'
       + hazBadge(p.typeId)
       + '<div class="pc-main">'
       +   '<div class="pc-top"><span class="serial">'+esc(p.serial)+'</span>'+statusChip(p.status)+'</div>'
@@ -838,12 +866,20 @@
       + '<div style="flex:1"><div class="ab-title">Settings</div><div class="ab-sub">'+(state.role==="foreman"?"Foreman":"Site Official")+' · '+esc(SITE.name)+'</div></div></div>';
   }
 
+  function appearanceSection(){
+    var on = (state.theme==="dark");
+    return setSection("Appearance",
+      '<div class="set-row"><div class="st-txt"><b>Dark mode</b><span>Easier on the eyes in low light — built for early starts and night shifts on site.</span></div>'
+      + '<button class="switch '+(on?"on":"")+'" data-action="theme-toggle" role="switch" aria-checked="'+on+'" aria-label="Dark mode"><span class="knob"></span></button></div>');
+  }
+
   function foremanSettings(){
     var s=state.settings.foreman;
     return ''
       + settingsAppbar()
       + roleStrip()
       + '<div class="body">'
+      + appearanceSection()
       + setSection("Alerts",
           setToggle("voiceRing","Voice ring when a permit is ready","Ring or speak the decision aloud the moment approval lands — so you hear it over site noise, gloves on.")
           + (s.voiceRing ? setSelect("ringtone","Ring sound",["Chime","Bell","Siren","Spoken voice"]) + ringPreview() : "")
@@ -865,6 +901,7 @@
       + settingsAppbar()
       + roleStrip()
       + '<div class="body">'
+      + appearanceSection()
       + setSection("Approval alerts",
           setToggle("dueSoonAlerts","Alert me when a start time is approaching","Notify me about permits still awaiting my approval as their scheduled start nears — so no crew waits on a sign-off.")
           + (s.dueSoonAlerts ? setSelect("dueSoonLead","Alert me this early",["30 minutes before","1 hour before","90 minutes before","2 hours before"]) : "")
@@ -1157,7 +1194,8 @@
     if (p.status==="approved") banner='<div class="callout approved"><span class="ci">✓</span><div><b>You approved this permit</b>'+esc(fmtDT(p.decision.at))+(p.decision.comment?' · “'+esc(p.decision.comment)+'”':"")+'</div></div>';
     if (p.status==="changes_required") banner='<div class="callout changes"><span class="ci">↩</span><div><b>You returned this for changes</b>“'+esc(p.decision.comment)+'”</div></div>';
     if (p.status==="rejected") banner='<div class="callout rejected"><span class="ci">✕</span><div><b>You rejected this permit</b>'+(p.decision.comment?'“'+esc(p.decision.comment)+'”':"")+'</div></div>';
-    if (!decided && isSoon(p.start)) banner='<div class="callout changes"><span class="ci">⏱️</span><div><b>Time-critical — '+esc(startsIn(p.start))+'</b>The crew is waiting on your decision to begin.</div></div>';
+    if (!decided && isOverdue(p.start)) banner='<div class="callout rejected"><span class="ci">⏱️</span><div><b>Overdue — '+esc(startsIn(p.start))+'</b>The scheduled start has already passed and the crew still can\'t begin. Decide now.</div></div>';
+    else if (!decided && isSoon(p.start)) banner='<div class="callout changes"><span class="ci">⏱️</span><div><b>Time-critical — '+esc(startsIn(p.start))+'</b>The crew is waiting on your decision to begin.</div></div>';
 
     var reqBar = '<div class="callout info"><span class="ci">👷</span><div><b>'+esc(p.createdByName)+(p.createdByOrg?' · '+esc(p.createdByOrg):"")+'</b>Submitted '+esc(rel(p.createdAt))+' · '+esc(startsIn(p.start))+'</div></div>';
 
@@ -1403,6 +1441,11 @@
       case "setting-toggle": {
         var sk=t.getAttribute("data-key"); var bag=state.settings[state.role];
         bag[sk]=!bag[sk]; save(); render(); break;
+      }
+      case "theme-toggle": {
+        state.theme = (state.theme==="dark") ? "light" : "dark";
+        save(); render();
+        toast(state.theme==="dark" ? "🌙 Dark mode on" : "☀️ Light mode on","ok"); break;
       }
       case "ring-preview": playRing(state.settings[state.role].ringtone); break;
       case "reset-demo": closeSheet(); resetDemo(); break;
@@ -1691,7 +1734,10 @@
   // reset its dismissal and guarantee a soon-starting pending permit exists for the foreman.
   (function ensurePingScenario(){
     state.pingDismissed = null;
-    var p = state.permits.filter(function(x){ return x.id==="p5"; })[0];
+    function find(id){ return state.permits.filter(function(x){ return x.id===id; })[0]; }
+
+    // p5 — the "starts soon" pending permit that drives the foreman ping banner.
+    var p = find("p5");
     if (p) { p.status="pending"; p.decision=null; p.start=nowShift(55); p.end=nowShift(180); }
     else {
       state.permits.push({
@@ -1706,6 +1752,33 @@
         history:[
           { action:"created", actor:USERS.foreman.name, at:nowShift(-45) },
           { action:"submitted", actor:USERS.foreman.name, at:nowShift(-40) }
+        ],
+        decision:null
+      });
+    }
+
+    // p3 (0140) — the overdue pending permit: its scheduled start has already passed,
+    // so it must sort to the very top and carry the strong "overdue" stroke.
+    var pd = find("p3");
+    if (pd) { pd.status="pending"; pd.decision=null; pd.start=nowShift(-34); pd.end=nowShift(210); }
+
+    // p10 (0147) — a pending permit that is NOT time-critical (starts hours from now),
+    // so the list shows all three tiers: overdue → time-critical → later.
+    var pl = find("p10");
+    if (pl) { pl.status="pending"; pl.decision=null; pl.start=nowShift(240); pl.end=nowShift(480); }
+    else {
+      state.permits.push({
+        id:"p10", serial:serialFor(147), typeId:"height", status:"pending",
+        title:"Roof edge-protection install — Level 12", zone:"Level 12 · Roof perimeter", detail:"North & east parapet runs",
+        start:nowShift(240), end:nowShift(480), workers:3,
+        description:"Install temporary guardrail edge protection to the L12 roof perimeter ahead of waterproofing works.",
+        form:{ height:"41", access:"MEWP / roof access",
+               fall:["Full-body harness & lanyard","Guardrails / edge protection","Anchor points inspected"],
+               weather:"yes", notes:"Later shift — not time-critical. Exclusion zone below to be cordoned before start." },
+        createdBy:"foreman", createdByName:"Priya Nair", createdByOrg:"Apex Access", createdAt:nowShift(-20),
+        history:[
+          { action:"created", actor:"Priya Nair", at:nowShift(-24) },
+          { action:"submitted", actor:"Priya Nair", at:nowShift(-20) }
         ],
         decision:null
       });

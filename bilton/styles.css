@@ -260,13 +260,14 @@ body {
 .permit-card .pc-main { flex: 1; min-width: 0; }
 .permit-card .pc-top { display: flex; align-items: center; gap: 8px; margin-bottom: 3px; }
 .permit-card .serial { font-size: 12.5px; font-weight: 700; color: var(--ink-3); letter-spacing: .01em; }
-.permit-card .title { font-size: 17px; font-weight: 600; letter-spacing: -.01em; margin: 1px 0 5px; }
+.permit-card .title { font-size: 17px; font-weight: 600; letter-spacing: -.01em; margin: 1px 0 5px; color: var(--ink); }
 .permit-card .meta { font-size: 14px; color: var(--ink-2); display: flex; flex-direction: column; gap: 3px; }
 .permit-card .meta .row { display: flex; align-items: center; gap: 6px; }
 .permit-card .chev { align-self: center; color: var(--ink-3); font-size: 20px; }
 
 /* Urgency accent for approver queue */
 .permit-card.soon { border-color: #f7cf97; }
+.permit-card.overdue { border-color: var(--rejected); box-shadow: 0 0 0 2px rgba(192,43,43,.18), var(--shadow-1); }
 
 /* ---------- Status chips ---------- */
 .chip {
@@ -301,7 +302,7 @@ body {
   box-shadow: 0 1px 2px rgba(16,24,40,.04);
 }
 .tb-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 11px; }
-.tb-title { font-size: 15px; font-weight: 700; color: var(--ink-1); line-height: 1.25; }
+.tb-title { font-size: 15px; font-weight: 700; color: var(--ink); line-height: 1.25; }
 .tb-title span { display: block; font-size: 12px; font-weight: 500; color: var(--ink-3); margin-top: 2px; }
 .tb-count { font-size: 24px; font-weight: 800; color: var(--brand-900); line-height: 1; white-space: nowrap; }
 .tb-count em { font-size: 14px; font-weight: 600; color: var(--ink-3); font-style: normal; }
@@ -313,7 +314,7 @@ body {
 .tb-fill.pending  { background: var(--pending); }
 .tb-legend { display: flex; gap: 14px; flex-wrap: wrap; }
 .tb-stat { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; color: var(--ink-3); }
-.tb-stat b { font-size: 13.5px; font-weight: 700; color: var(--ink-1); }
+.tb-stat b { font-size: 13.5px; font-weight: 700; color: var(--ink); }
 .tb-dot { width: 8px; height: 8px; border-radius: 3px; flex: 0 0 auto; }
 .tb-dot.approved { background: var(--approved); }
 .tb-dot.changes  { background: var(--changes); }
@@ -336,7 +337,7 @@ body {
 .sortdd-btn:active { background: #f2f3f5; }
 .sortdd.open .sortdd-btn { border-color: #c7ccd6; }
 .sortdd-btn .sdd-lbl { font-size: 13px; font-weight: 500; color: var(--ink-2); }
-.sortdd-btn .sdd-val { font-size: 13.5px; font-weight: 600; color: var(--ink-1); }
+.sortdd-btn .sdd-val { font-size: 13.5px; font-weight: 600; color: var(--ink); }
 .sortdd-btn .sdd-caret {
   font-size: 10px; color: var(--ink-2); margin-left: 1px;
   display: inline-flex; transition: transform .2s ease;
@@ -361,7 +362,7 @@ body {
 .sortdd-opt {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
   width: 100%; min-height: 44px; border: 0; background: transparent; cursor: pointer;
-  font-family: inherit; font-size: 15px; font-weight: 400; color: var(--ink-1);
+  font-family: inherit; font-size: 15px; font-weight: 400; color: var(--ink);
   padding: 0 16px; text-align: left;
   box-shadow: inset 0 .5px 0 rgba(0,0,0,.07);
 }
@@ -749,7 +750,7 @@ canvas.sigpad { display: block; width: 100%; height: 130px; touch-action: none; 
   display: flex; align-items: flex-start; gap: 8px; width: 100%; text-align: left;
   border: 1px solid var(--line); background: var(--surface); border-radius: 12px;
   padding: 12px 13px; cursor: pointer; font-family: var(--font);
-  font-size: 14.5px; line-height: 1.45; color: var(--ink-1); transition: background .1s, border-color .1s;
+  font-size: 14.5px; line-height: 1.45; color: var(--ink); transition: background .1s, border-color .1s;
 }
 .tpl-item:active { background: var(--brand-050); border-color: var(--brand-300, #b9c6e0); }
 .tpl-q { font-size: 22px; line-height: .8; color: var(--brand-500); font-weight: 800; flex: 0 0 auto; }
@@ -877,4 +878,97 @@ body.pre-auth .screen-wrap { background: #fbf7eb; } /* blend the statusbar strip
   .phone { width: 100vw; height: 100vh; max-width: 430px; border-radius: 0; padding: 0; }
   .screen-wrap { border-radius: 0; }
   .notch { display: none; }
+}
+
+/* ======================================================================
+   DARK MODE  — scoped to the phone screen (#screenWrap[data-theme=dark]).
+   Overrides design tokens so the token-based UI recolors wholesale, plus
+   targeted fixes where components hardcode light-only colors.
+   ====================================================================== */
+.screen-wrap[data-theme="dark"] {
+  --ink:      #e9eef7;
+  --ink-2:    #aeb9c9;
+  --ink-3:    #83909f;
+  --line:     #2b3648;
+  --line-2:   #212b3a;
+  --surface:  #171f2c;
+  --canvas:   #0e141f;
+
+  --brand-050: #14243a;
+  --brand-100: #1c3455;
+
+  --pending-bg:  #37300f;
+  --approved-bg: #0e3327;
+  --changes-bg:  #3a2413;
+  --rejected-bg: #3a1d1d;
+
+  --shadow-1: 0 1px 2px rgba(0,0,0,.4), 0 1px 3px rgba(0,0,0,.35);
+  --shadow-2: 0 8px 24px rgba(0,0,0,.5);
+  --shadow-3: 0 -10px 30px rgba(0,0,0,.55);
+
+  /* re-resolve inherited text color with the dark --ink (body sets color
+     from the light token, which would otherwise cascade in as dark navy) */
+  color: var(--ink);
+}
+
+/* neutral chip background */
+.screen-wrap[data-theme="dark"] .chip.draft { background: #232d3d; }
+
+/* brighten chip text against dark tints */
+.screen-wrap[data-theme="dark"] .chip.approved { color: #34d399; }
+.screen-wrap[data-theme="dark"] .chip.rejected { color: #f6807f; }
+.screen-wrap[data-theme="dark"] .chip.pending  { color: #e6b23e; }
+.screen-wrap[data-theme="dark"] .chip.changes_required { color: #f4884a; }
+
+/* callout text */
+.screen-wrap[data-theme="dark"] .callout.changes  { color: #f4884a; }
+.screen-wrap[data-theme="dark"] .callout.rejected { color: #f6807f; }
+.screen-wrap[data-theme="dark"] .callout.approved { color: #34d399; }
+.screen-wrap[data-theme="dark"] .callout.info     { color: #7fb4ee; }
+
+/* yes/no choice chips + ok value */
+.screen-wrap[data-theme="dark"] .choice.sel     { color: #7fb4ee; }
+.screen-wrap[data-theme="dark"] .choice.sel.yes { color: #34d399; }
+.screen-wrap[data-theme="dark"] .choice.sel.no  { color: #f6807f; }
+.screen-wrap[data-theme="dark"] .kv .v.ok       { color: #34d399; }
+
+/* segmented control active pill (brand-900 is too dark on dark) */
+.screen-wrap[data-theme="dark"] .seg.active {
+  background: var(--brand-500); border-color: var(--brand-500);
+}
+
+/* invalid field tint */
+.screen-wrap[data-theme="dark"] .field.invalid .input,
+.screen-wrap[data-theme="dark"] .field.invalid .select,
+.screen-wrap[data-theme="dark"] .field.invalid .textarea { background: #2a1a1c; }
+
+/* serial + signature accents */
+.screen-wrap[data-theme="dark"] .confirm .serial-badge .sv { color: #7fb4ee; }
+.screen-wrap[data-theme="dark"] .sig-actions .link { color: #7fb4ee; }
+
+/* textarea tool press state */
+.screen-wrap[data-theme="dark"] .ta-tool:active { background: #212b3a; }
+
+/* dashboard big count (brand-900 too dark on dark) */
+.screen-wrap[data-theme="dark"] .tb-count { color: #7fb4ee; }
+
+/* sort dropdown: button active + glass menu are light-only */
+.screen-wrap[data-theme="dark"] .sortdd-btn:active { background: #212b3a; }
+.screen-wrap[data-theme="dark"] .sortdd.open .sortdd-btn { border-color: #3a465b; }
+.screen-wrap[data-theme="dark"] .sortdd-menu {
+  background: rgba(28,36,50,.82);
+  border-color: rgba(255,255,255,.08);
+  box-shadow: 0 10px 34px rgba(0,0,0,.55), 0 1px 3px rgba(0,0,0,.4);
+}
+.screen-wrap[data-theme="dark"] .sortdd-opt { box-shadow: inset 0 .5px 0 rgba(255,255,255,.07); }
+.screen-wrap[data-theme="dark"] .sortdd-opt:first-child { box-shadow: none; }
+.screen-wrap[data-theme="dark"] .sortdd-opt:active { background: rgba(255,255,255,.08); }
+.screen-wrap[data-theme="dark"] .sortdd-opt .tick { color: #4c9bff; }
+
+/* map preview grid */
+.screen-wrap[data-theme="dark"] .map-preview {
+  background:
+    linear-gradient(0deg, rgba(31,116,208,.14), rgba(31,116,208,.14)),
+    repeating-linear-gradient(0deg, #1a2433 0 24px, #141d29 24px 25px),
+    repeating-linear-gradient(90deg, #1a2433 0 24px, #141d29 24px 25px);
 }
