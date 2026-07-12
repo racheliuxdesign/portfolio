@@ -868,9 +868,10 @@
 
   function appearanceSection(){
     var on = (state.theme==="dark");
-    return setSection("Appearance",
+    return '<div class="theme-setting" hidden>' + setSection("Appearance",
       '<div class="set-row"><div class="st-txt"><b>Dark mode</b><span>Easier on the eyes in low light — built for early starts and night shifts on site.</span></div>'
-      + '<button class="switch '+(on?"on":"")+'" data-action="theme-toggle" role="switch" aria-checked="'+on+'" aria-label="Dark mode"><span class="knob"></span></button></div>');
+      + '<button class="switch '+(on?"on":"")+'" data-action="theme-toggle" role="switch" aria-checked="'+on+'" aria-label="Dark mode"><span class="knob"></span></button></div>')
+      + '</div>';
   }
 
   function foremanSettings(){
@@ -1403,6 +1404,12 @@
 
   function markNotifRead(nid){ state.notif[state.role].forEach(function(n){ if(n.id===nid) n.unread=false; }); save(); }
 
+  function toggleTheme(){
+    state.theme = (state.theme==="dark") ? "light" : "dark";
+    save(); render();
+    toast(state.theme==="dark" ? "🌙 Dark mode on" : "☀️ Light mode on","ok");
+  }
+
   /* ---- delegation ---- */
   document.addEventListener("click", function(e){
     // close the sort dropdown when clicking anywhere outside it
@@ -1443,9 +1450,7 @@
         bag[sk]=!bag[sk]; save(); render(); break;
       }
       case "theme-toggle": {
-        state.theme = (state.theme==="dark") ? "light" : "dark";
-        save(); render();
-        toast(state.theme==="dark" ? "🌙 Dark mode on" : "☀️ Light mode on","ok"); break;
+        toggleTheme(); break;
       }
       case "ring-preview": playRing(state.settings[state.role].ringtone); break;
       case "reset-demo": closeSheet(); resetDemo(); break;
@@ -1692,6 +1697,11 @@
     if (st){ state.settings[state.role][st]=e.target.value; save(); }
     if (e.target.hasAttribute && e.target.hasAttribute("data-setting-sort")){ state.officialSort=e.target.value; save(); }
   });
+  document.addEventListener("keydown", function(e){
+    if (e.repeat || !e.shiftKey || (!e.ctrlKey && !e.metaKey) || String(e.key).toLowerCase()!=="q") return;
+    e.preventDefault();
+    toggleTheme();
+  });
   function syncMap(m){ if(m==="zone"){ var tag=document.querySelector(".map-preview .zone-tag"); if(tag) tag.textContent=state.draft.zone||"Set the zone below"; } }
 
   function handleChoice(node){
@@ -1728,6 +1738,7 @@
      8. Boot
   ====================================================================== */
   if (!load()) seed();
+  state.theme = "light";
   // safety: ensure notif structure exists
   if (!state.notif) { seed(); }
   // Mockup: always show the "not approved yet" ping banner on every refresh —

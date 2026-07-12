@@ -304,7 +304,7 @@ body {
 .tb-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 11px; }
 .tb-title { font-size: 15px; font-weight: 700; color: var(--ink); line-height: 1.25; }
 .tb-title span { display: block; font-size: 12px; font-weight: 500; color: var(--ink-3); margin-top: 2px; }
-.tb-count { font-size: 24px; font-weight: 800; color: var(--brand-900); line-height: 1; white-space: nowrap; }
+.tb-count { font-size: 24px; font-weight: 600; color: var(--brand-900); line-height: 1; white-space: nowrap; }
 .tb-count em { font-size: 14px; font-weight: 600; color: var(--ink-3); font-style: normal; }
 .tb-bar { display: flex; gap: 3px; height: 9px; border-radius: 6px; overflow: hidden; margin-bottom: 11px; }
 .tb-fill { border-radius: 3px; }
