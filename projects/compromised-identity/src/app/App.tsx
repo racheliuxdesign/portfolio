@@ -1720,7 +1720,7 @@ type TopTab = "demo" | "presentation";
 function TopNav({ tab, onTab }: { tab: TopTab; onTab: (t: TopTab) => void }) {
   const tabs: { id: TopTab; label: string }[] = [
     { id: "demo", label: "Live Demo" },
-    { id: "presentation", label: "Case Study Presentation" },
+    { id: "presentation", label: "Prototype design brief" },
   ];
 
   const [justMounted, setJustMounted] = useState(true);
@@ -1754,7 +1754,7 @@ function TopNav({ tab, onTab }: { tab: TopTab; onTab: (t: TopTab) => void }) {
             <path d="M9 12l2.2 2.2L15.5 10" stroke="#fff" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
-        <span style={{ fontFamily: F.bold, fontSize: 16, color: "#fff", letterSpacing: "-0.2px" }}>Racheli's Home Assignment</span>
+        <span style={{ fontFamily: F.bold, fontSize: 16, color: "#fff", letterSpacing: "-0.2px" }}>Alert queue and investigation page - Final Prototype</span>
       </div>
 
       {/* Tabs — centered in the header regardless of brand width */}
@@ -1971,7 +1971,6 @@ const CASE_TOC: TocSection[] = [
       { id: "sd-files", label: "Files" },
     ],
   },
-  { id: "ai", n: "04", title: "Using AI", children: [] },
 ];
 
 const CASE_FLAT: { id: string; level: number; n?: string; label: string }[] = CASE_TOC.flatMap((s) => [
@@ -2107,9 +2106,6 @@ function CaseStudyPresentation({ onViewDemo }: { onViewDemo: () => void }) {
           borderBottom: "1px solid #eef1f6",
         }}
       >
-        <span style={{ display: "inline-block", fontFamily: F.bold, fontSize: 11.5, letterSpacing: "0.14em", color: "#607aff", background: "#EAF0FF", borderRadius: 999, padding: "6px 14px", marginBottom: 22 }}>
-          CASE STUDY
-        </span>
         <h1 style={{ fontFamily: F.extrabold, fontSize: 40, lineHeight: 1.15, color: "#0f172a", margin: "0 auto 18px", maxWidth: 820 }}>
           Designing the Details Pane <span style={{ color: "#607aff" }}>→</span> A verdict in 5 seconds
         </h1>
@@ -2273,7 +2269,7 @@ function CaseStudyPresentation({ onViewDemo }: { onViewDemo: () => void }) {
           in long chats, while still surfacing the assistant exactly where it's genuinely useful.
         </CaseP>
         <CaseP>
-          I did not design the chat component itself, as that falls slightly outside the scope of this task.
+          I did not design the chat component itself, as that falls slightly outside the scope of this project.
           Defining how and where the component is used, however, sits well within it.
         </CaseP>
 
@@ -2373,37 +2369,6 @@ function CaseStudyPresentation({ onViewDemo }: { onViewDemo: () => void }) {
         </CaseP>
         <CasePic label="Downloaded files side panel" ratio="16/9" src={downloadedFilesPanelImg} />
 
-        {/* 04 — Reflection ------------------------------------------------------ */}
-        <CaseH2 n="04" title="Using AI" id="ai" />
-        <CaseP>
-          This project was especially interesting because it combined UX challenges with technical challenges while
-          I was also evolving the way I work with AI.
-        </CaseP>
-        <CaseP>
-          I used Figma (Design + Make), Claude (Chat + Code), and GitHub to create both the prototype and this
-          presentation. AI was involved throughout the entire process:
-        </CaseP>
-        <CaseList
-          items={[
-            "Learning about Zero Trust",
-            "Researching competitors",
-            "Brainstorming solutions",
-            "Exploring visual directions",
-            "Sketching ideas",
-            "Writing technical content",
-            "QA and iteration",
-          ]}
-        />
-        <CaseP>
-          Today, I honestly can't imagine my workflow without AI. It has completely changed the way I design. The
-          transition between different AI tools still isn't seamless, but each one brings unique strengths and
-          opens new possibilities.
-        </CaseP>
-        <CaseP>
-          Over time, I've built my own workflows and prompting techniques, and I'm constantly refining them. But
-          above all, the most important part is still my own judgment — knowing how to combine all these tools into
-          one coherent design that truly serves the user's goal.
-        </CaseP>
       </div>
     </div>
   );
