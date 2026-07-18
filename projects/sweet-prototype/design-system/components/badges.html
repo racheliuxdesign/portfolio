@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sweet DS — Badges &amp; Chips</title>
+  <link rel="stylesheet" href="../css/tokens.css" />
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+  <style>
+    body { padding: 32px; }
+    h1 { margin: 0 0 24px; } h2 { margin: 32px 0 12px; }
+    .row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+  </style>
+</head>
+<body>
+  <h1 class="ds-page-title">Badges &amp; Chips</h1>
+
+  <h2 class="ds-section">Severity badge — Tint (default)</h2>
+  <div class="row">
+    <span class="sds-badge sds-badge--critical">Critical</span>
+    <span class="sds-badge sds-badge--high">High</span>
+    <span class="sds-badge sds-badge--medium">Medium</span>
+    <span class="sds-badge sds-badge--low">Low</span>
+  </div>
+  <h2 class="ds-section">Severity badge — Solid</h2>
+  <div class="row">
+    <span class="sds-badge sds-badge--solid sds-badge--critical">Critical</span>
+    <span class="sds-badge sds-badge--solid sds-badge--high">High</span>
+    <span class="sds-badge sds-badge--solid sds-badge--medium">Medium</span>
+    <span class="sds-badge sds-badge--solid sds-badge--low">Low</span>
+  </div>
+
+  <h2 class="ds-section">Status badge</h2>
+  <div class="row">
+    <span class="sds-status sds-status--open"><span class="sds-status__dot"></span>Open</span>
+    <span class="sds-status sds-status--resolved"><span class="sds-status__dot"></span>Resolved</span>
+    <span class="sds-status sds-status--failed">Failed</span>
+    <span class="sds-status sds-status--passed">Passed</span>
+  </div>
+
+  <h2 class="ds-section">Method chip</h2>
+  <div class="row">
+    <span class="sds-method sds-method--get">GET</span>
+    <span class="sds-method sds-method--post">POST</span>
+    <span class="sds-method sds-method--put">PUT</span>
+    <span class="sds-method sds-method--delete">DELETE</span>
+    <span class="sds-method sds-method--head">HEAD</span>
+  </div>
+
+  <h2 class="ds-section">Utility chips</h2>
+  <div class="row">
+    <span class="sds-chip sds-chip--time"><img class="sds-chip__icon" src="../assets/icons/clock.svg" alt="" />3 days ago</span>
+    <span class="sds-chip sds-chip--code">arn:aws:iam::role/Admin</span>
+    <span class="sds-chip sds-chip--ai"><img class="sds-chip__icon" src="../assets/icons/shield.svg" alt="" />AI insight</span>
+    <span class="sds-chip sds-chip--data">PII detected</span>
+  </div>
+</body>
+</html>

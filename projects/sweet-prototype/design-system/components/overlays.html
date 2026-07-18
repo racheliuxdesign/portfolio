@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sweet DS — Overlays &amp; Feedback</title>
+  <link rel="stylesheet" href="../css/tokens.css" />
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+  <style>
+    body { padding: 32px; }
+    h1 { margin: 0 0 24px; } h2 { margin: 32px 0 12px; }
+    .row { display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 12px; align-items: flex-start; }
+  </style>
+</head>
+<body>
+  <h1 class="ds-page-title">Overlays &amp; Feedback</h1>
+
+  <h2 class="ds-section">Toast</h2>
+  <div class="row">
+    <div class="sds-toast">
+      <img class="sds-toast__icon" src="../assets/icons/alert-circle.svg" alt="" />
+      <span class="sds-toast__msg">Incident resolved</span>
+      <img class="sds-toast__close" src="../assets/icons/close.svg" alt="Close" />
+    </div>
+    <div class="sds-toast sds-toast--success">
+      <img class="sds-toast__icon" src="../assets/icons/check.svg" alt="" />
+      <span class="sds-toast__msg">Changes saved</span>
+      <img class="sds-toast__close" src="../assets/icons/close.svg" alt="Close" />
+    </div>
+    <div class="sds-toast sds-toast--error">
+      <img class="sds-toast__icon" src="../assets/icons/warning.svg" alt="" />
+      <span class="sds-toast__msg">Failed to connect</span>
+      <img class="sds-toast__close" src="../assets/icons/close.svg" alt="Close" />
+    </div>
+  </div>
+
+  <h2 class="ds-section">Dropdown menu</h2>
+  <div class="row">
+    <div class="sds-menu">
+      <button class="sds-menu-item">Create a ticket</button>
+      <button class="sds-menu-item">Add comment</button>
+      <button class="sds-menu-item">Export as PDF</button>
+      <button class="sds-menu-item sds-menu-item--danger">Delete</button>
+    </div>
+  </div>
+
+  <h2 class="ds-section">Accordion</h2>
+  <div class="row" style="flex-direction:column">
+    <div class="sds-accordion" style="width:560px; max-width:100%">
+      <div class="sds-accordion__header">
+        <span class="sds-accordion__title">Sweet Score Reasoning</span>
+        <img class="sds-accordion__chevron" src="../assets/icons/chevron-down.svg" alt="" />
+      </div>
+      <div class="sds-accordion__body">While the vulnerability has a Critical (9.8) base score, several factors significantly reduce the risk: the package maintainer assessed it as Low severity, and the package is not loaded in runtime.</div>
+    </div>
+    <div class="sds-accordion is-collapsed" style="width:560px; max-width:100%">
+      <div class="sds-accordion__header">
+        <span class="sds-accordion__title">Exploitation Methods</span>
+        <img class="sds-accordion__chevron" src="../assets/icons/chevron-down.svg" alt="" />
+      </div>
+      <div class="sds-accordion__body">Collapsed content.</div>
+    </div>
+  </div>
+
+  <h2 class="ds-section">Tooltip</h2>
+  <div class="row">
+    <span class="sds-tooltip">Cmd + scroll to zoom</span>
+  </div>
+
+  <h2 class="ds-section">Avatar</h2>
+  <div class="row" style="align-items:center">
+    <span class="sds-avatar">L</span>
+    <span class="sds-avatar sds-avatar--ink">M</span>
+    <span class="sds-avatar sds-avatar--md">AR</span>
+    <span class="sds-avatar sds-avatar--md sds-avatar--ink">JS</span>
+  </div>
+
+  <h2 class="ds-section">Announcement banner</h2>
+  <div class="row">
+    <div class="sds-banner">
+      <span>New! We have just launched our new issues hub.</span>
+      <a class="sds-banner__cta" href="#">Check it out →</a>
+      <img class="sds-banner__close" src="../assets/icons/close.svg" alt="Close" />
+    </div>
+  </div>
+
+  <h2 class="ds-section">Modal / Detail</h2>
+  <div class="row">
+    <div class="sds-modal" style="position:static; box-shadow:var(--shadow-overlay)">
+      <div class="sds-modal__header">
+        <span class="sds-entity sds-entity--vulnerabilities"><img src="../assets/icons/bug.svg" alt="" /></span>
+        <span class="sds-modal__title">CVE-2024-1234 · Remote code execution</span>
+        <img class="sds-modal__close" src="../assets/icons/close.svg" alt="Close" />
+      </div>
+      <div class="sds-modal__body">
+        <div class="sds-accordion">
+          <div class="sds-accordion__header">
+            <span class="sds-accordion__title">Impact</span>
+            <img class="sds-accordion__chevron" src="../assets/icons/chevron-down.svg" alt="" />
+          </div>
+          <div class="sds-accordion__body">Attacker can execute arbitrary code on the affected host.</div>
+        </div>
+      </div>
+      <div class="sds-modal__footer">
+        <button class="sds-btn sds-btn--ghost">Dismiss</button>
+        <button class="sds-btn sds-btn--primary">Remediate</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sweet DS — Navigation</title>
+  <link rel="stylesheet" href="../css/tokens.css" />
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+  <style>
+    body { padding: 32px; }
+    h1 { margin: 0 0 24px; } h2 { margin: 32px 0 12px; }
+    .row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 12px; }
+  </style>
+</head>
+<body>
+  <h1 class="ds-page-title">Navigation</h1>
+
+  <h2 class="ds-section">Top bar</h2>
+  <div class="sds-topbar">
+    <span class="sds-topbar__logo">S.</span>
+    <div class="sds-topbar__actions">
+      <span class="sds-topbar__bell">
+        <img class="sds-topbar__icon sds-icon-inverse" src="../assets/icons/bell.svg" alt="alerts" />
+        <span class="sds-topbar__badge">103</span>
+      </span>
+      <img class="sds-topbar__icon sds-icon-inverse" src="../assets/icons/book.svg" alt="docs" />
+      <span class="sds-avatar">L</span>
+    </div>
+  </div>
+
+  <h2 class="ds-section">Tabs</h2>
+  <div class="sds-tabs">
+    <button class="sds-tab sds-tab--active">Exposed Endpoints</button>
+    <button class="sds-tab">Findings</button>
+    <button class="sds-tab">Activity</button>
+  </div>
+
+  <h2 class="ds-section">Sidebar</h2>
+  <nav class="sds-sidebar">
+    <button class="sds-icon-btn"><img src="../assets/icons/search.svg" alt="" /></button>
+    <button class="sds-icon-btn"><img src="../assets/icons/check.svg" alt="" /></button>
+    <button class="sds-icon-btn"><img src="../assets/icons/settings.svg" alt="" /></button>
+    <button class="sds-icon-btn sds-icon-btn--selected"><img class="sds-icon-inverse" src="../assets/icons/shield.svg" alt="" /></button>
+    <button class="sds-icon-btn"><img src="../assets/icons/alert-circle.svg" alt="" /></button>
+    <button class="sds-icon-btn"><img src="../assets/icons/cloud.svg" alt="" /></button>
+    <button class="sds-icon-btn"><img src="../assets/icons/key.svg" alt="" /></button>
+    <button class="sds-icon-btn"><img src="../assets/icons/bug.svg" alt="" /></button>
+  </nav>
+
+  <h2 class="ds-section">Breadcrumb</h2>
+  <nav class="sds-breadcrumb">
+    <span class="sds-breadcrumb__item">
+      <span class="sds-breadcrumb__entity"><img src="../assets/icons/cloud.svg" alt="" /></span>
+      <span class="sds-breadcrumb__label">AWS</span>
+      <img class="sds-breadcrumb__sep" src="../assets/icons/chevron-right.svg" alt="" />
+    </span>
+    <span class="sds-breadcrumb__item">
+      <span class="sds-breadcrumb__entity"><img src="../assets/icons/user.svg" alt="" /></span>
+      <span class="sds-breadcrumb__label">prod-account</span>
+      <img class="sds-breadcrumb__sep" src="../assets/icons/chevron-right.svg" alt="" />
+    </span>
+    <span class="sds-breadcrumb__item sds-breadcrumb__item--last">
+      <span class="sds-breadcrumb__entity"><img src="../assets/icons/key.svg" alt="" /></span>
+      <span class="sds-breadcrumb__label">AdminRole</span>
+    </span>
+  </nav>
+
+  <h2 class="ds-section">Pagination</h2>
+  <div class="sds-pagination">
+    <span>Rows per page:</span>
+    <span class="sds-pagination__size">50 <img src="../assets/icons/chevron-down.svg" alt="" style="width:12px;height:12px" /></span>
+    <span>1–3 of 3</span>
+    <span class="sds-pagination__nav">
+      <img src="../assets/icons/chevron-left.svg" alt="prev" />
+      <img src="../assets/icons/chevron-right.svg" alt="next" />
+    </span>
+  </div>
+</body>
+</html>

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sweet Security — Deployment · Sensors</title>
+  <link rel="stylesheet" href="design-system/css/tokens.css" />
+  <link rel="stylesheet" href="design-system/css/base.css" />
+  <link rel="stylesheet" href="design-system/css/components.css" />
+  <link rel="stylesheet" href="app.css?v=79" />
+</head>
+<body>
+  <div class="app">
+    <!-- Icon-only left sidebar (dark chrome pattern) -->
+    <nav class="sds-sidebar" aria-label="Primary">
+      <button class="sds-icon-btn" title="Search" aria-label="Search">
+        <svg viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M11 11l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <button class="sds-icon-btn sds-icon-btn--selected" title="Deployment" aria-label="Deployment" aria-current="page">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M8 14.7S13.3 12 13.3 8V3.3L8 1.3 2.7 3.3V8C2.7 12 8 14.7 8 14.7Z" stroke="currentColor" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="sds-icon-btn" title="Findings" aria-label="Findings">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M8 1.5v13M1.5 8h13" stroke="currentColor" stroke-width="1.33" stroke-linecap="round"/></svg>
+      </button>
+      <button class="sds-icon-btn" title="Settings" aria-label="Settings">
+        <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2.2" stroke="currentColor" stroke-width="1.33"/><path d="M8 1.6v1.5M8 12.9v1.5M14.4 8h-1.5M3.1 8H1.6" stroke="currentColor" stroke-width="1.33" stroke-linecap="round"/></svg>
+      </button>
+      <div class="sds-sidebar__spacer"></div>
+    </nav>
+
+    <div class="app__body" style="flex-direction:column">
+      <!-- Application top bar -->
+      <header class="sds-topbar">
+        <div class="sds-topbar__left">
+          <span class="sds-topbar__logo-mark">
+            <svg viewBox="0 0 16 16" fill="none"><path d="M8 14.7S13.3 12 13.3 8V3.3L8 1.3 2.7 3.3V8C2.7 12 8 14.7 8 14.7Z" stroke="currentColor" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="sds-topbar__logo">Sweet</span>
+          </span>
+        </div>
+        <div class="sds-topbar__actions">
+          <span class="sds-topbar__bell">
+            <svg width="18" height="18" viewBox="0 0 16 16" fill="none" style="color:var(--color-text-inverse)"><path d="M8 1.8a3.5 3.5 0 0 0-3.5 3.5c0 4-1.5 5-1.5 5h10s-1.5-1-1.5-5A3.5 3.5 0 0 0 8 1.8ZM6.8 13.5a1.3 1.3 0 0 0 2.4 0" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <span class="sds-avatar sds-avatar--md" title="Jordan Ellis">JE</span>
+        </div>
+      </header>
+
+      <main class="app__main">
+        <!-- Tabs (in place of the breadcrumb) -->
+        <div class="tabs-row">
+          <div class="sds-tabs" role="tablist">
+            <button class="sds-tab" role="tab">Cloud Entities</button>
+            <button class="sds-tab" role="tab">Logs</button>
+            <button class="sds-tab sds-tab--active" role="tab" aria-selected="true">Sensors</button>
+            <button class="sds-tab" role="tab">Registry Scanner</button>
+          </div>
+        </div>
+
+        <div class="page-head">
+          <div class="page-head__row">
+            <div>
+              <h1 class="ds-page-title page-head__title">Sensors</h1>
+              <p class="ds-body page-head__desc">Deploy and monitor the sensors that stream security data from your cloud infrastructure into Sweet.</p>
+            </div>
+            <button class="sds-btn sds-btn--outline sds-btn--md" id="demo-empty-toggle" title="Preview the empty state">Preview empty state</button>
+          </div>
+        </div>
+
+        <!-- ===================== POPULATED STATE ===================== -->
+        <section id="view-populated" class="stack stack--lg">
+          <!-- Mini dashboard: 3 widgets -->
+          <div class="dash-grid">
+
+            <!-- Widget 1: Healthy sensors (bar) -->
+            <div class="widget widget--center">
+              <span class="widget__title">Healthy Sensors</span>
+              <div class="widget__coverage healthbar">
+                <div class="healthbar__value">
+                  <span class="healthbar__num">14</span>
+                  <span class="healthbar__total">/ 20</span>
+                </div>
+                <div class="healthbar__bar">
+                  <span class="healthbar__fill" style="width:70%"></span>
+                </div>
+                <p class="healthbar__caption">70% healthy · 6 need attention</p>
+              </div>
+            </div>
+
+            <!-- Widget 2: Deployment coverage (donut) -->
+            <div class="widget">
+              <span class="widget__title">Cloud Assets Covered</span>
+              <div class="widget__coverage">
+                <div class="cov-gauge cov-gauge--low">
+                  <svg class="cov-gauge__svg" viewBox="0 0 96 96" aria-hidden="true">
+                    <circle class="cov-gauge__track" cx="48" cy="48" r="42"></circle>
+                    <circle class="cov-gauge__fill" cx="48" cy="48" r="42" style="stroke-dasharray:263.9;stroke-dashoffset:21.1"></circle>
+                  </svg>
+                  <div class="cov-gauge__center">
+                    <span class="sds-donut__value">92%</span>
+                    <span class="sds-donut__label">Covered</span>
+                  </div>
+                </div>
+                <div class="widget__coverage-text">
+                  <p><strong>4,624 / 5,026</strong> entities protected</p>
+                  <p>402 entities missing sensors</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Widget 3: Sensor Health States (horizontal bars) -->
+            <div class="widget widget--states">
+              <span class="widget__title">Sensor Health States</span>
+              <ul class="statebars">
+                <li class="statebar">
+                  <span class="statebar__label"><span class="statebar__dot" style="background:var(--color-status-success)"></span>Healthy</span>
+                  <span class="statebar__track"><span class="statebar__fill" style="width:70%;background:var(--color-status-success)"></span></span>
+                  <span class="statebar__count">14</span>
+                  <span class="statebar__pct">70%</span>
+                </li>
+                <li class="statebar">
+                  <span class="statebar__label"><span class="statebar__dot" style="background:var(--color-status-warning)"></span>Warning</span>
+                  <span class="statebar__track"><span class="statebar__fill" style="width:15%;background:var(--color-status-warning)"></span></span>
+                  <span class="statebar__count">3</span>
+                  <span class="statebar__pct">15%</span>
+                </li>
+                <li class="statebar">
+                  <span class="statebar__label"><span class="statebar__dot" style="background:#d1d5db"></span>Offline</span>
+                  <span class="statebar__track"><span class="statebar__fill" style="width:10%;background:#d1d5db"></span></span>
+                  <span class="statebar__count">2</span>
+                  <span class="statebar__pct">10%</span>
+                </li>
+                <li class="statebar">
+                  <span class="statebar__label"><span class="statebar__dot" style="background:var(--sev-critical)"></span>Critical</span>
+                  <span class="statebar__track"><span class="statebar__fill" style="width:5%;background:var(--sev-critical)"></span></span>
+                  <span class="statebar__count">1</span>
+                  <span class="statebar__pct">5%</span>
+                </li>
+              </ul>
+            </div>
+
+          </div>
+
+          <!-- Toolbar -->
+          <div class="toolbar">
+            <div class="toolbar__row">
+              <label class="sds-input" style="min-width:280px">
+                <svg class="sds-input__icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M11 11l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                <input class="sds-input__field" type="text" placeholder="Search in the table..." />
+              </label>
+              <div class="toolbar__spacer"></div>
+              <div class="sort-control" id="sort-control"><!-- injected by app.js --></div>
+              <button class="sds-btn sds-btn--primary sds-btn--md" id="deploy-cta">
+                <svg class="sds-btn__icon" viewBox="0 0 16 16" fill="none"><path d="M8 3.3v9.4M3.3 8h9.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                Deploy sensor
+              </button>
+            </div>
+            <div class="toolbar__row toolbar__row--filters">
+              <div class="filters" id="filters"><!-- injected by app.js --></div>
+            </div>
+          </div>
+
+          <!-- Sensors card list -->
+          <div class="cardlist">
+            <!-- Titles row — sortable headers injected by app.js -->
+            <div class="cardlist__head" role="row" id="sensor-head"></div>
+            <!-- Cards injected by app.js -->
+            <div class="cardlist__body" id="sensor-rows"></div>
+            <div class="cardlist__footer" id="sensor-footer"><!-- pagination injected by app.js --></div>
+          </div>
+        </section>
+
+        <!-- ===================== EMPTY STATE ===================== -->
+        <section id="view-empty" class="panel is-hidden">
+          <div class="empty">
+            <span class="empty__art">
+              <svg viewBox="0 0 16 16" fill="none"><path d="M8 14.7S13.3 12 13.3 8V3.3L8 1.3 2.7 3.3V8C2.7 12 8 14.7 8 14.7Z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.8 8l1.6 1.6L10.4 6.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <h2 class="ds-section empty__title">No sensors deployed yet</h2>
+            <p class="ds-body empty__desc">Sensors stream workload, Kubernetes, and cloud-API telemetry into Sweet. Deploy your first one to turn on visibility and detections.</p>
+            <div class="empty__actions">
+              <button class="sds-btn sds-btn--primary sds-btn--md deploy-cta">
+                <svg class="sds-btn__icon" viewBox="0 0 16 16" fill="none"><path d="M8 3.3v9.4M3.3 8h9.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                Deploy your first sensor
+              </button>
+              <a class="sds-btn sds-btn--outline sds-btn--md" href="#" onclick="return false">
+                View deployment docs
+                <svg class="sds-btn__icon" viewBox="0 0 16 16" fill="none"><path d="M6 3h7v7M13 3 6.5 9.5M11 9v3.5H3.5V5H7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </a>
+            </div>
+            <a class="empty__back sds-action-link" href="#" id="demo-populated-toggle" onclick="return false">Back to default prototype</a>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Wizard mounts here -->
+  <div id="wizard-root"></div>
+  <!-- Sensor detail side panel mounts here -->
+  <div id="drawer-root"></div>
+  <!-- Toasts -->
+  <div class="toast-host" id="toast-host" aria-live="polite"></div>
+
+  <script src="app.js?v=69"></script>
+</body>
+</html>

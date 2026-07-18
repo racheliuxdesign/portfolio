@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sweet DS — Inputs &amp; Controls</title>
+  <link rel="stylesheet" href="../css/tokens.css" />
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+  <style>
+    body { padding: 32px; }
+    h1 { margin: 0 0 24px; } h2 { margin: 32px 0 12px; }
+    .row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 12px; }
+    .col { display: flex; flex-direction: column; gap: 12px; margin-bottom: 12px; }
+  </style>
+</head>
+<body>
+  <h1 class="ds-page-title">Inputs &amp; Controls</h1>
+
+  <h2 class="ds-section">Text input</h2>
+  <div class="row">
+    <span class="sds-input"><input class="sds-input__field" placeholder="Placeholder" /></span>
+    <span class="sds-input"><input class="sds-input__field" value="Filled value" /></span>
+    <span class="sds-input is-disabled"><input class="sds-input__field" value="Disabled" disabled /></span>
+  </div>
+
+  <h2 class="ds-section">Search input</h2>
+  <div class="row">
+    <span class="sds-input"><img class="sds-input__icon" src="../assets/icons/search.svg" alt="" /><input class="sds-input__field" placeholder="Search" /></span>
+  </div>
+
+  <h2 class="ds-section">Checkbox</h2>
+  <div class="col">
+    <label class="sds-checkbox"><span class="sds-checkbox__box"></span>Unchecked</label>
+    <label class="sds-checkbox sds-checkbox--checked"><span class="sds-checkbox__box"></span>Checked</label>
+    <label class="sds-checkbox sds-checkbox--indeterminate"><span class="sds-checkbox__box"></span>Indeterminate</label>
+    <label class="sds-checkbox sds-checkbox--checked is-disabled"><span class="sds-checkbox__box"></span>Checked disabled</label>
+  </div>
+
+  <h2 class="ds-section">Select</h2>
+  <div class="row">
+    <span class="sds-select"><span class="sds-select__value">CIS K8s Benchmark v1.9.0</span><img class="sds-select__chevron" src="../assets/icons/chevron-down.svg" alt="" /></span>
+    <span class="sds-select is-open"><span class="sds-select__value">Open state</span><img class="sds-select__chevron" src="../assets/icons/chevron-down.svg" alt="" /></span>
+    <span class="sds-select is-disabled"><span class="sds-select__value">Disabled</span><img class="sds-select__chevron" src="../assets/icons/chevron-down.svg" alt="" /></span>
+  </div>
+
+  <h2 class="ds-section">Filter chip</h2>
+  <div class="row">
+    <button class="sds-filter">Host <img class="sds-filter__chevron" src="../assets/icons/chevron-down.svg" alt="" /></button>
+    <button class="sds-filter sds-filter--active">Severity · 2 <img class="sds-filter__chevron" src="../assets/icons/chevron-down.svg" alt="" /></button>
+  </div>
+
+  <h2 class="ds-section">Segmented control</h2>
+  <div class="row">
+    <div class="sds-segmented">
+      <button class="sds-segment">Cloud</button>
+      <button class="sds-segment sds-segment--selected">Service</button>
+      <button class="sds-segment">Account</button>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,89 @@
+/* ==========================================================================
+   Sweet Design System — Base reset + typography utilities
+   Depends on: tokens.css
+   ========================================================================== */
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-primary);
+  background: var(--color-bg-page);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+img, svg { display: block; max-width: 100%; }
+button, input, select, textarea { font: inherit; color: inherit; }
+a { color: var(--color-text-link); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* --------------------------------------------------------------------------
+   Typography classes — map 1:1 to Figma text styles.
+   -------------------------------------------------------------------------- */
+.ds-page-title {
+  font-family: var(--font-sans);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-page-title);
+  line-height: var(--line-height-page-title);
+}
+.ds-section {
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-section);
+  line-height: var(--line-height-section);
+}
+.ds-card-title {
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-card);
+  line-height: var(--line-height-card);
+}
+.ds-body {
+  font-weight: var(--font-weight-regular);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+}
+.ds-body-strong {
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+}
+.ds-small {
+  font-weight: var(--font-weight-regular);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-small);
+}
+.ds-label {
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-label);
+  line-height: var(--line-height-label);
+}
+.ds-caption {
+  font-weight: var(--font-weight-regular);
+  font-size: var(--font-size-caption);
+  line-height: var(--line-height-caption);
+  color: var(--color-text-secondary);
+}
+.ds-stat-lg {
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-stat-lg);
+  line-height: var(--line-height-stat-lg);
+}
+.ds-stat-md {
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-stat-md);
+  line-height: var(--line-height-stat-md);
+}
+.ds-code {
+  font-family: var(--font-mono);
+  font-weight: var(--font-weight-regular);
+  font-size: var(--font-size-code);
+  line-height: var(--line-height-code);
+}

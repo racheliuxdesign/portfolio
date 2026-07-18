@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sweet Design System</title>
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <style>
+    body { padding: 40px; max-width: 1100px; margin: 0 auto; background: var(--color-bg-page); }
+    header { margin-bottom: 40px; }
+    h1 { margin: 0 0 8px; } h2 { margin: 40px 0 16px; }
+    .lede { color: var(--color-text-secondary); font-size: 15px; max-width: 720px; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+    a.card { text-decoration: none; display: flex; flex-direction: column; gap: 6px; padding: 20px;
+      background: var(--color-bg-surface); border: 1px solid var(--color-border-default);
+      border-radius: var(--radius-lg); box-shadow: var(--shadow-card); }
+    a.card:hover { border-color: var(--color-border-strong); }
+    .card__title { font-weight: var(--font-weight-semibold); font-size: 15px; color: var(--color-text-primary); }
+    .card__desc { font-size: 13px; color: var(--color-text-secondary); }
+    .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+    .sw { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--color-text-secondary); }
+    .sw__chip { width: 28px; height: 28px; border-radius: var(--radius-sm); border: 1px solid var(--color-border-default); flex: none; }
+    .icons { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 8px; }
+    .ico { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 6px; font-size: 10px; color: var(--color-text-muted);
+      background: var(--color-bg-surface); border: 1px solid var(--color-border-default); border-radius: var(--radius-md); }
+    .ico img { width: 20px; height: 20px; color: var(--color-text-primary); }
+    .scale { display: flex; flex-direction: column; gap: 4px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1 class="ds-page-title">Sweet Design System</h1>
+    <p class="lede">A static HTML/CSS extraction of the <strong>sweet-design-system</strong> Figma file, built for a security SaaS product. Vanilla tokens (CSS custom properties) + <code>sds-</code> component classes. No build step, no dependencies.</p>
+  </header>
+
+  <h2 class="ds-section">Components</h2>
+  <div class="cards">
+    <a class="card" href="components/buttons.html"><span class="card__title">Buttons</span><span class="card__desc">Primary, outline, ghost, icon, action links</span></a>
+    <a class="card" href="components/badges.html"><span class="card__title">Badges &amp; Chips</span><span class="card__desc">Severity, status, method, filter chips</span></a>
+    <a class="card" href="components/inputs.html"><span class="card__title">Inputs &amp; Controls</span><span class="card__desc">Text field, select, checkbox, segmented</span></a>
+    <a class="card" href="components/navigation.html"><span class="card__title">Navigation</span><span class="card__desc">Tabs, top bar, sidebar, breadcrumb, pagination</span></a>
+    <a class="card" href="components/table.html"><span class="card__title">Table</span><span class="card__desc">Header, rows, zebra, sort, footer</span></a>
+    <a class="card" href="components/cards.html"><span class="card__title">Cards &amp; Stats</span><span class="card__desc">Stat card, list card, section card, progress</span></a>
+    <a class="card" href="components/charts.html"><span class="card__title">Charts &amp; Indicators</span><span class="card__desc">Status dot, donut, entity icon, graph node</span></a>
+    <a class="card" href="components/overlays.html"><span class="card__title">Overlays &amp; Feedback</span><span class="card__desc">Toast, menu, accordion, tooltip, avatar, modal</span></a>
+  </div>
+
+  <h2 class="ds-section">Severity &amp; status colors</h2>
+  <div class="swatches">
+    <div class="sw"><span class="sw__chip" style="background:var(--color-severity-critical)"></span> severity-critical</div>
+    <div class="sw"><span class="sw__chip" style="background:var(--color-severity-high)"></span> severity-high</div>
+    <div class="sw"><span class="sw__chip" style="background:var(--color-severity-medium)"></span> severity-medium</div>
+    <div class="sw"><span class="sw__chip" style="background:var(--color-severity-low)"></span> severity-low</div>
+    <div class="sw"><span class="sw__chip" style="background:var(--color-status-success)"></span> status-success</div>
+    <div class="sw"><span class="sw__chip" style="background:var(--color-status-warning)"></span> status-warning</div>
+    <div class="sw"><span class="sw__chip" style="background:var(--color-status-info)"></span> status-info</div>
+    <div class="sw"><span class="sw__chip" style="background:var(--color-status-error)"></span> status-error</div>
+    <div class="sw"><span class="sw__chip" style="background:var(--color-accent-coral)"></span> accent-coral</div>
+    <div class="sw"><span class="sw__chip" style="background:var(--color-accent-ai)"></span> accent-ai</div>
+    <div class="sw"><span class="sw__chip" style="background:var(--color-category-vulnerabilities)"></span> category-vulnerabilities</div>
+    <div class="sw"><span class="sw__chip" style="background:var(--color-category-secrets)"></span> category-secrets</div>
+    <div class="sw"><span class="sw__chip" style="background:var(--color-category-findings)"></span> category-findings</div>
+    <div class="sw"><span class="sw__chip" style="background:var(--color-category-issues)"></span> category-issues</div>
+    <div class="sw"><span class="sw__chip" style="background:var(--color-bg-ink)"></span> bg-ink</div>
+    <div class="sw"><span class="sw__chip" style="background:var(--color-text-primary)"></span> text-primary</div>
+  </div>
+
+  <h2 class="ds-section">Typography</h2>
+  <div class="scale">
+    <span class="ds-page-title">Page title — 24/32 Semibold</span>
+    <span class="ds-section">Section — 18/26 Semibold</span>
+    <span class="ds-card-title">Card title — 16/24 Semibold</span>
+    <span class="ds-body">Body — 14/20 Regular</span>
+    <span class="ds-small">Small — 12/16 Regular</span>
+    <span class="ds-caption">Caption — 11/14 Regular</span>
+    <span class="ds-code">Code — 12/16 Mono</span>
+  </div>
+
+  <h2 class="ds-section">Icons</h2>
+  <div class="icons">
+    <span class="ico"><img src="assets/icons/search.svg" alt="" />search</span>
+    <span class="ico"><img src="assets/icons/bell.svg" alt="" />bell</span>
+    <span class="ico"><img src="assets/icons/settings.svg" alt="" />settings</span>
+    <span class="ico"><img src="assets/icons/chevron-down.svg" alt="" />chevron-down</span>
+    <span class="ico"><img src="assets/icons/chevron-up.svg" alt="" />chevron-up</span>
+    <span class="ico"><img src="assets/icons/chevron-right.svg" alt="" />chevron-right</span>
+    <span class="ico"><img src="assets/icons/chevron-left.svg" alt="" />chevron-left</span>
+    <span class="ico"><img src="assets/icons/close.svg" alt="" />close</span>
+    <span class="ico"><img src="assets/icons/check.svg" alt="" />check</span>
+    <span class="ico"><img src="assets/icons/clock.svg" alt="" />clock</span>
+    <span class="ico"><img src="assets/icons/warning.svg" alt="" />warning</span>
+    <span class="ico"><img src="assets/icons/alert-circle.svg" alt="" />alert-circle</span>
+    <span class="ico"><img src="assets/icons/shield.svg" alt="" />shield</span>
+    <span class="ico"><img src="assets/icons/key.svg" alt="" />key</span>
+    <span class="ico"><img src="assets/icons/cloud.svg" alt="" />cloud</span>
+    <span class="ico"><img src="assets/icons/user.svg" alt="" />user</span>
+    <span class="ico"><img src="assets/icons/book.svg" alt="" />book</span>
+    <span class="ico"><img src="assets/icons/filter.svg" alt="" />filter</span>
+    <span class="ico"><img src="assets/icons/more-horizontal.svg" alt="" />more-horizontal</span>
+    <span class="ico"><img src="assets/icons/plus.svg" alt="" />plus</span>
+    <span class="ico"><img src="assets/icons/external-link.svg" alt="" />external-link</span>
+    <span class="ico"><img src="assets/icons/bug.svg" alt="" />bug</span>
+    <span class="ico"><img src="assets/icons/refresh.svg" alt="" />refresh</span>
+    <span class="ico"><img src="assets/icons/sort.svg" alt="" />sort</span>
+    <span class="ico"><img src="assets/icons/eye.svg" alt="" />eye</span>
+  </div>
+</body>
+</html>

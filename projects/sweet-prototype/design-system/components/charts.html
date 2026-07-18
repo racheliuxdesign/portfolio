@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sweet DS — Charts &amp; Indicators</title>
+  <link rel="stylesheet" href="../css/tokens.css" />
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+  <style>
+    body { padding: 32px; }
+    h1 { margin: 0 0 24px; } h2 { margin: 32px 0 12px; }
+    .row { display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 12px; align-items: center; }
+  </style>
+</head>
+<body>
+  <h1 class="ds-page-title">Charts &amp; Indicators</h1>
+
+  <h2 class="ds-section">Status dot</h2>
+  <div class="row">
+    <span class="sds-dot-label"><span class="sds-dot sds-dot--critical"></span> Critical</span>
+    <span class="sds-dot-label"><span class="sds-dot sds-dot--high"></span> High</span>
+    <span class="sds-dot-label"><span class="sds-dot sds-dot--medium"></span> Medium</span>
+    <span class="sds-dot-label"><span class="sds-dot sds-dot--low"></span> Low</span>
+    <span class="sds-dot-label"><span class="sds-dot sds-dot--success"></span> Success</span>
+    <span class="sds-dot-label"><span class="sds-dot sds-dot--coral"></span> Coral</span>
+    <span class="sds-dot-label"><span class="sds-dot sds-dot--neutral"></span> Neutral</span>
+  </div>
+
+  <h2 class="ds-section">Donut chart</h2>
+  <div class="row">
+    <div class="sds-donut" style="--sds-donut-value:78">
+      <span class="sds-donut__value">13</span>
+      <span class="sds-donut__label">Total</span>
+    </div>
+    <div class="sds-donut sds-donut--success" style="--sds-donut-value:64">
+      <span class="sds-donut__value">86%</span>
+      <span class="sds-donut__label">Passed</span>
+    </div>
+  </div>
+
+  <h2 class="ds-section">Entity icon</h2>
+  <div class="row">
+    <span class="sds-entity sds-entity--vulnerabilities"><img src="../assets/icons/bug.svg" alt="" /></span>
+    <span class="sds-entity sds-entity--secrets"><img src="../assets/icons/key.svg" alt="" /></span>
+    <span class="sds-entity sds-entity--findings"><img src="../assets/icons/shield.svg" alt="" /></span>
+    <span class="sds-entity sds-entity--issues"><img src="../assets/icons/warning.svg" alt="" /></span>
+  </div>
+
+  <h2 class="ds-section">Graph node</h2>
+  <div class="row">
+    <div class="sds-graph-node">
+      <div class="sds-graph-node__circle"><img class="sds-icon-inverse" src="../assets/icons/cloud.svg" alt="" /></div>
+      <span class="sds-graph-node__badge">x6K</span>
+      <span class="sds-graph-node__label">mongo</span>
+    </div>
+    <div class="sds-graph-node">
+      <div class="sds-graph-node__circle"><img class="sds-icon-inverse" src="../assets/icons/user.svg" alt="" /></div>
+      <span class="sds-graph-node__badge">x12</span>
+      <span class="sds-graph-node__label">users</span>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sweet DS — Buttons</title>
+  <link rel="stylesheet" href="../css/tokens.css" />
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+  <style>
+    body { padding: 32px; }
+    h1 { margin: 0 0 24px; }
+    h2 { margin: 32px 0 12px; }
+    .row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 12px; }
+    .swatch-dark { background: var(--color-bg-ink); padding: 12px; border-radius: var(--radius-md); }
+  </style>
+</head>
+<body>
+  <h1 class="ds-page-title">Buttons</h1>
+  <p class="ds-body">Primary (dark ink), Outline, and Ghost buttons in two sizes. Icon is optional.</p>
+
+  <h2 class="ds-section">Primary</h2>
+  <div class="row">
+    <button class="sds-btn sds-btn--primary sds-btn--sm">Small</button>
+    <button class="sds-btn sds-btn--primary sds-btn--md">Medium</button>
+    <button class="sds-btn sds-btn--primary sds-btn--md">
+      <img class="sds-btn__icon" src="../assets/icons/plus.svg" alt="" style="filter:invert(1)" /> With icon
+    </button>
+    <button class="sds-btn sds-btn--primary sds-btn--md" disabled>Disabled</button>
+  </div>
+
+  <h2 class="ds-section">Outline</h2>
+  <div class="row">
+    <button class="sds-btn sds-btn--outline sds-btn--sm">Small</button>
+    <button class="sds-btn sds-btn--outline sds-btn--md">Medium</button>
+    <button class="sds-btn sds-btn--outline sds-btn--md">
+      <img class="sds-btn__icon" src="../assets/icons/filter.svg" alt="" /> Filter
+    </button>
+    <button class="sds-btn sds-btn--outline sds-btn--md" disabled>Disabled</button>
+  </div>
+
+  <h2 class="ds-section">Ghost</h2>
+  <div class="row">
+    <button class="sds-btn sds-btn--ghost sds-btn--sm">Small</button>
+    <button class="sds-btn sds-btn--ghost sds-btn--md">Medium</button>
+    <button class="sds-btn sds-btn--ghost sds-btn--md" disabled>Disabled</button>
+  </div>
+
+  <h2 class="ds-section">Action link</h2>
+  <div class="row">
+    <button class="sds-action-link">Review</button>
+    <button class="sds-action-link">Onboard</button>
+    <button class="sds-action-link is-disabled">Rotate</button>
+  </div>
+
+  <h2 class="ds-section">Icon button</h2>
+  <div class="row">
+    <button class="sds-icon-btn"><img src="../assets/icons/settings.svg" alt="settings" /></button>
+    <button class="sds-icon-btn"><img src="../assets/icons/bell.svg" alt="alerts" /></button>
+    <div class="swatch-dark">
+      <div class="row" style="margin:0">
+        <button class="sds-icon-btn sds-icon-btn--selected"><img src="../assets/icons/shield.svg" alt="shield" style="filter:invert(1)" /></button>
+        <button class="sds-icon-btn" style="color:var(--color-text-inverse)"><img src="../assets/icons/book.svg" alt="docs" style="filter:invert(1)" /></button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

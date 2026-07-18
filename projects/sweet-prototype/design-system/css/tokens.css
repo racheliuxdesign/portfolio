@@ -1,0 +1,159 @@
+/* ==========================================================================
+   Sweet Design System — Design Tokens
+   Source of truth: Figma "sweet-design-system" (Foundations pages).
+   Light UI, dark-ink chrome. Extracted from the Sweet Security application.
+
+   Layer 1: Primitives (raw values — do NOT use directly in components).
+   Layer 2: Semantic tokens (use these in components).
+   ========================================================================== */
+
+:root {
+  /* ---------------------------------------------------------------------- */
+  /* PRIMITIVES — raw palette. Reference only from semantic tokens below.   */
+  /* ---------------------------------------------------------------------- */
+  --ink-900: #040316;
+  --ink-700: #19192b;
+  --white: #ffffff;
+  --gray-50: #f7f7f9;
+  --gray-100: #f4f4f6;
+  --gray-200: #ececee;
+  --gray-300: #d0d0d0;
+  --gray-400: #9a9aa2;
+  --gray-500: #8d8d8d;
+  --gray-700: #4a4a52;
+  --gray-900: #0b0b14;
+  --red-700: #9b3526;
+  --red-100: #e6cdc9;
+  --red-50: #faefec;
+  --salmon-400: #d77f78;
+  --amber-400: #e2a367;
+  --amber-500: #f2aa3d;
+  --amber-50: #fbf2d9;
+  --orange-400: #f19d43;
+  --orange-50: #fdf4eb;
+  --coral-500: #f36c53;
+  --green-700: #008001;
+  --green-300: #7dbd98;
+  --green-50: #ebf8f1;
+  --blue-600: #456dcd;
+  --blue-100: #e8f0fb;
+  --blue-50: #ecf6fe;
+  --purple-500: #846ca1;
+  --purple-400: #8e6ca9;
+  --purple-50: #eae2ef;
+  --magenta-600: #a53e7b;
+  --navy-700: #353a6a;
+
+  /* ---------------------------------------------------------------------- */
+  /* SEMANTIC COLOR — use these everywhere in components.                   */
+  /* ---------------------------------------------------------------------- */
+
+  /* Backgrounds */
+  --color-bg-page: var(--gray-50);        /* app canvas / page background   */
+  --color-bg-surface: var(--white);       /* cards, panels, menus           */
+  --color-bg-subtle: var(--gray-100);     /* zebra rows, subtle fills       */
+  --color-bg-ink: var(--ink-900);         /* dark chrome (top bar, sidebar) */
+
+  /* Text */
+  --color-text-primary: var(--gray-900);
+  --color-text-secondary: var(--gray-500);
+  --color-text-muted: var(--gray-400);
+  --color-text-disabled: var(--gray-300);
+  --color-text-inverse: var(--white);
+  --color-text-link: var(--blue-600);
+
+  /* Borders */
+  --color-border-default: var(--gray-200);
+  --color-border-strong: var(--gray-300);
+  --color-border-ink: var(--ink-900);
+
+  /* Severity — the core signal language of the product.                    */
+  /* Use ONLY these tokens for Critical/High/Medium/Low.                    */
+  --color-severity-critical: var(--red-700);
+  --color-severity-critical-tint: var(--red-100);
+  --color-severity-high: var(--salmon-400);
+  --color-severity-high-tint: var(--red-50);
+  --color-severity-medium: var(--amber-400);
+  --color-severity-medium-tint: var(--amber-50);
+  --color-severity-low: var(--green-300);
+  --color-severity-low-tint: var(--green-50);
+
+  /* Status */
+  --color-status-success: var(--green-700);
+  --color-status-success-tint: var(--green-50);
+  --color-status-warning: var(--orange-400);
+  --color-status-warning-tint: var(--orange-50);
+  --color-status-info: var(--blue-600);
+  --color-status-info-tint: var(--blue-50);
+  --color-status-error: var(--red-700);
+  --color-status-error-tint: var(--red-50);
+
+  /* Accents */
+  --color-accent-coral: var(--coral-500);
+  --color-accent-ai: var(--purple-500);        /* AI / assistant features   */
+  --color-accent-ai-tint: var(--purple-50);
+  --color-accent-code-bg: var(--blue-100);
+
+  /* Category (data domains) */
+  --color-category-vulnerabilities: var(--magenta-600);
+  --color-category-secrets: var(--purple-400);
+  --color-category-findings: var(--navy-700);
+  --color-category-issues: var(--amber-500);
+
+  /* ---------------------------------------------------------------------- */
+  /* SPACING — 2px base scale.                                              */
+  /* ---------------------------------------------------------------------- */
+  --space-2xs: 2px;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 20px;
+  --space-2xl: 24px;
+  --space-3xl: 32px;
+  --space-4xl: 40px;
+  --space-5xl: 48px;
+
+  /* ---------------------------------------------------------------------- */
+  /* RADIUS                                                                 */
+  /* ---------------------------------------------------------------------- */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  /* ---------------------------------------------------------------------- */
+  /* TYPOGRAPHY                                                             */
+  /* ---------------------------------------------------------------------- */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+
+  /* Type scale — font-size / line-height pairs (see typography classes).   */
+  --font-size-page-title: 24px;   --line-height-page-title: 32px;
+  --font-size-section: 18px;      --line-height-section: 26px;
+  --font-size-card: 16px;         --line-height-card: 24px;
+  --font-size-body: 14px;         --line-height-body: 20px;
+  --font-size-small: 12px;        --line-height-small: 16px;
+  --font-size-label: 12px;        --line-height-label: 16px;
+  --font-size-caption: 11px;      --line-height-caption: 14px;
+  --font-size-stat-lg: 48px;      --line-height-stat-lg: 56px;
+  --font-size-stat-md: 32px;      --line-height-stat-md: 40px;
+  --font-size-code: 12px;         --line-height-code: 16px;
+
+  /* ---------------------------------------------------------------------- */
+  /* ELEVATION / SHADOWS (refined from component extraction)                */
+  /* ---------------------------------------------------------------------- */
+  /* Shadow/Card (exact Figma effect style): two stacked drop shadows */
+  --shadow-card: 0 1px 2px 0 rgba(11, 11, 20, 0.05), 0 2px 6px 0 rgba(11, 11, 20, 0.04);
+  --shadow-sm: 0 1px 2px 0 rgba(11, 11, 20, 0.05);
+  --shadow-md: 0 2px 8px rgba(11, 11, 20, 0.08);
+  --shadow-lg: 0 8px 24px rgba(11, 11, 20, 0.12);
+  --shadow-overlay: 0 12px 32px rgba(11, 11, 20, 0.18);
+  --shadow-dropdown: 0 4px 12px rgba(11, 11, 20, 0.10);
+}

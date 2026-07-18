@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sweet DS — Cards &amp; Stats</title>
+  <link rel="stylesheet" href="../css/tokens.css" />
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+  <style>
+    body { padding: 32px; }
+    h1 { margin: 0 0 24px; } h2 { margin: 32px 0 12px; }
+    .row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 12px; align-items: flex-start; }
+  </style>
+</head>
+<body>
+  <h1 class="ds-page-title">Cards &amp; Stats</h1>
+
+  <h2 class="ds-section">Stat card</h2>
+  <div class="row">
+    <div class="sds-stat-card" style="width:360px">
+      <span class="sds-stat-card__title">Passed Checks</span>
+      <span class="sds-stat-card__subtitle">10 passed out of 31 checks</span>
+      <span class="sds-stat-card__value">10</span>
+      <div class="sds-progress"><div class="sds-progress__fill sds-progress__fill--ink" style="width:32%"></div></div>
+    </div>
+    <div class="sds-stat-card" style="width:360px">
+      <span class="sds-stat-card__title">Coverage</span>
+      <span class="sds-stat-card__subtitle">Assets with an agent installed</span>
+      <span class="sds-stat-card__value">86%</span>
+      <div class="sds-progress"><div class="sds-progress__fill" style="width:86%"></div></div>
+    </div>
+  </div>
+
+  <h2 class="ds-section">Progress bar</h2>
+  <div class="row" style="flex-direction:column; gap:12px; max-width:200px">
+    <div class="sds-progress"><div class="sds-progress__fill" style="width:60%"></div></div>
+    <div class="sds-progress"><div class="sds-progress__fill sds-progress__fill--error" style="width:40%"></div></div>
+    <div class="sds-progress"><div class="sds-progress__fill sds-progress__fill--ink" style="width:75%"></div></div>
+    <div class="sds-progress"><div class="sds-progress__fill sds-progress__fill--coral" style="width:20%"></div></div>
+  </div>
+
+  <h2 class="ds-section">List card (insight row)</h2>
+  <div class="row" style="flex-direction:column">
+    <div class="sds-list-card" style="width:900px; max-width:100%">
+      <div class="sds-list-card__stripe sds-list-card__stripe--critical"></div>
+      <div class="sds-list-card__content">
+        <span class="sds-entity sds-entity--secrets"><img src="../assets/icons/key.svg" alt="" /></span>
+        <span class="sds-list-card__title">Insecure Secrets: Plaintext secrets found in environment variables or disk files</span>
+      </div>
+      <div class="sds-list-card__meta">
+        <div class="sds-list-card__col">
+          <span class="sds-list-card__col-label">Severity</span>
+          <span class="sds-badge sds-badge--critical">Critical</span>
+        </div>
+        <div class="sds-list-card__col">
+          <span class="sds-list-card__col-label">Recommended action</span>
+          <button class="sds-action-link">Rotate</button>
+        </div>
+        <div class="sds-list-card__col">
+          <span class="sds-list-card__col-label">Violations</span>
+          <span class="sds-list-card__col-value">98</span>
+        </div>
+        <img class="sds-list-card__chevron" src="../assets/icons/chevron-down.svg" alt="" />
+      </div>
+    </div>
+  </div>
+
+  <h2 class="ds-section">Section card</h2>
+  <div class="row">
+    <div class="sds-section-card" style="width:480px; max-width:100%">
+      <div class="sds-section-card__header">Sweet Score Reasoning</div>
+      <div class="sds-section-card__divider"></div>
+      <div class="sds-section-card__body">While the vulnerability has a Critical (9.8) base score, several factors significantly reduce the risk in this environment.</div>
+    </div>
+  </div>
+</body>
+</html>
