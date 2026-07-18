@@ -485,7 +485,6 @@
         { h:"Reachable with a thumb", p:"The floating “+ New permit” button stays in thumb range, because this flow is meant to be filled out standing on site, not at a desk." }
       ]},
       official: { eyebrow:"Approvals · Site Official", items:[
-        { h:"Pending means “still my job”", p:"A freshly submitted permit and one the foreman is revising after a return both show as Pending — the official has no outstanding action on either." },
         { h:"Today, at a glance", p:"The mini progress board answers “how am I doing today” in one glance — reviewed vs. still outstanding — before scrolling into the list." },
         { h:"Soonest start sorts first", p:"Default sort is by scheduled start time, so the permit that would block a crew soonest is always the one on top." }
       ]}
@@ -516,7 +515,6 @@
     ],
     detail: {
       foreman: { eyebrow:"Permit detail · Foreman", items:[
-        { h:"The banner explains the “why”", p:"Rather than a bare status chip, the banner always states who decided and, for changes or rejections, exactly what comment they left." },
         { h:"One tap to revise", p:"A returned permit shows a single primary action, Revise & resubmit, which reopens the same 3-step flow pre-filled with the previous answers." }
       ]},
       official: { eyebrow:"Permit detail · Site Official", items:[
@@ -1169,10 +1167,28 @@
     return '<div class="card" style="padding:14px"><div class="h-sec" style="margin:0 0 10px">Activity</div><div class="timeline">'+items+'</div></div>';
   }
 
+  // Deterministic pseudo-barcode built from the permit serial, so an approved
+  // permit carries a scannable-looking code the foreman can present on site.
+  function barcode(serial){
+    var s = String(serial);
+    var seed = 5381;
+    for (var i=0;i<s.length;i++) seed = ((seed*33) ^ s.charCodeAt(i)) >>> 0;
+    function rnd(){ seed = (seed*1103515245 + 12345) >>> 0; return seed / 4294967296; }
+    var unit = 2, x = 0, h = 46, bars = "";
+    for (var k=0;k<59;k++){                 // alternating bar/gap, varied widths
+      var w = (1 + Math.floor(rnd()*3)) * unit;
+      if (k % 2 === 0) bars += '<rect x="'+x+'" y="0" width="'+w+'" height="'+h+'"/>';
+      x += w;
+    }
+    return '<div class="barcode">'
+      + '<svg class="bc-svg" viewBox="0 0 '+x+' '+h+'" preserveAspectRatio="none" role="img" aria-label="Permit barcode">'+bars+'</svg>'
+      + '<span class="bc-num">'+esc(s)+'</span></div>';
+  }
+
   function foremanDetail(p){
     var banner="";
     if (p.status==="changes_required") banner='<div class="callout changes"><span class="ci">↩</span><div><b>Changes required by '+esc(p.decision.by)+'</b>'+esc(p.decision.comment)+'</div></div>';
-    if (p.status==="approved") banner='<div class="callout approved"><span class="ci">✓</span><div><b>Approved by '+esc(p.decision.by)+'</b>'+(p.decision.comment?esc(p.decision.comment):"You are cleared to begin. Keep the permit accessible on site.")+'</div></div>';
+    if (p.status==="approved") banner='<div class="callout approved"><span class="ci">✓</span><div><b>Approved by '+esc(p.decision.by)+'</b>'+(p.decision.comment?esc(p.decision.comment):"You are cleared to begin. Keep the permit accessible on site.")+barcode(p.serial)+'</div></div>';
     if (p.status==="rejected") banner='<div class="callout rejected"><span class="ci">✕</span><div><b>Rejected by '+esc(p.decision.by)+'</b>'+(p.decision.comment?esc(p.decision.comment):"This request was denied.")+'</div></div>';
     if (p.status==="pending") banner='<div class="callout info"><span class="ci">⏳</span><div><b>Awaiting approval</b>Submitted '+esc(rel(p.createdAt))+'. You\'ll be notified the moment '+esc(USERS.official.name)+' decides.</div></div>';
 
