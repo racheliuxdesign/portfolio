@@ -117,8 +117,16 @@ function heartbeatBucket(hb) {
   const h = hb.match(/(\d+)\s*h ago/i); if (h) return +h[1] < 24 ? '< 24 hours' : 'Over 24 hours';
   return 'Over 24 hours';
 }
-/* Applies the active filters. Coverage rate is a cluster-level metric with no
-   per-sensor field, so it's illustrative only and not used for matching. */
+/* Bucket a per-sensor coverage percentage into the filter's ranges.
+   Returns null when coverage is unavailable (sensor not connected). */
+function coverageBucket(pct) {
+  if (typeof pct !== 'number') return null;
+  if (pct < 50) return 'Under 50%';
+  if (pct < 80) return '50–80%';
+  if (pct < 95) return '80–95%';
+  return 'Over 95%';
+}
+/* Applies the active filters. */
 function sensorMatches(s) {
   const v = filterState.values;
   const t = splitType(s.type);
@@ -129,6 +137,7 @@ function sensorMatches(s) {
   if (v.version && s.version !== v.version) return false;
   if (v.environment && !s.env.includes(v.environment)) return false;
   if (v.heartbeat && heartbeatBucket(s.heartbeat) !== v.heartbeat) return false;
+  if (v.coverage && coverageBucket(s.coverage) !== v.coverage) return false;
   return true;
 }
 
