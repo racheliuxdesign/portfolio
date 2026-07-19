@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="design-system/css/tokens.css" />
   <link rel="stylesheet" href="design-system/css/base.css" />
   <link rel="stylesheet" href="design-system/css/components.css" />
-  <link rel="stylesheet" href="app.css?v=86" />
+  <link rel="stylesheet" href="app.css?v=89" />
   <style>
     :root{
       --topbar-h:56px;
@@ -23,23 +23,43 @@
     .pres-topbar{position:sticky;top:0;z-index:40;}
     .progress{position:fixed;top:var(--topbar-h);left:0;height:2px;width:0%;background:var(--accent);z-index:45;transition:width .08s linear;}
 
-    .deck{height:calc(100vh - var(--topbar-h));overflow-y:auto;scroll-snap-type:y proximity;scroll-behavior:smooth;}
-    .slide{scroll-snap-align:start;display:flex;align-items:flex-start;
+    .deck{height:calc(100vh - var(--topbar-h));overflow-y:auto;}
+    .slide{display:flex;align-items:flex-start;
       padding:clamp(22px,3.4vh,34px) clamp(24px,4vw,56px);position:relative;}
-    .slide.hero{min-height:calc(76vh - var(--topbar-h));align-items:center;}
+    .slide.hero{align-items:flex-start;}
     .wrap{width:100%;max-width:1040px;margin:0 auto;}
-    .wrap--wide{max-width:1340px;}
+    .wrap--wide{max-width:1040px;}
+
+    /* floating table of contents */
+    .toc{display:none;position:fixed;top:calc(var(--topbar-h,56px) + 44px);right:clamp(20px,3vw,40px);z-index:35;
+      width:240px;max-height:calc(100vh - var(--topbar-h,56px) - 88px);overflow-y:auto;font-size:12px;line-height:1.35;}
+    .toc__h{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin:0 0 12px;}
+    .toc ul{list-style:none;margin:0;padding:0;}
+    .toc__sec{margin:0 0 11px;}
+    .toc__title{display:block;font-weight:700;color:var(--ink);text-decoration:none;padding:2px 0 2px 12px;border-left:2px solid transparent;transition:color .12s,border-color .12s;}
+    .toc__title:hover{color:var(--accent);}
+    .toc__sub{display:none;}
+    .toc__sub a{display:block;color:var(--muted);text-decoration:none;padding:3px 0 3px 12px;border-left:2px solid var(--hair);transition:color .12s,border-color .12s;}
+    .toc__sub a:hover{color:var(--ink);}
+    .toc a.is-active{color:var(--accent);border-left-color:var(--accent);font-weight:600;}
+    @media(min-width:1240px){
+      .toc{display:block;}
+      .slide{padding-left:clamp(24px,4vw,56px);padding-right:300px;}
+    }
 
     /* ---- Type scale: 16 / 14 / 12 ---- */
     .over{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:.13em;
       text-transform:uppercase;color:var(--accent);margin:0 0 7px;}
     .over::before{content:"";width:18px;height:1.5px;background:var(--accent);opacity:.5;}
     .over--plain::before{display:none;}
-    .over .sec{color:var(--faint);font-weight:600;}
+    .over .sec{display:inline-block;padding:2px 7px;border-radius:5px;background:var(--accent);color:#fff;font-weight:700;letter-spacing:.08em;}
 
-    h1.title{font-size:24px;line-height:1.08;letter-spacing:-.015em;font-weight:640;margin:0;}
+    h1.title{font-size:clamp(30px,4vw,44px);line-height:1.06;letter-spacing:-.02em;font-weight:680;margin:0;}
     h2{font-size:15px;line-height:1.3;letter-spacing:-.003em;font-weight:640;margin:0 0 8px;color:var(--ink);}
-    h2.big{font-size:16px;line-height:1.25;}
+    h2.big{font-size:clamp(22px,2.6vw,28px);line-height:1.18;letter-spacing:-.015em;font-weight:680;margin:0 0 10px;color:var(--ink);}
+    .sname{font-size:clamp(24px,3vw,32px);line-height:1.14;letter-spacing:-.02em;font-weight:700;color:var(--ink);margin:0;}
+    .sname .snum{color:var(--accent);font-weight:800;margin-right:12px;}
+    .ssub{font-size:clamp(15px,1.7vw,18px);line-height:1.35;color:var(--muted);font-weight:500;margin:8px 0 14px;}
     .lead{font-size:14px;line-height:1.5;color:var(--muted);max-width:66ch;margin:0;}
     .lead b{color:var(--ink);font-weight:600;}
     .sub{font-size:14px;color:var(--muted);line-height:1.5;margin:12px 0 0;max-width:52ch;}
@@ -52,15 +72,16 @@
 
     /* mockup — compact */
     .mock{position:relative;border-radius:14px;overflow:hidden;background:linear-gradient(180deg,#fcfcfd,#f5f5f8);
-      border:1px solid var(--hair);width:1300px;max-width:100%;aspect-ratio:1300/600;margin:18px auto 0;
+      border:1px solid var(--hair);width:1300px;max-width:100%;margin:18px auto 0;
       display:flex;flex-direction:column;box-shadow:0 22px 48px -30px rgba(11,11,20,.30);}
     .mock__chrome{display:flex;gap:5px;padding:10px 12px;border-bottom:1px solid var(--hair);}
     .mock__chrome i{width:8px;height:8px;border-radius:50%;background:#e2e2e6;}
+    .mock__img{display:block;width:100%;height:auto;}
     .mock__body{flex:1;display:grid;place-items:center;text-align:center;padding:20px;}
     .mock__label{display:flex;flex-direction:column;align-items:center;gap:8px;}
     .mock__label svg{width:24px;height:24px;color:#c3c3ca;}
     .mock__tag{font-size:12px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);}
-    .mock__cap{font-size:12px;color:#b3b3ba;max-width:34ch;line-height:1.4;}
+    .mock__cap{font-size:12px;color:#8a8a92;line-height:1.4;padding:10px 14px;border-top:1px solid var(--hair);text-align:center;}
 
     /* steps */
     .steps{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;}
@@ -111,7 +132,7 @@
     .card p{font-size:13px;line-height:1.45;color:var(--muted);margin:0;}
 
     /* status dimensions */
-    .dims{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:16px;}
+    .dims{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:16px;}
     @media(max-width:760px){.dims{grid-template-columns:1fr;}}
     .dim{border:1px solid var(--hair);border-radius:12px;padding:16px;}
     .dim h4{margin:0 0 10px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);font-weight:700;}
@@ -123,7 +144,13 @@
     .ba{display:grid;grid-template-columns:1fr 1.35fr;gap:14px;margin-top:16px;align-items:stretch;}
     @media(max-width:820px){.ba{grid-template-columns:1fr;}}
     .ba__card{border:1px solid var(--hair);border-radius:12px;padding:16px 18px;background:#fff;}
-    .ba__card.is-bad{background:#fafafb;}
+    .ba__card.is-bad{background:#fafafb;display:flex;flex-direction:column;}
+    .ba__ph{flex:1;margin-top:2px;border:1px solid var(--hair);border-radius:10px;background:#fff;overflow:hidden;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+      padding:0;min-height:120px;text-align:center;color:var(--faint);}
+    .ba__ph img{display:block;width:100%;height:auto;}
+    .ba__ph svg{width:26px;height:26px;color:#c3c3ca;}
+    .ba__ph span{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
     .ba__k{font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;margin:0 0 9px;}
     .is-bad .ba__k{color:var(--faint);}
     .is-good .ba__k{color:var(--accent);}
@@ -176,10 +203,52 @@
 
   <div class="progress" id="progress"></div>
 
+  <nav class="toc" id="toc" aria-label="Presentation contents">
+    <p class="toc__h">Contents</p>
+    <ul>
+      <li class="toc__sec"><a class="toc__title" href="#s1" data-target="s1">Cover</a></li>
+      <li class="toc__sec"><a class="toc__title" href="#s2" data-target="s2">01 · The starting point</a>
+        <ul class="toc__sub"><li><a href="#s2" data-target="s2">Deployment is the first thing users do</a></li></ul>
+      </li>
+      <li class="toc__sec"><a class="toc__title" href="#s3" data-target="s3">02 · What I assumed</a>
+        <ul class="toc__sub"><li><a href="#s3" data-target="s3">Design starts with a point of view</a></li></ul>
+      </li>
+      <li class="toc__sec"><a class="toc__title" href="#s4" data-target="s4">03 · The deployment flow</a>
+        <ul class="toc__sub">
+          <li><a href="#s4" data-target="s4">Five steps. One decision at a time.</a></li>
+          <li><a href="#s5" data-target="s5">Reduce friction at every step.</a></li>
+          <li><a href="#s6" data-target="s6">Build confidence it actually worked.</a></li>
+        </ul>
+      </li>
+      <li class="toc__sec"><a class="toc__title" href="#s7" data-target="s7">04 · The Sensors page</a>
+        <ul class="toc__sub">
+          <li><a href="#s7" data-target="s7">Answer the questions teams actually ask.</a></li>
+          <li><a href="#s8" data-target="s8">In five seconds, they should know where they stand.</a></li>
+        </ul>
+      </li>
+      <li class="toc__sec"><a class="toc__title" href="#s9" data-target="s9">05 · Key decisions</a>
+        <ul class="toc__sub">
+          <li><a href="#s9" data-target="s9">One "status" was hiding three problems.</a></li>
+          <li><a href="#s10" data-target="s10">Every problem should explain itself.</a></li>
+          <li><a href="#s11" data-target="s11">Four more calls that shaped the page.</a></li>
+        </ul>
+      </li>
+      <li class="toc__sec"><a class="toc__title" href="#s12" data-target="s12">06 · Trade-offs &amp; challenges</a>
+        <ul class="toc__sub"><li><a href="#s12" data-target="s12">What I chose, and what it cost.</a></li></ul>
+      </li>
+      <li class="toc__sec"><a class="toc__title" href="#s13" data-target="s13">07 · If I had more time</a>
+        <ul class="toc__sub"><li><a href="#s13" data-target="s13">Where I'd take it next.</a></li></ul>
+      </li>
+      <li class="toc__sec"><a class="toc__title" href="#s14" data-target="s14">08 · Key takeaways</a>
+        <ul class="toc__sub"><li><a href="#s14" data-target="s14">How I think about design.</a></li></ul>
+      </li>
+    </ul>
+  </nav>
+
   <main class="deck" id="deck">
 
     <!-- 1 · TITLE -->
-    <section class="slide hero">
+    <section id="s1" class="slide hero">
       <div class="wrap">
         <p class="over over--plain">Product design case study · Cloud security</p>
         <h1 class="title">Sensor Deployment Flow</h1>
@@ -192,10 +261,10 @@
     </section>
 
     <!-- 2 · PROBLEM + PERSONA -->
-    <section class="slide">
+    <section id="s2" class="slide">
       <div class="wrap">
-        <p class="over">The starting point</p>
-        <h2 class="big">Deployment is the first thing users do — and the easiest place to lose them.</h2>
+        <h2 class="sname"><span class="snum">01</span>The starting point</h2>
+        <p class="ssub">Deployment is the first thing users do — and the easiest place to lose them.</p>
         <div class="duo" style="margin-top:20px">
           <div class="block">
             <h3>The problem</h3>
@@ -210,25 +279,24 @@
     </section>
 
     <!-- 3 · ASSUMPTIONS -->
-    <section class="slide">
+    <section id="s3" class="slide">
       <div class="wrap">
-        <p class="over">What I assumed</p>
-        <h2 class="big">Design starts with a point of view. Here's mine.</h2>
+        <h2 class="sname"><span class="snum">02</span>What I assumed</h2>
+        <p class="ssub">Design starts with a point of view. Here's mine.</p>
         <ul class="list">
           <li><span class="n">1</span><div>Users <b>don't know this UI</b> — it has to guide them, not test them.</div></li>
-          <li><span class="n">2</span><div>They trust <b>familiar, industry-standard patterns</b> over anything clever.</div></li>
-          <li><span class="n">3</span><div>They need <b>confidence</b> that everything installed correctly.</div></li>
-          <li><span class="n">4</span><div>They want to understand <b>exactly what protection</b> they're getting.</div></li>
-          <li><span class="n">5</span><div>When something breaks, they need <b>immediate clarity</b> on what happened and how to fix it.</div></li>
+          <li><span class="n">2</span><div>They need <b>confidence</b> that everything installed correctly.</div></li>
+          <li><span class="n">3</span><div>They want to understand <b>exactly what protection</b> they're getting.</div></li>
+          <li><span class="n">4</span><div>When something breaks, they need <b>immediate clarity</b> on what happened and how to fix it.</div></li>
         </ul>
       </div>
     </section>
 
     <!-- 4 · DEPLOYMENT FLOW -->
-    <section class="slide">
+    <section id="s4" class="slide">
       <div class="wrap wrap--wide">
-        <p class="over"><span class="sec">01 ·</span>&nbsp;The deployment flow</p>
-        <h2 class="big">Five steps. One decision at a time.</h2>
+        <h2 class="sname"><span class="snum">03</span>The deployment flow</h2>
+        <p class="ssub">Five steps. One decision at a time.</p>
         <p class="lead">A stepped wizard instead of one dense page. A persistent rail shows progress and the choices already made — the flow remembers the context, not the user.</p>
         <div class="steps">
           <span class="s"><b>1</b>Provider</span>
@@ -237,22 +305,18 @@
           <span class="s"><b>4</b>Install</span>
           <span class="s"><b>5</b>Verify</span>
         </div>
-        <div class="mock">
+        <figure class="mock">
           <div class="mock__chrome"><i></i><i></i><i></i></div>
-          <div class="mock__body"><div class="mock__label">
-            <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.6"/><circle cx="8.5" cy="9.5" r="1.6" stroke="currentColor" stroke-width="1.6"/><path d="M4 17l5-4 4 3 3-2 4 3" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
-            <span class="mock__tag">[ Insert mockup ]</span>
-            <span class="mock__cap">Wizard — provider step with the persistent progress rail</span>
-          </div></div>
-        </div>
+          <img class="mock__img" src="assets/images/1.png" alt="Wizard — provider step with the persistent progress rail">
+          <figcaption class="mock__cap">Wizard — provider step with the persistent progress rail</figcaption>
+        </figure>
       </div>
     </section>
 
     <!-- 5 · REDUCE FRICTION -->
-    <section class="slide">
+    <section id="s5" class="slide">
       <div class="wrap wrap--wide">
-        <p class="over"><span class="sec">01 ·</span>&nbsp;Design goals</p>
-        <h2 class="big">Reduce friction at every step.</h2>
+        <p class="ssub">Reduce friction at every step.</p>
         <div class="goals goals--row" style="margin-top:14px">
           <div class="goal">
             <span class="gi"><svg viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1.6" stroke="currentColor" stroke-width="1.4"/></svg></span>
@@ -271,22 +335,18 @@
             <div><h4>Make it effortless</h4><p>Copy-ready commands; failures in plain language.</p></div>
           </div>
         </div>
-        <div class="mock">
+        <figure class="mock">
           <div class="mock__chrome"><i></i><i></i><i></i></div>
-          <div class="mock__body"><div class="mock__label">
-            <svg viewBox="0 0 24 24" fill="none"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13 5l-2 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            <span class="mock__tag">[ Insert mockup ]</span>
-            <span class="mock__cap">Install step — one focused choice + copy-ready command</span>
-          </div></div>
-        </div>
+          <img class="mock__img" src="assets/images/2.png" alt="Install step — one focused choice + copy-ready command">
+          <figcaption class="mock__cap">Install step — one focused choice + copy-ready command</figcaption>
+        </figure>
       </div>
     </section>
 
     <!-- 6 · BUILD CONFIDENCE -->
-    <section class="slide">
+    <section id="s6" class="slide">
       <div class="wrap wrap--wide">
-        <p class="over"><span class="sec">01 ·</span>&nbsp;Design goals</p>
-        <h2 class="big">Build confidence it actually worked.</h2>
+        <p class="ssub">Build confidence it actually worked.</p>
         <div class="goals goals--row3" style="margin-top:14px">
           <div class="goal">
             <span class="gi"><svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.4"/><path d="M8 11V7.5M8 5.5h.01" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
@@ -301,44 +361,37 @@
             <div><h4>Verify — don't ask</h4><p>Sweet checks the whole chain: release → pods → auth → connectivity → telemetry. Confirmed, not assumed.</p></div>
           </div>
         </div>
-        <div class="mock">
+        <figure class="mock">
           <div class="mock__chrome"><i></i><i></i><i></i></div>
-          <div class="mock__body"><div class="mock__label">
-            <svg viewBox="0 0 24 24" fill="none"><path d="M12 3l7 3v5c0 4.4-3 7.6-7 9-4-1.4-7-4.6-7-9V6l7-3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            <span class="mock__tag">[ Insert mockup ]</span>
-            <span class="mock__cap">Verification checklist — every link in the chain, confirmed</span>
-          </div></div>
-        </div>
+          <img class="mock__img" src="assets/images/3.png" alt="Verification checklist — every link in the chain, confirmed">
+          <figcaption class="mock__cap">Verification checklist — every link in the chain, confirmed</figcaption>
+        </figure>
       </div>
     </section>
 
     <!-- 7 · SENSORS PAGE -->
-    <section class="slide">
+    <section id="s7" class="slide">
       <div class="wrap wrap--wide">
-        <p class="over"><span class="sec">02 ·</span>&nbsp;The Sensors page</p>
-        <h2 class="big">Answer the questions teams actually ask.</h2>
+        <h2 class="sname"><span class="snum">04</span>The Sensors page</h2>
+        <p class="ssub">Answer the questions teams actually ask.</p>
         <div class="cards cards--4" style="margin-top:14px">
           <div class="card"><h4>Am I protected?</h4><p>A coverage widget answers it before anything else.</p></div>
           <div class="card"><h4>Where are my blind spots?</h4><p>The gap between expected and actual coverage, made visible.</p></div>
           <div class="card"><h4>Is anything broken?</h4><p>Clear, specific health states — never a vague "status."</p></div>
           <div class="card"><h4>What do I fix first?</h4><p>Issue, context and recommended action, together.</p></div>
         </div>
-        <div class="mock">
+        <figure class="mock">
           <div class="mock__chrome"><i></i><i></i><i></i></div>
-          <div class="mock__body"><div class="mock__label">
-            <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 3a9 9 0 0 1 7.8 13.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
-            <span class="mock__tag">[ Insert mockup ]</span>
-            <span class="mock__cap">Sensors overview — coverage + health states</span>
-          </div></div>
-        </div>
+          <img class="mock__img" src="assets/images/4.png" alt="Sensors overview — coverage + health states">
+          <figcaption class="mock__cap">Sensors overview — coverage + health states</figcaption>
+        </figure>
       </div>
     </section>
 
     <!-- 8 · FIVE-SECOND TEST -->
-    <section class="slide">
+    <section id="s8" class="slide">
       <div class="wrap wrap--wide">
-        <p class="over"><span class="sec">02 ·</span>&nbsp;The five-second test</p>
-        <h2 class="big">In five seconds, they should know where they stand.</h2>
+        <p class="ssub">In five seconds, they should know where they stand.</p>
         <ul class="list list--check goals--row" style="margin-top:14px;gap:16px 22px">
           <li><span class="n">✓</span><div>Is the sensor <b>healthy</b>?</div></li>
           <li><span class="n">✓</span><div>Is it <b>protecting</b> my environment?</div></li>
@@ -346,68 +399,49 @@
           <li><span class="n">✓</span><div>Do I <b>need to act</b>?</div></li>
         </ul>
         <p class="cap" style="margin-top:12px">Carried by four elements: health badge · coverage widget · security findings · issue banner.</p>
-        <div class="mock">
+        <figure class="mock">
           <div class="mock__chrome"><i></i><i></i><i></i></div>
-          <div class="mock__body"><div class="mock__label">
-            <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            <span class="mock__tag">[ Insert mockup ]</span>
-            <span class="mock__cap">Full page — badge · coverage · findings · issue banner</span>
-          </div></div>
-        </div>
+          <img class="mock__img" src="assets/images/5.png" alt="Full page — badge · coverage · findings · issue banner">
+          <figcaption class="mock__cap">Full page — badge · coverage · findings · issue banner</figcaption>
+        </figure>
       </div>
     </section>
 
     <!-- 9 · DECISION 1 -->
-    <section class="slide">
+    <section id="s9" class="slide">
       <div class="wrap">
-        <p class="over"><span class="sec">03 ·</span>&nbsp;Key decision · the big one</p>
-        <h2 class="big">One "status" was hiding three different problems.</h2>
-        <p class="lead">A generic status forces users to interpret. I split it into three independent dimensions, so anyone can tell instantly <b>what kind</b> of problem they're facing.</p>
+        <h2 class="sname"><span class="snum">05</span>Key decisions</h2>
+        <p class="ssub">One "status" was hiding three different problems.</p>
+        <p class="lead" style="max-width:none">A generic status forces users to interpret. I realized a sensor actually has several distinct states: <b>health</b> — an inclusive state that accumulates its issues and their severity — plus <b>connectivity</b>, <b>deployment</b> state, and <b>coverage</b> level. Health is the most important parameter, so I gave it the highest hierarchy in the UI: it sits in the table on its own, to prevent ambiguity. The details pane holds all the other factors, but health always stays at the top of the hierarchy.</p>
+        <p class="lead" style="margin-top:12px;max-width:none"><b>Offline state</b> — I was genuinely conflicted about where to place "Offline." It's a connectivity state, but its severity led me to give it a place of honor as a health state: its criticality sits on a different level, even next to other critical issues. That was a UX decision grounded in one question — what matters most to the user?</p>
         <div class="dims">
           <div class="dim"><h4>Health</h4><ul>
             <li><i style="background:var(--green-700)"></i>Healthy</li>
             <li><i style="background:var(--orange-400)"></i>Warning</li>
             <li><i style="background:var(--red-700)"></i>Critical</li>
-            <li><i style="background:var(--gray-400)"></i>Offline</li>
+            <li><i style="background:transparent;box-shadow:inset 0 0 0 1.5px var(--sev-critical)"></i>Offline</li>
           </ul></div>
           <div class="dim"><h4>Connection</h4><ul>
             <li><i style="background:var(--green-700)"></i>Connected</li>
             <li><i style="background:var(--orange-400)"></i>Connecting</li>
             <li><i style="background:var(--red-700)"></i>Disconnected</li>
-            <li><i style="background:var(--gray-400)"></i>Never connected</li>
-          </ul></div>
-          <div class="dim"><h4>Deployment</h4><ul>
-            <li><i style="background:var(--blue-600)"></i>Deploying</li>
-            <li><i style="background:var(--purple-500)"></i>Updating</li>
-            <li><i style="background:var(--red-700)"></i>Failed</li>
-            <li><i style="background:var(--green-700)"></i>Installed</li>
           </ul></div>
         </div>
       </div>
     </section>
 
     <!-- 10 · DECISION 2 -->
-    <section class="slide">
+    <section id="s10" class="slide">
       <div class="wrap">
-        <p class="over"><span class="sec">03 ·</span>&nbsp;Key decision</p>
-        <h2 class="big">Every problem should explain itself.</h2>
-        <div class="ba">
-          <div class="ba__card is-bad"><p class="ba__k">Before</p><p class="ba__msg">"Sensor upgrade required."</p></div>
-          <div class="ba__card is-good">
-            <p class="ba__k">After</p>
-            <p class="ba__msg"><span class="strong">This sensor is running v4.7.0</span>, no longer the latest supported release. Until it's upgraded, it may not report full telemetry or receive the latest protections.</p>
-            <div class="ba__actions">Recommended: upgrade to the latest version · if centrally managed, roll out the updated Helm chart via Argo CD, Flux, or CI/CD · confirm it returns to Healthy.</div>
-            <span class="ba__cta">Upgrade sensor</span>
-          </div>
-        </div>
+        <p class="ssub">Every problem should explain itself.</p>
+        <img src="assets/images/6.png" alt="A sensor issue that explains itself — plain-language message with a recommended fix" style="display:block;width:100%;max-width:511px;height:auto;border:1px solid var(--hair);border-radius:12px;margin-top:16px;">
       </div>
     </section>
 
     <!-- 11 · DECISIONS 3-6 -->
-    <section class="slide">
+    <section id="s11" class="slide">
       <div class="wrap">
-        <p class="over"><span class="sec">03 ·</span>&nbsp;More decisions</p>
-        <h2 class="big">Four more calls that shaped the page.</h2>
+        <p class="ssub">Four more calls that shaped the page.</p>
         <div class="cards">
           <div class="card"><p class="k">03</p><h4>Show value immediately</h4><p>The moment install finishes, users see the sensor is already protecting them — and what's in scope.</p></div>
           <div class="card"><p class="k">04</p><h4>Attention, impossible to miss</h4><p>Active problems carry the most visual weight. Attention lands where it's needed.</p></div>
@@ -418,23 +452,25 @@
     </section>
 
     <!-- 12 · TRADE-OFFS + CHALLENGES -->
-    <section class="slide">
+    <section id="s12" class="slide">
       <div class="wrap">
-        <p class="over">Trade-offs &amp; challenges</p>
-        <h2 class="big">What I chose, and what it cost.</h2>
+        <h2 class="sname"><span class="snum">06</span>Trade-offs &amp; challenges</h2>
+        <p class="ssub">What I chose, and what it cost.</p>
         <div class="duo" style="margin-top:16px">
           <div class="duo__item"><h3>Overview over density</h3><p>I gave the overview more vertical space, even though it pushes the table down. Seeing what matters first beat a few extra rows above the fold.</p></div>
-          <div class="duo__item"><h3>Modal over full page</h3><p>A full page spread the content too thin and hurt scanning. A modal fit the volume and kept users anchored on the Sensors page.</p></div>
+          <div class="duo__item"><h3>Modal over full page</h3><p>I initially started with a page layout, but the elements felt too spread out. A modal seemed better suited to the amount of content I needed to display. It also has the added benefit of keeping users in the context of the Sensors page.</p></div>
         </div>
-        <p class="lead" style="margin-top:18px"><b>Hardest part — hierarchy.</b> It took many iterations to land on issues → coverage → everything else. I cut a duplicate coverage summary once it stayed visible without scrolling, and kept the details panel in one view rather than tabs to aid discoverability.</p>
+        <p class="lead" style="margin-top:18px;max-width:none">The hardest part for me was deciding on the information hierarchy. I kept rearranging the order of the elements before finally settling on showing Issues first, followed by Coverage.</p>
+        <p class="lead" style="margin-top:12px;max-width:none">I also experimented with displaying a coverage summary and the total number of collected entities in the header. However, I felt it was redundant since the same information was already visible in the expanded details pane. In the end, I removed it because users can see the data without needing to scroll.</p>
+        <p class="lead" style="margin-top:12px;max-width:none">Another decision I debated was whether to split the details pane into two tabs — Issues and Coverage. Ultimately, I decided against it because there isn't enough content to justify separate tabs, and keeping everything together makes the information easier to discover.</p>
       </div>
     </section>
 
     <!-- 13 · IF I HAD MORE TIME -->
-    <section class="slide">
+    <section id="s13" class="slide">
       <div class="wrap">
-        <p class="over">If I had more time</p>
-        <h2 class="big">Where I'd take it next.</h2>
+        <h2 class="sname"><span class="snum">07</span>If I had more time</h2>
+        <p class="ssub">Where I'd take it next.</p>
         <div class="duo" style="margin-top:16px">
           <div class="duo__item"><h3>Historical coverage trends</h3><p>A date selector and trend line. If telemetry stops, the break is obvious — and easy to correlate with a deployment change.</p></div>
           <div class="duo__item"><h3>Interactive health distribution</h3><p>Click any segment of the health widget to filter the sensors table instantly. The overview becomes a control, not just a chart.</p></div>
@@ -443,10 +479,10 @@
     </section>
 
     <!-- 14 · KEY TAKEAWAYS -->
-    <section class="slide">
+    <section id="s14" class="slide">
       <div class="wrap">
-        <p class="over">Key takeaways</p>
-        <h2 class="big">How I think about design.</h2>
+        <h2 class="sname"><span class="snum">08</span>Key takeaways</h2>
+        <p class="ssub">How I think about design.</p>
         <ul class="takes">
           <li><span class="n">01</span><p>Guide people through complexity instead of exposing it.</p></li>
           <li><span class="n">02</span><p>Verify success — don't ask users to.</p></li>
@@ -470,8 +506,13 @@
     const counter=document.getElementById('counter');
     const total=slides.length;
     function nearest(){
-      const top=deck.getBoundingClientRect().top;let best=0,bd=Infinity;
-      slides.forEach((el,idx)=>{const d=Math.abs(el.getBoundingClientRect().top-top);if(d<bd){bd=d;best=idx;}});
+      const view=deck.getBoundingClientRect();
+      let best=0,bestDist=Infinity;
+      slides.forEach((el,idx)=>{
+        const d=Math.abs(el.getBoundingClientRect().top-view.top);
+        if(d<bestDist){bestDist=d;best=idx;}
+      });
+      if(deck.scrollTop+deck.clientHeight>=deck.scrollHeight-2) best=slides.length-1;
       return best;
     }
     function onScroll(){
@@ -479,7 +520,29 @@
       bar.style.width=(max>0?(deck.scrollTop/max)*100:0)+'%';
       const i=nearest();
       counter.innerHTML='<b>'+String(i+1).padStart(2,'0')+'</b> / '+String(total).padStart(2,'0');
+      setActiveToc(i);
     }
+    function setActiveToc(i){
+      const id=slides[i]?slides[i].id:'';
+      document.querySelectorAll('.toc a.is-active').forEach(a=>a.classList.remove('is-active'));
+      const sub=document.querySelector('.toc__sub a[data-target="'+id+'"]');
+      if(sub){
+        sub.classList.add('is-active');
+        const sec=sub.closest('.toc__sec');
+        const title=sec&&sec.querySelector('.toc__title');
+        if(title)title.classList.add('is-active');
+      }else{
+        const t=document.querySelector('.toc__title[data-target="'+id+'"]');
+        if(t)t.classList.add('is-active');
+      }
+    }
+    document.querySelectorAll('.toc a[data-target]').forEach(a=>{
+      a.addEventListener('click',(e)=>{
+        e.preventDefault();
+        const el=document.getElementById(a.dataset.target);
+        if(el)el.scrollIntoView({behavior:'smooth',block:'start'});
+      });
+    });
     deck.addEventListener('scroll',onScroll,{passive:true});onScroll();
     function current(){return nearest();}
     function go(i){i=Math.max(0,Math.min(total-1,i));slides[i].scrollIntoView({behavior:'smooth'});}

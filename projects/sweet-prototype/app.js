@@ -256,14 +256,14 @@ const SENSORS = [
   { name: 'staging-eks-api',     env: 'AWS · us-east-2',    provider: 'cloud',  type: 'K8s (Helm)',   health: 'healthy', version: 'v4.8.1', latest: true,  heartbeat: '2m ago', coverage: 85 },
   { name: 'prod-vm-egress-01',   env: 'AWS · us-east-1',    provider: 'cloud',  type: 'VM (systemd)', health: 'healthy', version: 'v4.8.1', latest: true,  heartbeat: '40s ago', coverage: 91 },
   { name: 'prod-vm-egress-02',   env: 'AWS · us-west-2',    provider: 'cloud',  type: 'VM (systemd)', health: 'healthy', version: 'v4.8.1', latest: true,  heartbeat: '55s ago', coverage: 89 },
-  { name: 'onprem-k8s-analytics', env: 'On-prem · dc-nyc',  provider: 'onprem', type: 'K8s (Helm)',   health: 'healthy', version: 'v4.8.1', latest: true,  heartbeat: '1m ago', coverage: 96 },
+  { name: 'onprem-k8s-analytics', env: 'On-prem · dc-nyc',  provider: 'onprem', type: 'K8s (Helm)',   health: 'updating', version: 'v4.7.0', latest: false, heartbeat: '1m ago', coverage: 44 },
   { name: 'staging-aks-jobs',    env: 'Azure · northeurope', provider: 'cloud', type: 'K8s (Helm)',   health: 'updating', version: 'v4.7.0', latest: false, heartbeat: '3m ago', coverage: 68 },
   { name: 'edge-vm-fleet-02',    env: 'Azure · uksouth',    provider: 'cloud',  type: 'VM (systemd)', health: 'disconnected', version: 'v4.6.2', latest: true, heartbeat: '2h ago', coverage: null },
 ];
 
 const HEALTH_LABEL = {
   healthy: 'Healthy', disconnected: 'Offline', updating: 'Warning',
-  pending: 'Warning', critical: 'Critical', never: 'Critical',
+  pending: 'N/A', critical: 'Critical', never: 'Critical',
 };
 
 /* Which cards are expanded (keyed by sensor name) */
@@ -306,7 +306,11 @@ function sensorDetail(s) {
         body: `<p>This sensor is streaming telemetry normally — last heartbeat ${s.heartbeat}, running the latest version (${s.version}).</p><p>No action needed. Coverage for this environment is active.</p>`,
       };
     case 'updating':
-      return {
+      return s.coverage < 60 ? {
+        sev: 'warning', badgeIcon: 'warn', badge: 'Warning', title: 'Low coverage',
+        body: `<p>This sensor is protecting only ${s.coverage}% of the workloads in this environment. The remaining ${100 - s.coverage}% are running without telemetry, leaving blind spots where malicious activity could go undetected.</p><p>Recommended action:</p><ul><li>Check for nodes or namespaces where the sensor isn't scheduled — node taints, tolerations, or resource limits are the most common causes.</li><li>Confirm the DaemonSet is running on every eligible node and that no pods are stuck pending.</li><li>Re-check coverage once the sensor has rolled out to the remaining nodes.</li></ul>`,
+        actions: [{ label: 'View uncovered workloads', primary: true, onClick: () => toast('Opening coverage breakdown…') }],
+      } : {
         sev: 'warning', badgeIcon: 'warn', badge: 'Warning', title: 'Sensor upgrade required',
         body: `<p>This sensor is running version ${s.version}, which is no longer the latest supported release. Until it is upgraded, the sensor may not report full telemetry or receive the latest protections.</p><p>Recommended action:</p><ul><li>Upgrade the sensor to the latest supported version.</li><li>If you manage clusters centrally, roll out the updated Helm chart through your delivery pipeline (such as Argo CD, Flux, or CI).</li><li>After the upgrade, confirm the status is Healthy and that a recent heartbeat has been received.</li></ul>`,
         actions: [{ label: 'Upgrade sensor', primary: true, onClick: () => toast('Opening upgrade instructions…') }, { label: 'Release notes', external: true }],
@@ -359,14 +363,14 @@ function detailPanel(s) {
 
 function versionCell(s) {
   const wrap = el('span', { class: 'scard__version' }, el('span', { class: 'cell-mono' }, s.version));
-  if (!s.latest && s.version !== '—') wrap.append(el('span', { class: 'upgrade-pill' }, 'upgrade'));
+  if (!s.latest && s.version !== '—' && !(s.health === 'updating' && s.coverage < 60)) wrap.append(el('span', { class: 'upgrade-pill' }, 'upgrade'));
   return el('div', { class: 'scard__cell' }, wrap);
 }
 
 /* Coverage → severity level: >=80 low (green), 60–79 medium (amber), <60 critical (red) */
 function coverageSeverity(pct) {
   if (pct >= 80) return 'low';
-  if (pct >= 60) return 'medium';
+  if (pct >= 40) return 'medium';
   return 'critical';
 }
 function coverageCell(s) {
@@ -376,7 +380,7 @@ function coverageCell(s) {
   }
   const pct = s.coverage;
   return el('div', { class: 'scard__cell' },
-    el('span', { class: `sds-badge sds-badge--${coverageSeverity(pct)}` }, `${pct}%`));
+    el('span', { class: `sds-badge cov-badge cov-badge--${coverageSeverity(pct)}` }, `${pct}%`));
 }
 
 function sensorCard(s) {
@@ -624,7 +628,7 @@ function highlightSensor(name) {
 const PANEL_STATUS = {
   healthy:      { badge: 'Healthy',  sev: 'success',  conn: 'Connected',       deploy: null },
   updating:     { badge: 'Warning',  sev: 'warning',  conn: 'Connected',       deploy: 'Updating' },
-  pending:      { badge: 'Warning',  sev: 'warning',  conn: 'Connecting',      deploy: 'Deploying' },
+  pending:      { badge: 'N/A',      sev: 'info',     conn: 'Connecting',      deploy: 'Deploying' },
   critical:     { badge: 'Critical', sev: 'critical', conn: 'Connected',       deploy: null },
   disconnected: { badge: 'Offline',  sev: 'offline',  conn: null,             deploy: null },
   never:        { badge: 'Critical', sev: 'critical', conn: 'Never Connected', deploy: 'Deployment Failed' },
@@ -748,7 +752,7 @@ function issueBanner(issue) {
     el('span', { class: 'panel-banner__icon', html: ICONS[issue.badgeIcon] }),
     el('div', { class: 'panel-banner__titles' },
       el('span', { class: 'panel-banner__title' }, issue.title),
-      el('span', { class: `sev-badge sev-badge--${issue.sev}` }, icon(issue.badgeIcon), el('span', {}, issue.badge))),
+      issue.badge ? el('span', { class: `sev-badge sev-badge--${issue.sev}` }, icon(issue.badgeIcon), el('span', {}, issue.badge)) : null),
     el('span', { class: 'panel-banner__chevron', html: ICONS.chevron }));
   const collapse = el('div', { class: 'panel-banner__collapse' },
     el('div', { class: 'panel-banner__body', html: issue.body }),
@@ -777,7 +781,7 @@ function renderPanelIssues(s) {
   if (s.health !== 'healthy') {
     const d = sensorDetail(s);
     const st = PANEL_STATUS[s.health];
-    issues.push({ sev: st.sev, badgeIcon: d.badgeIcon, badge: st.badge, title: d.title, body: d.body, actions: d.actions });
+    issues.push({ sev: st.sev, badgeIcon: d.badgeIcon, badge: s.health === 'pending' ? null : st.badge, title: d.title, body: d.body, actions: d.actions });
   }
   (EXTRA_ISSUES[s.name] || []).forEach(i => issues.push(i));
   return issues.map(issueBanner);
@@ -812,7 +816,7 @@ function renderPanelCoverage(s) {
 
 /* Widget 2 — Security Highlights (clickable cards); empty state when no telemetry */
 function renderPanelHighlights(s) {
-  if (s && (s.health === 'disconnected' || s.health === 'never')) {
+  if (s && (s.health === 'disconnected' || s.health === 'never' || s.health === 'pending')) {
     return el('section', { class: 'panel-widget' },
       el('h3', { class: 'panel-widget__title' }, 'Top security findings'),
       el('div', { class: 'panel-empty' },
@@ -835,7 +839,7 @@ function renderPanelHighlights(s) {
 
 /* Fact line — last heartbeat + issues counter as text with a pipe divider */
 function renderPanelFacts(s) {
-  const issuesN = (s.health !== 'healthy' ? 1 : 0) + (EXTRA_ISSUES[s.name] || []).length;
+  const issuesN = ((s.health !== 'healthy' && s.health !== 'pending') ? 1 : 0) + (EXTRA_ISSUES[s.name] || []).length;
   return el('div', { class: 'panel-facts' },
     el('span', { class: 'panel-fact' },
       el('span', { class: 'panel-fact__label' }, 'Last heartbeat: '),
@@ -891,7 +895,7 @@ function renderScanSelector() {
 
 /* Scan Summary widget — checklist for connected sensors, empty state otherwise */
 function renderScanSummary(s) {
-  const noData = s.health === 'disconnected' || s.health === 'never';
+  const noData = s.health === 'disconnected' || s.health === 'never' || s.health === 'pending';
   if (noData) {
     return el('section', { class: 'panel-widget' },
       el('h3', { class: 'panel-widget__title' }, 'Scan Summary'),

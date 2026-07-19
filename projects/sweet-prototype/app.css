@@ -153,6 +153,12 @@
 /* Coverage column — neutral "N/A" badge for sensors that aren't connected */
 .coverage-na { background: var(--color-bg-subtle); color: var(--color-text-muted); }
 
+/* Coverage % badges — high-contrast (dark saturated text on a tint + border) */
+.cov-badge { font-weight: 700; border: 1px solid transparent; }
+.cov-badge.cov-badge--low      { background: var(--color-status-success-tint); color: #0b7a55; border-color: #8fe0c4; }
+.cov-badge.cov-badge--medium   { background: var(--color-status-warning-tint); color: #9a4400; border-color: #ffbf8a; }
+.cov-badge.cov-badge--critical { background: var(--color-status-error-tint);   color: #8f0002; border-color: #f0a3a3; }
+
 /* Widget 3 — Sensors States: segmented donut + legend.
    flex:1 + centering aligns the content vertically with the coverage pie;
    the 6px nudge matches the coverage donut's offset. */
@@ -418,7 +424,7 @@
 .health--disconnected .health__dot { background: transparent; box-shadow: inset 0 0 0 1.5px var(--sev-critical); }
 .health--updating     .health__dot { background: var(--sev-medium); }
 .health--critical     .health__dot { background: var(--sev-critical); }
-.health--pending      .health__dot { background: var(--sev-medium); }
+.health--pending      .health__dot { background: var(--color-status-info); }
 .health--never        .health__dot { background: var(--color-status-error); }
 
 /* Version cell */
@@ -667,7 +673,7 @@ body.is-drawer-open { overflow: hidden; }
 .panel-cov__bar { height: 10px; background: var(--gray-200); border-radius: var(--radius-full); overflow: hidden; }
 .panel-cov__fill { display: block; height: 100%; background: var(--color-status-success); border-radius: var(--radius-full); }
 .panel-cov__note { margin: 0; font-size: 11px; color: var(--color-text-muted); }
-/* Coverage color uses the vivid severity palette (>=80 green, 60-79 orange, <60 red) */
+/* Coverage color uses the vivid severity palette (>=80 green, 40-79 orange, <40 red) */
 .panel-cov--low .panel-cov__pct      { color: var(--sev-healthy); }
 .panel-cov--low .panel-cov__fill     { background: var(--sev-healthy); }
 .panel-cov--medium .panel-cov__pct   { color: var(--sev-medium); }
