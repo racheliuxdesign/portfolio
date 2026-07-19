@@ -602,6 +602,20 @@ body.is-drawer-open { overflow: hidden; }
 .panel-widget__title { margin: 0; font-size: var(--font-size-small); font-weight: var(--font-weight-semibold); color: var(--color-text-primary); }
 .panel-widget__head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-md); }
 
+/* Zone separator between issue banners and coverage figures:
+   a section label followed by a trailing rule. */
+.panel-divider {
+  display: flex; align-items: center; gap: var(--space-md);
+  margin: var(--space-sm) 0 0;
+}
+.panel-divider__title {
+  font-size: var(--font-size-small); font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary); flex: none;
+}
+.panel-divider::after {
+  content: ""; flex: 1 1 auto; height: 1px; background: var(--color-border-default);
+}
+
 /* Alert banner */
 .panel-banner {
   border: 1px solid var(--color-status-error); border-left-width: 4px;

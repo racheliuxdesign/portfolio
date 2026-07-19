@@ -726,6 +726,14 @@ function panelWidget(title, ...body) {
     ...body);
 }
 
+/* Prominent section divider with a subtitle — separates the sensor's issue
+   banners from the coverage figures so a green coverage % is never mistaken
+   for the sensor's (possibly critical) health status. */
+function panelDivider(title) {
+  return el('div', { class: 'panel-divider', role: 'separator', 'aria-label': title },
+    el('span', { class: 'panel-divider__title' }, title));
+}
+
 /* Build a collapsed-by-default issue banner from a generic issue descriptor. */
 function issueBanner(issue) {
   const banner = el('div', { class: `panel-banner panel-banner--${issue.sev}` });
@@ -969,8 +977,9 @@ function renderDrawer(s) {
 
   const bodyKids = [
     renderPanelFacts(s),
-    renderPanelCoverage(s),
     ...renderPanelIssues(s),
+    panelDivider('Coverage'),
+    renderPanelCoverage(s),
     renderPanelHighlights(s),
     renderScanSummary(s)].filter(Boolean);
 
