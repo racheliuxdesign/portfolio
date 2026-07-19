@@ -415,8 +415,9 @@
 .health { display: inline-flex; align-items: center; gap: var(--space-sm); font-size: 13px; }
 .health__dot { width: 8px; height: 8px; border-radius: var(--radius-full); flex: none; }
 .health--healthy      .health__dot { background: var(--color-status-success); }
-.health--disconnected .health__dot { background: #d1d5db; }
+.health--disconnected .health__dot { background: transparent; box-shadow: inset 0 0 0 1.5px var(--sev-critical); }
 .health--updating     .health__dot { background: var(--sev-medium); }
+.health--critical     .health__dot { background: var(--sev-critical); }
 .health--pending      .health__dot { background: var(--sev-medium); }
 .health--never        .health__dot { background: var(--color-status-error); }
 
@@ -469,6 +470,7 @@
 .sev-badge svg { width: 16px; height: 16px; }
 .sev-badge--warning  { background: var(--sev-medium);            color: #fff; }
 .sev-badge--critical { background: var(--color-status-error);     color: var(--color-text-inverse); }
+.sev-badge--offline  { background: transparent; color: var(--sev-critical); box-shadow: inset 0 0 0 1.5px var(--sev-critical); }
 .sev-badge--success  { background: var(--color-status-success);   color: var(--color-text-inverse); }
 .sev-badge--info     { background: var(--color-status-info);      color: var(--color-text-inverse); }
 
@@ -608,6 +610,7 @@ body.is-drawer-open { overflow: hidden; }
 }
 .panel-banner--warning { border-color: var(--color-status-warning); background: var(--color-bg-surface); }
 .panel-banner--info    { border-color: var(--color-status-info);    background: var(--color-bg-surface); }
+.panel-banner--offline { border-color: var(--sev-critical);         background: var(--color-bg-surface); }
 .panel-banner__head {
   display: flex; align-items: center; gap: var(--space-sm);
   width: 100%; padding: 0; border: 0; background: transparent; cursor: pointer; text-align: left;
@@ -615,6 +618,7 @@ body.is-drawer-open { overflow: hidden; }
 .panel-banner__icon { flex: none; width: 20px; height: 20px; color: var(--color-status-error); }
 .panel-banner--warning .panel-banner__icon { color: var(--color-status-warning); }
 .panel-banner--info .panel-banner__icon { color: var(--color-status-info); }
+.panel-banner--offline .panel-banner__icon { color: var(--sev-critical); }
 .panel-banner__icon svg { width: 20px; height: 20px; }
 .panel-banner__titles { display: flex; flex-direction: row; align-items: center; gap: var(--space-sm); flex-wrap: wrap; flex: 1 0 0; }
 .panel-banner__title { font-size: 15px; font-weight: var(--font-weight-semibold); color: var(--color-text-primary); }

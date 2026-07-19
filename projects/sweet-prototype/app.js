@@ -242,10 +242,9 @@ function resetFilters() {
 const SENSORS = [
   { name: 'prod-eks-payments', env: 'AWS · us-east-1', provider: 'cloud', type: 'K8s (Helm)', health: 'healthy',      version: 'v4.8.1', latest: true,  heartbeat: '30s ago', coverage: 98 },
   { name: 'prod-eks-checkout', env: 'AWS · us-east-1', provider: 'cloud', type: 'K8s (Helm)', health: 'healthy',      version: 'v4.8.1', latest: true,  heartbeat: '1m ago', coverage: 96 },
-  { name: 'staging-gke-core',  env: 'GCP · us-central1', provider: 'cloud', type: 'K8s (Helm)', health: 'updating',   version: 'v4.7.0', latest: false, heartbeat: '2m ago', coverage: 85 },
+  { name: 'staging-gke-core',  env: 'GCP · us-central1', provider: 'cloud', type: 'K8s (Helm)', health: 'critical',   version: 'v4.7.0', latest: false, heartbeat: '2m ago', coverage: 85 },
   { name: 'edge-vm-fleet-01',  env: 'Azure · westeurope', provider: 'cloud', type: 'VM (systemd)', health: 'disconnected', version: 'v4.6.2', latest: true, heartbeat: '5h ago', coverage: null },
   { name: 'prod-eks-ledger',   env: 'AWS · eu-west-1', provider: 'cloud', type: 'K8s (Helm)', health: 'pending',      version: 'v4.8.1', latest: true,  heartbeat: 'Awaiting first telemetry', coverage: null },
-  { name: 'onprem-dc-collector', env: 'On-prem · dc-fra', provider: 'onprem', type: 'VM (systemd)', health: 'never',  version: '—',      latest: false, heartbeat: 'Never connected', coverage: null },
   { name: 'prod-eks-orders',     env: 'AWS · us-east-1',    provider: 'cloud',  type: 'K8s (Helm)',   health: 'healthy', version: 'v4.8.1', latest: true,  heartbeat: '15s ago', coverage: 99 },
   { name: 'prod-eks-inventory',  env: 'AWS · us-west-2',    provider: 'cloud',  type: 'K8s (Helm)',   health: 'healthy', version: 'v4.8.1', latest: true,  heartbeat: '45s ago', coverage: 95 },
   { name: 'prod-eks-search',     env: 'AWS · eu-central-1', provider: 'cloud',  type: 'K8s (Helm)',   health: 'healthy', version: 'v4.8.1', latest: true,  heartbeat: '1m ago', coverage: 92 },
@@ -264,7 +263,7 @@ const SENSORS = [
 
 const HEALTH_LABEL = {
   healthy: 'Healthy', disconnected: 'Offline', updating: 'Warning',
-  pending: 'Warning', never: 'Critical',
+  pending: 'Warning', critical: 'Critical', never: 'Critical',
 };
 
 /* Which cards are expanded (keyed by sensor name) */
@@ -311,6 +310,12 @@ function sensorDetail(s) {
         sev: 'warning', badgeIcon: 'warn', badge: 'Warning', title: 'Sensor upgrade required',
         body: `<p>This sensor is running version ${s.version}, which is no longer the latest supported release. Until it is upgraded, the sensor may not report full telemetry or receive the latest protections.</p><p>Recommended action:</p><ul><li>Upgrade the sensor to the latest supported version.</li><li>If you manage clusters centrally, roll out the updated Helm chart through your delivery pipeline (such as Argo CD, Flux, or CI).</li><li>After the upgrade, confirm the status is Healthy and that a recent heartbeat has been received.</li></ul>`,
         actions: [{ label: 'Upgrade sensor', primary: true, onClick: () => toast('Opening upgrade instructions…') }, { label: 'Release notes', external: true }],
+      };
+    case 'critical':
+      return {
+        sev: 'critical', badgeIcon: 'warn', badge: 'Critical', title: 'Low storage remaining',
+        body: `<p>The node pool backing this sensor is critically low on available disk — telemetry buffering is at risk and data loss may occur if storage is exhausted.</p><p>Recommended action:</p><ul><li>Free up disk on the affected nodes or expand the node pool's disk size.</li><li>Check for large log or image caches that can be pruned.</li><li>Re-check status once storage returns to a healthy threshold.</li></ul>`,
+        actions: [{ label: 'View nodes', primary: true, onClick: () => toast('Opening node storage details…') }],
       };
     case 'disconnected':
       return {
@@ -376,7 +381,7 @@ function coverageCell(s) {
 
 function sensorCard(s) {
   const { type, method } = splitType(s.type);
-  const attention = s.health === 'updating' || s.health === 'disconnected' || s.health === 'never';
+  const attention = s.health === 'updating' || s.health === 'critical' || s.health === 'disconnected' || s.health === 'never';
 
   // Every row opens the detail side panel; attention rows get a "Review issue" affordance.
   const actionCell = attention
@@ -417,7 +422,7 @@ function toggleCard(name) {
    -------------------------------------------------------------------------- */
 /* Higher weight = more attention needed; used for State + Issues columns */
 function severityWeight(health) {
-  return { disconnected: 4, never: 3, updating: 2, pending: 1, healthy: 0 }[health] ?? 0;
+  return { critical: 5, never: 4, disconnected: 3, updating: 2, pending: 1, healthy: 0 }[health] ?? 0;
 }
 /* Normalize a heartbeat string to minutes-ago for chronological sorting */
 function heartbeatMinutes(hb) {
@@ -620,11 +625,12 @@ const PANEL_STATUS = {
   healthy:      { badge: 'Healthy',  sev: 'success',  conn: 'Connected',       deploy: null },
   updating:     { badge: 'Warning',  sev: 'warning',  conn: 'Connected',       deploy: 'Updating' },
   pending:      { badge: 'Warning',  sev: 'warning',  conn: 'Connecting',      deploy: 'Deploying' },
-  disconnected: { badge: 'Critical', sev: 'critical', conn: 'Disconnected',    deploy: null },
+  critical:     { badge: 'Critical', sev: 'critical', conn: 'Connected',       deploy: null },
+  disconnected: { badge: 'Offline',  sev: 'offline',  conn: null,             deploy: null },
   never:        { badge: 'Critical', sev: 'critical', conn: 'Never Connected', deploy: 'Deployment Failed' },
 };
-/* Connection-status dot color: connected=green, connecting=yellow, offline=red */
-const CONN_TONE = { 'Connected': 'ok', 'Connecting': 'warn', 'Disconnected': 'bad', 'Never Connected': 'bad' };
+/* Connection-status dot color: connected=green, connecting=yellow, never=solid red */
+const CONN_TONE = { 'Connected': 'ok', 'Connecting': 'warn', 'Never Connected': 'bad' };
 
 /* Header chips derived from the sensor so they never contradict the logo/data:
    cloud brand · platform (Kubernetes / VM) · deployment method (Helm / systemd) */
@@ -751,9 +757,9 @@ function issueBanner(issue) {
 /* Additional per-sensor issues (beyond the health-derived one). */
 const EXTRA_ISSUES = {
   'staging-gke-core': [{
-    sev: 'warning', badgeIcon: 'warn', badge: 'Warning', title: 'Low storage remaining',
-    body: `<p>The node pool backing this sensor is running low on available disk — telemetry buffering may be affected if storage is exhausted.</p><p>Recommended action:</p><ul><li>Free up disk on the affected nodes or expand the node pool's disk size.</li><li>Check for large log or image caches that can be pruned.</li><li>Re-check status once storage returns to a healthy threshold.</li></ul>`,
-    actions: [{ label: 'View nodes', primary: true, onClick: () => toast('Opening node storage details…') }],
+    sev: 'warning', badgeIcon: 'warn', badge: 'Warning', title: 'Sensor upgrade required',
+    body: `<p>This sensor is running version v4.7.0, which is no longer the latest supported release. Until it is upgraded, the sensor may not report full telemetry or receive the latest protections.</p><p>Recommended action:</p><ul><li>Upgrade the sensor to the latest supported version.</li><li>If you manage clusters centrally, roll out the updated Helm chart through your delivery pipeline (such as Argo CD, Flux, or CI).</li><li>After the upgrade, confirm the status is Healthy and that a recent heartbeat has been received.</li></ul>`,
+    actions: [{ label: 'Upgrade sensor', primary: true, onClick: () => toast('Opening upgrade instructions…') }, { label: 'Release notes', external: true }],
   }],
 };
 
@@ -958,8 +964,8 @@ function renderDrawer(s) {
 
   const statusRow = el('div', { class: 'drawer__statusrow' },
     badges,
-    el('span', { class: `drawer__conn drawer__conn--${CONN_TONE[st.conn] || 'bad'}` },
-      el('span', { class: 'drawer__conn-dot' }), st.conn));
+    st.conn ? el('span', { class: `drawer__conn drawer__conn--${CONN_TONE[st.conn] || 'bad'}` },
+      el('span', { class: 'drawer__conn-dot' }), st.conn) : null);
 
   const bodyKids = [
     renderPanelFacts(s),
