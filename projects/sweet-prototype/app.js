@@ -91,7 +91,7 @@ async function copyText(text, btn) {
    Default chip shows just the attribute name + chevron (no value until picked).
    -------------------------------------------------------------------------- */
 const FILTERS_BASE = [
-  { id: 'health',   label: 'Health',              options: ['Healthy', 'Updating', 'Disconnected', 'Deploying', 'Never connected'] },
+  { id: 'health',   label: 'Health',              options: ['Healthy', 'Warning', 'Offline', 'Critical'] },
   { id: 'provider', label: 'Provider',            options: ['AWS', 'GCP', 'Azure', 'On-prem'] },
   { id: 'type',     label: 'Type',                options: ['K8s', 'VM'] },
   { id: 'method',   label: 'Installation method', options: ['Helm', 'Terraform', 'Pulumi', 'systemd'] },
