@@ -257,7 +257,7 @@ const SENSORS = [
   { name: 'prod-vm-egress-01',   env: 'AWS · us-east-1',    provider: 'cloud',  type: 'VM (systemd)', health: 'healthy', version: 'v4.8.1', latest: true,  heartbeat: '40s ago', coverage: 91 },
   { name: 'prod-vm-egress-02',   env: 'AWS · us-west-2',    provider: 'cloud',  type: 'VM (systemd)', health: 'healthy', version: 'v4.8.1', latest: true,  heartbeat: '55s ago', coverage: 89 },
   { name: 'onprem-k8s-analytics', env: 'On-prem · dc-nyc',  provider: 'onprem', type: 'K8s (Helm)',   health: 'updating', version: 'v4.7.0', latest: false, heartbeat: '1m ago', coverage: 44 },
-  { name: 'staging-aks-jobs',    env: 'Azure · northeurope', provider: 'cloud', type: 'K8s (Helm)',   health: 'updating', version: 'v4.7.0', latest: false, heartbeat: '3m ago', coverage: 68 },
+  { name: 'staging-aks-jobs',    env: 'Azure · northeurope', provider: 'cloud', type: 'K8s (Helm)',   health: 'updating', version: 'v4.7.0', latest: false, heartbeat: '3m ago', coverage: 82 },
   { name: 'edge-vm-fleet-02',    env: 'Azure · uksouth',    provider: 'cloud',  type: 'VM (systemd)', health: 'disconnected', version: 'v4.6.2', latest: true, heartbeat: '2h ago', coverage: null },
 ];
 
